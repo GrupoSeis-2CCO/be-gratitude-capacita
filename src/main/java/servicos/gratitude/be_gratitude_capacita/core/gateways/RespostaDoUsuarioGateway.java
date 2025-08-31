@@ -1,0 +1,12 @@
+package servicos.gratitude.be_gratitude_capacita.core.gateways;
+
+import servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario;
+import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.RespostaDoUsuarioCompoundKey;
+
+import java.util.List;
+
+public interface RespostaDoUsuarioGateway {
+    RespostaDoUsuario save(RespostaDoUsuario respostaDoUsuario);
+    List<RespostaDoUsuario> findAll();
+    Boolean existsById(RespostaDoUsuarioCompoundKey idComposto);
+}

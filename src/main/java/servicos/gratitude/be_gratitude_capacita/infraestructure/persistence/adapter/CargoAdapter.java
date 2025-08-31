@@ -1,7 +1,7 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
 import org.springframework.stereotype.Service;
-import servicos.gratitude.be_gratitude_capacita.core.adapters.CargoGateway;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.CargoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Cargo;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.CargoMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.CargoRepository;

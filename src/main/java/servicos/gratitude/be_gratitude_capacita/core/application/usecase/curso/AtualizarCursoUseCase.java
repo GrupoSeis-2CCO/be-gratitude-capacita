@@ -1,6 +1,6 @@
 package servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso;
 
-import servicos.gratitude.be_gratitude_capacita.core.adapters.CursoGateway;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.CursoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.AtualizarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;

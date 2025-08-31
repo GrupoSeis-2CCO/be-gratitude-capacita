@@ -4,14 +4,14 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.MatriculaCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.MatriculaEntityCompoundKey;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class MatriculaEntity {
     @EmbeddedId
-    private MatriculaCompoundKey idMatriculaComposto;
+    private MatriculaEntityCompoundKey idMatriculaComposto;
 
     private LocalDateTime dtInscricao;
     private LocalDateTime ultimoAcesso;
@@ -26,11 +26,11 @@ public class MatriculaEntity {
     @MapsId("fkCurso")
     private CursoEntity curso;
 
-    public MatriculaCompoundKey getIdMatriculaComposto() {
+    public MatriculaEntityCompoundKey getIdMatriculaComposto() {
         return idMatriculaComposto;
     }
 
-    public void setIdMatriculaComposto(MatriculaCompoundKey idMatriculaComposto) {
+    public void setIdMatriculaComposto(MatriculaEntityCompoundKey idMatriculaComposto) {
         this.idMatriculaComposto = idMatriculaComposto;
     }
 

@@ -4,14 +4,14 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.MaterialAlunoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.MaterialAlunoEntityCompoundKey;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class MaterialAlunoEntity {
     @EmbeddedId
-    private MaterialAlunoCompoundKey idMaterialAlunoComposto;
+    private MaterialAlunoEntityCompoundKey idMaterialAlunoComposto;
 
     private Boolean isFinalizado;
     private LocalDateTime ultimoAcesso;
@@ -26,11 +26,11 @@ public class MaterialAlunoEntity {
     @MapsId("idMatriculaComposto")
     private MatriculaEntity matricula;
 
-    public MaterialAlunoCompoundKey getIdMaterialAlunoComposto() {
+    public MaterialAlunoEntityCompoundKey getIdMaterialAlunoComposto() {
         return idMaterialAlunoComposto;
     }
 
-    public void setIdMaterialAlunoComposto(MaterialAlunoCompoundKey idMaterialAlunoComposto) {
+    public void setIdMaterialAlunoComposto(MaterialAlunoEntityCompoundKey idMaterialAlunoComposto) {
         this.idMaterialAlunoComposto = idMaterialAlunoComposto;
     }
 

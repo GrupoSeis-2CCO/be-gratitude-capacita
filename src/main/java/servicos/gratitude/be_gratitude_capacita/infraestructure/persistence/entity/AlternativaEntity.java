@@ -4,12 +4,12 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.AlternativaCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.AlternativaEntityCompoundKey;
 
 @Entity
 public class AlternativaEntity {
     @EmbeddedId
-    private AlternativaCompoundKey alternativaChaveComposta;
+    private AlternativaEntityCompoundKey alternativaChaveComposta;
 
     private String texto;
     private Integer ordem;
@@ -18,11 +18,11 @@ public class AlternativaEntity {
     @MapsId("idQuestaoComposto")
     private QuestaoEntity questao;
 
-    public AlternativaCompoundKey getAlternativaChaveComposta() {
+    public AlternativaEntityCompoundKey getAlternativaChaveComposta() {
         return alternativaChaveComposta;
     }
 
-    public void setAlternativaChaveComposta(AlternativaCompoundKey alternativaChaveComposta) {
+    public void setAlternativaChaveComposta(AlternativaEntityCompoundKey alternativaChaveComposta) {
         this.alternativaChaveComposta = alternativaChaveComposta;
     }
 

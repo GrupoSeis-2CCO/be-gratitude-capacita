@@ -1,4 +1,4 @@
-package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys;
+package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys;
 
 import jakarta.persistence.Embeddable;
 
@@ -6,9 +6,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class AlternativaCompoundKey implements Serializable {
+public class AlternativaEntityCompoundKey implements Serializable {
     private Integer idAlternativa;
-    private QuestaoCompoundKey idQuestaoComposto;
+    private QuestaoEntityCompoundKey idQuestaoComposto;
 
     public Integer getIdAlternativa() {
         return idAlternativa;
@@ -18,11 +18,11 @@ public class AlternativaCompoundKey implements Serializable {
         this.idAlternativa = idAlternativa;
     }
 
-    public QuestaoCompoundKey getIdQuestaoComposto() {
+    public QuestaoEntityCompoundKey getIdQuestaoComposto() {
         return idQuestaoComposto;
     }
 
-    public void setIdQuestaoComposto(QuestaoCompoundKey idQuestaoComposto) {
+    public void setIdQuestaoComposto(QuestaoEntityCompoundKey idQuestaoComposto) {
         this.idQuestaoComposto = idQuestaoComposto;
     }
 
@@ -30,7 +30,7 @@ public class AlternativaCompoundKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AlternativaCompoundKey that = (AlternativaCompoundKey) o;
+        AlternativaEntityCompoundKey that = (AlternativaEntityCompoundKey) o;
         return Objects.equals(idAlternativa, that.idAlternativa) && Objects.equals(idQuestaoComposto, that.idQuestaoComposto);
     }
 

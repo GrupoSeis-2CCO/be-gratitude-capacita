@@ -1,4 +1,4 @@
-package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys;
+package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys;
 
 import jakarta.persistence.Embeddable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class MatriculaCompoundKey implements Serializable {
+public class MatriculaEntityCompoundKey implements Serializable {
     private Integer fkUsuario;
     private Integer fkCurso;
 
@@ -30,7 +30,7 @@ public class MatriculaCompoundKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MatriculaCompoundKey that = (MatriculaCompoundKey) o;
+        MatriculaEntityCompoundKey that = (MatriculaEntityCompoundKey) o;
         return Objects.equals(fkUsuario, that.fkUsuario) && Objects.equals(fkCurso, that.fkCurso);
     }
 

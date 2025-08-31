@@ -4,14 +4,14 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.TentativaCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.TentativaEntityCompoundKey;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class TentativaEntity {
     @EmbeddedId
-    private TentativaCompoundKey idTentativaComposto;
+    private TentativaEntityCompoundKey idTentativaComposto;
 
     private LocalDateTime dtTentativa;
 
@@ -22,11 +22,11 @@ public class TentativaEntity {
     @ManyToOne(optional = false)
     private AvaliacaoEntity avaliacao;
 
-    public TentativaCompoundKey getIdTentativaComposto() {
+    public TentativaEntityCompoundKey getIdTentativaComposto() {
         return idTentativaComposto;
     }
 
-    public void setIdTentativaComposto(TentativaCompoundKey idTentativaComposto) {
+    public void setIdTentativaComposto(TentativaEntityCompoundKey idTentativaComposto) {
         this.idTentativaComposto = idTentativaComposto;
     }
 

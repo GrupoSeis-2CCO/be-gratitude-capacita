@@ -1,8 +1,7 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
 import org.springframework.stereotype.Service;
-import servicos.gratitude.be_gratitude_capacita.core.adapters.CursoGateway;
-import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.CursoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.CursoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.CursoMapper;

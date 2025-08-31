@@ -1,12 +1,12 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity;
 
 import jakarta.persistence.*;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.QuestaoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.QuestaoEntityCompoundKey;
 
 @Entity
 public class QuestaoEntity {
     @EmbeddedId
-    private QuestaoCompoundKey idQuestaoComposto;
+    private QuestaoEntityCompoundKey idQuestaoComposto;
 
     private String enunciado;
     private Integer numeroQuestao;
@@ -18,11 +18,11 @@ public class QuestaoEntity {
     @OneToOne
     private AlternativaEntity fkAlternativaCorreta;
 
-    public QuestaoCompoundKey getIdQuestaoComposto() {
+    public QuestaoEntityCompoundKey getIdQuestaoComposto() {
         return idQuestaoComposto;
     }
 
-    public void setIdQuestaoComposto(QuestaoCompoundKey idQuestaoComposto) {
+    public void setIdQuestaoComposto(QuestaoEntityCompoundKey idQuestaoComposto) {
         this.idQuestaoComposto = idQuestaoComposto;
     }
 

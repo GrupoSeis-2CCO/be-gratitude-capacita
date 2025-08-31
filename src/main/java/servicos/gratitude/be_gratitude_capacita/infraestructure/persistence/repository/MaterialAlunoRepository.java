@@ -3,11 +3,11 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.rep
 import org.springframework.data.jpa.repository.JpaRepository;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MaterialAlunoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MatriculaEntity;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.MaterialAlunoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.MaterialAlunoEntityCompoundKey;
 
 import java.util.List;
 
-public interface MaterialAlunoRepository extends JpaRepository<MaterialAlunoRepository, MaterialAlunoCompoundKey> {
+public interface MaterialAlunoRepository extends JpaRepository<MaterialAlunoRepository, MaterialAlunoEntityCompoundKey> {
     List<MaterialAlunoEntity> findAllByMatricula(MatriculaEntity matricula);
     List<MaterialAlunoEntity> findAllByMatriculaAndIsFinalizado(MatriculaEntity matricula, Boolean isFinalizado);
 }

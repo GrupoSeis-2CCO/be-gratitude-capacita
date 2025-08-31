@@ -1,4 +1,4 @@
-package servicos.gratitude.be_gratitude_capacita.core.adapters;
+package servicos.gratitude.be_gratitude_capacita.core.gateways;
 
 import servicos.gratitude.be_gratitude_capacita.core.domain.Cargo;
 

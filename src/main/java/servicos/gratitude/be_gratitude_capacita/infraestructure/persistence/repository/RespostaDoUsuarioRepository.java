@@ -2,7 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.rep
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.RespostaDoUsuarioEntity;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.RespostaDoUsuarioCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.RespostaDoUsuarioEntityCompoundKey;
 
-public interface RespostaDoUsuarioRepository extends JpaRepository<RespostaDoUsuarioEntity, RespostaDoUsuarioCompoundKey> {
+public interface RespostaDoUsuarioRepository extends JpaRepository<RespostaDoUsuarioEntity, RespostaDoUsuarioEntityCompoundKey> {
 }

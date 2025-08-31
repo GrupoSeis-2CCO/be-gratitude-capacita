@@ -1,9 +1,8 @@
-package servicos.gratitude.be_gratitude_capacita.core.adapters;
+package servicos.gratitude.be_gratitude_capacita.core.gateways;
 
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CursoGateway {
     Curso save(Curso curso);

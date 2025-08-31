@@ -1,4 +1,4 @@
-package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys;
+package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys;
 
 import jakarta.persistence.Embeddable;
 
@@ -6,9 +6,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class TentativaCompoundKey implements Serializable {
+public class TentativaEntityCompoundKey implements Serializable {
     private Integer idTentativa;
-    private MatriculaCompoundKey idMatriculaComposto;
+    private MatriculaEntityCompoundKey idMatriculaComposto;
 
     public Integer getIdTentativa() {
         return idTentativa;
@@ -18,11 +18,11 @@ public class TentativaCompoundKey implements Serializable {
         this.idTentativa = idTentativa;
     }
 
-    public MatriculaCompoundKey getIdMatriculaComposto() {
+    public MatriculaEntityCompoundKey getIdMatriculaComposto() {
         return idMatriculaComposto;
     }
 
-    public void setIdMatriculaComposto(MatriculaCompoundKey idMatriculaComposto) {
+    public void setIdMatriculaComposto(MatriculaEntityCompoundKey idMatriculaComposto) {
         this.idMatriculaComposto = idMatriculaComposto;
     }
 
@@ -30,7 +30,7 @@ public class TentativaCompoundKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TentativaCompoundKey that = (TentativaCompoundKey) o;
+        TentativaEntityCompoundKey that = (TentativaEntityCompoundKey) o;
         return Objects.equals(idTentativa, that.idTentativa) && Objects.equals(idMatriculaComposto, that.idMatriculaComposto);
     }
 

@@ -1,4 +1,4 @@
-package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys;
+package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys;
 
 import jakarta.persistence.Embeddable;
 
@@ -6,9 +6,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class MaterialAlunoCompoundKey implements Serializable {
+public class MaterialAlunoEntityCompoundKey implements Serializable {
     private Integer idMaterialAluno;
-    private MatriculaCompoundKey idMatriculaComposto;
+    private MatriculaEntityCompoundKey idMatriculaComposto;
 
     public Integer getIdMaterialAluno() {
         return idMaterialAluno;
@@ -18,11 +18,11 @@ public class MaterialAlunoCompoundKey implements Serializable {
         this.idMaterialAluno = idMaterialAluno;
     }
 
-    public MatriculaCompoundKey getIdMatriculaComposto() {
+    public MatriculaEntityCompoundKey getIdMatriculaComposto() {
         return idMatriculaComposto;
     }
 
-    public void setIdMatriculaComposto(MatriculaCompoundKey idMatriculaComposto) {
+    public void setIdMatriculaComposto(MatriculaEntityCompoundKey idMatriculaComposto) {
         this.idMatriculaComposto = idMatriculaComposto;
     }
 
@@ -30,7 +30,7 @@ public class MaterialAlunoCompoundKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MaterialAlunoCompoundKey that = (MaterialAlunoCompoundKey) o;
+        MaterialAlunoEntityCompoundKey that = (MaterialAlunoEntityCompoundKey) o;
         return Objects.equals(idMaterialAluno, that.idMaterialAluno) && Objects.equals(idMatriculaComposto, that.idMatriculaComposto);
     }
 

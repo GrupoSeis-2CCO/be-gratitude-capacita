@@ -3,10 +3,10 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.rep
 import org.springframework.data.jpa.repository.JpaRepository;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.AvaliacaoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.QuestaoEntity;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.compoundKeys.QuestaoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.QuestaoEntityCompoundKey;
 
 import java.util.List;
 
-public interface QuestaoRepository extends JpaRepository<QuestaoEntity, QuestaoCompoundKey> {
+public interface QuestaoRepository extends JpaRepository<QuestaoEntity, QuestaoEntityCompoundKey> {
     List<QuestaoEntity> findAllByAvaliacao(AvaliacaoEntity avaliacao);
 }

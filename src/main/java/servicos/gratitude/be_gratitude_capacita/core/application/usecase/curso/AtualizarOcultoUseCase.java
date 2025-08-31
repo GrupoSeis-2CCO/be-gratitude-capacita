@@ -1,7 +1,6 @@
 package servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso;
 
-import servicos.gratitude.be_gratitude_capacita.core.adapters.CursoGateway;
-import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.CursoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 
@@ -29,7 +28,7 @@ public class AtualizarOcultoUseCase {
         curso.setDuracaoEstimada(cursoParaAtualizar.getDuracaoEstimada());
         curso.setIdCurso(idCurso);
         curso.setOcultado(!curso.getOcultado());
-""
+
         return gateway.save(curso);
     }
 }
