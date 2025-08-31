@@ -1,9 +1,11 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Entity
 public class CargoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
