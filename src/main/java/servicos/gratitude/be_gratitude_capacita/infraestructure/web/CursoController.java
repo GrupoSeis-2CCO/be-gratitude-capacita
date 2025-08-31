@@ -55,7 +55,7 @@ public class CursoController {
         List<Curso> cursos = listarCursoUseCase.execute();
 
         if (cursos.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(cursos);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(cursos);
