@@ -39,26 +39,16 @@ public class CursoAdapter implements CursoGateway {
     public Curso findByTitulo(String titulo) {
         Optional<CursoEntity> entity = repository.findByTituloCurso(titulo);
 
-        if (entity.isEmpty()){
-            throw new NaoEncontradoException("""
-                Nao foi encontrado curso com o titulo %s
-            """.formatted(titulo));
-        }
+        return entity.map(CursoMapper::toDomain).orElse(null);
 
-        return CursoMapper.toDomain(entity.get());
     }
 
     @Override
     public Curso findById(Integer id) {
         Optional<CursoEntity> entity = repository.findById(id);
 
-        if (entity.isEmpty()){
-            throw new NaoEncontradoException("""
-                Nao foi encontrado curso com o id %d
-            """.formatted(id));
-        }
+        return entity.map(CursoMapper::toDomain).orElse(null);
 
-        return CursoMapper.toDomain(entity.get());
     }
 
     @Override

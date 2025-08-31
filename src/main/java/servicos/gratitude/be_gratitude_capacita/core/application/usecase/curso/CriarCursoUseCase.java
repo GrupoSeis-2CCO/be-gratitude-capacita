@@ -26,9 +26,6 @@ public class CriarCursoUseCase {
         curso.setDuracaoEstimada(command.duracaoEstimada());
         curso.setOcultado(true);
 
-        gateway.save(curso);
-
-
-        return curso;
+        return gateway.save(curso);
     }
 }
