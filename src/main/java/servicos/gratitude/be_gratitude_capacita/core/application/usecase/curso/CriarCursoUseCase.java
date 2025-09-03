@@ -7,15 +7,15 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 
 public class CriarCursoUseCase {
 
-    private final CursoGateway gateway;
+    private final CursoGateway cursoGateway;
 
-    public CriarCursoUseCase(CursoGateway gateway) {
-        this.gateway = gateway;
+    public CriarCursoUseCase(CursoGateway cursoGateway) {
+        this.cursoGateway = cursoGateway;
     }
 
     public Curso execute(CriarCursoCommand command){
 
-        if (gateway.existsByTitulo(command.tituloCurso())){
+        if (cursoGateway.existsByTitulo(command.tituloCurso())){
             throw new ConflitoException("Um curso com este titulo já foi cadastrado");
         }
 
@@ -26,6 +26,6 @@ public class CriarCursoUseCase {
         curso.setDuracaoEstimada(command.duracaoEstimada());
         curso.setOcultado(true);
 
-        return gateway.save(curso);
+        return cursoGateway.save(curso);
     }
 }

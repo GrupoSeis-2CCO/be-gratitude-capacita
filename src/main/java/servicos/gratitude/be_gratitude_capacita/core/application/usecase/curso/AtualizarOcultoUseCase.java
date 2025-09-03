@@ -8,14 +8,14 @@ import java.util.Objects;
 
 public class AtualizarOcultoUseCase {
 
-    private final CursoGateway gateway;
+    private final CursoGateway cursoGateway;
 
-    public AtualizarOcultoUseCase(CursoGateway gateway) {
-        this.gateway = gateway;
+    public AtualizarOcultoUseCase(CursoGateway cursoGateway) {
+        this.cursoGateway = cursoGateway;
     }
 
     public Curso execute(Integer idCurso){
-        Curso cursoParaAtualizar = gateway.findById(idCurso);
+        Curso cursoParaAtualizar = cursoGateway.findById(idCurso);
 
         if (Objects.isNull(cursoParaAtualizar)){
             throw new NaoEncontradoException("Não foi encontrado um curso para o id informado");
@@ -29,6 +29,6 @@ public class AtualizarOcultoUseCase {
         curso.setIdCurso(idCurso);
         curso.setOcultado(!cursoParaAtualizar.getOcultado());
 
-        return gateway.save(curso);
+        return cursoGateway.save(curso);
     }
 }

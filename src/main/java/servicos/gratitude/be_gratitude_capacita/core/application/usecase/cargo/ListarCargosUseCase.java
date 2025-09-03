@@ -6,13 +6,13 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Cargo;
 import java.util.List;
 
 public class ListarCargosUseCase {
-    private final CargoGateway gateway;
+    private final CargoGateway cargoGateway;
 
-    public ListarCargosUseCase(CargoGateway gateway) {
-        this.gateway = gateway;
+    public ListarCargosUseCase(CargoGateway cargoGateway) {
+        this.cargoGateway = cargoGateway;
     }
 
     public List<Cargo> execute(){
-        return gateway.findAll();
+        return cargoGateway.findAll();
     }
 }

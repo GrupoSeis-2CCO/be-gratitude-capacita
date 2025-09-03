@@ -7,13 +7,13 @@ import java.util.List;
 
 public class ListarCursoUseCase {
 
-    private final CursoGateway gateway;
+    private final CursoGateway cursoGateway;
 
-    public ListarCursoUseCase(CursoGateway gateway) {
-        this.gateway = gateway;
+    public ListarCursoUseCase(CursoGateway cursoGateway) {
+        this.cursoGateway = cursoGateway;
     }
 
     public List<Curso> execute(){
-        return gateway.findAll();
+        return cursoGateway.findAll();
     }
 }

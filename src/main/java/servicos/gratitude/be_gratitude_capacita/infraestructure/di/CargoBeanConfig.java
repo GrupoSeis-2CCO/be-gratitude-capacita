@@ -11,7 +11,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adap
 public class CargoBeanConfig {
 
     @Bean
-    public ListarCargosUseCase listarCargosUseCase(CargoAdapter adapter){
-        return new ListarCargosUseCase(adapter);
+    public ListarCargosUseCase listarCargosUseCase(CargoAdapter cargoAdapter){
+        return new ListarCargosUseCase(cargoAdapter);
     }
 }

@@ -9,25 +9,25 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import java.util.Objects;
 
 public class AtualizarCursoUseCase {
-    private final CursoGateway gateway;
+    private final CursoGateway cursoGateway;
 
-    public AtualizarCursoUseCase(CursoGateway gateway) {
-        this.gateway = gateway;
+    public AtualizarCursoUseCase(CursoGateway cursoGateway) {
+        this.cursoGateway = cursoGateway;
     }
 
     public Curso execute(AtualizarCursoCommand command, Integer idCurso){
 
-        if (!gateway.existsById(idCurso)){
+        if (!cursoGateway.existsById(idCurso)){
             throw new NaoEncontradoException("Não encontrado curso com id informado");
         }
 
-        Curso cursoComMesmoTitulo = gateway.findByTitulo(command.tituloCurso());
+        Curso cursoComMesmoTitulo = cursoGateway.findByTitulo(command.tituloCurso());
 
         if (!Objects.isNull(cursoComMesmoTitulo) && (cursoComMesmoTitulo.getIdCurso() != idCurso)){
             throw new ConflitoException("Já existe um curso com esse título");
         }
 
-        Curso cursoNoBanco = gateway.findById(idCurso);
+        Curso cursoNoBanco = cursoGateway.findById(idCurso);
 
         Curso curso = new Curso();
         curso.setTituloCurso(command.tituloCurso());
@@ -37,6 +37,6 @@ public class AtualizarCursoUseCase {
         curso.setIdCurso(idCurso);
         curso.setOcultado(cursoNoBanco.getOcultado());
 
-        return gateway.save(curso);
+        return cursoGateway.save(curso);
     }
 }

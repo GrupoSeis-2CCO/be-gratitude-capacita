@@ -45,7 +45,7 @@ public class CursoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(criarCursoUseCase.execute(request));
         } catch (ConflitoException e){
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Já existe um curso com o titulo informado", e
+                    HttpStatus.CONFLICT, e.getMessage(), e
             );
         }
     }
@@ -70,11 +70,11 @@ public class CursoController {
             return ResponseEntity.status(HttpStatus.OK).body(atualizarCursoUseCase.execute(request, idCurso));
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Não foi encontrado o curso com o id informado", e
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
             );
         } catch (ConflitoException e){
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Já existe um curso com o titulo informado", e
+                    HttpStatus.CONFLICT, e.getMessage(), e
             );
         }
     }
@@ -87,7 +87,7 @@ public class CursoController {
             return ResponseEntity.status(HttpStatus.OK).body(atualizarOcultoUseCase.execute(idCurso));
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Não foi encontrado o curso com o id informado", e
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
             );
         }
     }
@@ -101,7 +101,7 @@ public class CursoController {
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Não foi encontrado o curso com o id informado", e
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
             );
         }
     }

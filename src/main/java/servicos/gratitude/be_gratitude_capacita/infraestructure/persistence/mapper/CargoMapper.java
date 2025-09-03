@@ -8,7 +8,25 @@ import java.util.List;
 
 public class CargoMapper {
 
-    public static List<Cargo> toDomain (List<CargoEntity> entities){
+    public static Cargo toDomain(CargoEntity entity){
+        Cargo cargo = new Cargo();
+
+        cargo.setIdCargo(entity.getIdCargo());
+        cargo.setNomeCargo(entity.getNomeCargo());
+
+        return cargo;
+    }
+
+    public static CargoEntity toEntity(Cargo cargo){
+        CargoEntity entity = new CargoEntity();
+
+        entity.setIdCargo(cargo.getIdCargo());
+        entity.setNomeCargo(cargo.getNomeCargo());
+
+        return entity;
+    }
+
+    public static List<Cargo> toDomains(List<CargoEntity> entities){
         List<Cargo> cargos = new ArrayList<>();
 
         for (CargoEntity entityDaVez : entities) {

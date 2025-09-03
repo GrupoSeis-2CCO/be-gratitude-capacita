@@ -13,38 +13,37 @@ import java.util.Optional;
 @Service
 public class CursoAdapter implements CursoGateway {
 
-    private final CursoRepository repository;
+    private final CursoRepository cursoRepository;
 
-    public CursoAdapter(CursoRepository repository) {
-        this.repository = repository;
+    public CursoAdapter(CursoRepository cursoRepository) {
+        this.cursoRepository = cursoRepository;
     }
 
     @Override
     public Curso save(Curso curso) {
         CursoEntity cursoEntity = CursoMapper.toEntity(curso);
-        repository.save(cursoEntity);
+        cursoRepository.save(cursoEntity);
 
         return CursoMapper.toDomain(cursoEntity);
     }
 
     @Override
     public List<Curso> findAll() {
-        List<CursoEntity> entities = repository.findAll();
+        List<CursoEntity> entities = cursoRepository.findAll();
 
         return CursoMapper.toDomains(entities);
     }
 
     @Override
     public Curso findByTitulo(String titulo) {
-        Optional<CursoEntity> entity = repository.findByTituloCurso(titulo);
+        Optional<CursoEntity> entity = cursoRepository.findByTituloCurso(titulo);
 
         return entity.map(CursoMapper::toDomain).orElse(null);
-
     }
 
     @Override
     public Curso findById(Integer id) {
-        Optional<CursoEntity> entity = repository.findById(id);
+        Optional<CursoEntity> entity = cursoRepository.findById(id);
 
         return entity.map(CursoMapper::toDomain).orElse(null);
 
@@ -52,16 +51,16 @@ public class CursoAdapter implements CursoGateway {
 
     @Override
     public Boolean existsByTitulo(String titulo) {
-        return repository.existsByTituloCurso(titulo);
+        return cursoRepository.existsByTituloCurso(titulo);
     }
 
     @Override
     public Boolean existsById(Integer id) {
-        return repository.existsById(id);
+        return cursoRepository.existsById(id);
     }
 
     @Override
     public void deleteById(Integer id) {
-        repository.deleteById(id);
+        cursoRepository.deleteById(id);
     }
 }

@@ -9,27 +9,27 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adap
 public class CursoBeanConfig {
 
     @Bean
-    public CriarCursoUseCase criarCursoUseCase(CursoAdapter adapter){
-        return new CriarCursoUseCase(adapter);
+    public CriarCursoUseCase criarCursoUseCase(CursoAdapter cursoAdapter){
+        return new CriarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public AtualizarCursoUseCase atualizarCursoUseCase(CursoAdapter adapter){
-        return new AtualizarCursoUseCase(adapter);
+    public AtualizarCursoUseCase atualizarCursoUseCase(CursoAdapter cursoAdapter){
+        return new AtualizarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public AtualizarOcultoUseCase atualizarOcultoUseCase(CursoAdapter adapter){
-        return new AtualizarOcultoUseCase(adapter);
+    public AtualizarOcultoUseCase atualizarOcultoUseCase(CursoAdapter cursoAdapter){
+        return new AtualizarOcultoUseCase(cursoAdapter);
     }
 
     @Bean
-    public DeletarCursoUseCase deletarCursoUseCase(CursoAdapter adapter){
-        return new DeletarCursoUseCase(adapter);
+    public DeletarCursoUseCase deletarCursoUseCase(CursoAdapter cursoAdapter){
+        return new DeletarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public ListarCursoUseCase listarCursoUseCase(CursoAdapter adapter){
-        return new ListarCursoUseCase(adapter);
+    public ListarCursoUseCase listarCursoUseCase(CursoAdapter cursoAdapter){
+        return new ListarCursoUseCase(cursoAdapter);
     }
 }

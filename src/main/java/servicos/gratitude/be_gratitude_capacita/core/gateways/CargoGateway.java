@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface CargoGateway {
     List<Cargo> findAll();
+    Boolean existsById(Integer idCargo);
+    Cargo findById(Integer idCargo);
 }
