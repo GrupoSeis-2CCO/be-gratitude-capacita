@@ -27,7 +27,7 @@ public class AtualizarOcultoUseCase {
         curso.setImagem(cursoParaAtualizar.getImagem());
         curso.setDuracaoEstimada(cursoParaAtualizar.getDuracaoEstimada());
         curso.setIdCurso(idCurso);
-        curso.setOcultado(!curso.getOcultado());
+        curso.setOcultado(!cursoParaAtualizar.getOcultado());
 
         return gateway.save(curso);
     }

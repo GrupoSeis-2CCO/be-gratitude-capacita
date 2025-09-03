@@ -61,7 +61,7 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.OK).body(cursos);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{idCurso}")
     public ResponseEntity<Curso> atualizarCurso(
             @PathVariable Integer idCurso,
             @RequestBody AtualizarCursoCommand request
@@ -79,7 +79,7 @@ public class CursoController {
         }
     }
 
-    @PutMapping("/atualizarOculto/{id}")
+    @PutMapping("/atualizarOculto/{idCurso}")
     public ResponseEntity<Curso> atualizarOculto(
             @PathVariable Integer idCurso
     ) {
@@ -92,7 +92,7 @@ public class CursoController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{idCurso}")
     public ResponseEntity deletarCurso(
             @PathVariable Integer idCurso
     ) {

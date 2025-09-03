@@ -27,13 +27,15 @@ public class AtualizarCursoUseCase {
             throw new ConflitoException("Já existe um curso com esse título");
         }
 
+        Curso cursoNoBanco = gateway.findById(idCurso);
+
         Curso curso = new Curso();
         curso.setTituloCurso(command.tituloCurso());
         curso.setDescricao(command.descricao());
         curso.setImagem(command.imagem());
         curso.setDuracaoEstimada(command.duracaoEstimada());
         curso.setIdCurso(idCurso);
-        curso.setOcultado(cursoComMesmoTitulo.getOcultado());
+        curso.setOcultado(cursoNoBanco.getOcultado());
 
         return gateway.save(curso);
     }
