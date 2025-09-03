@@ -7,7 +7,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 
 import java.util.List;
 
-public interface MaterialAlunoRepository extends JpaRepository<MaterialAlunoRepository, MaterialAlunoEntityCompoundKey> {
+public interface MaterialAlunoRepository extends JpaRepository<MaterialAlunoEntity, MaterialAlunoEntityCompoundKey> {
     List<MaterialAlunoEntity> findAllByMatricula(MatriculaEntity matricula);
     List<MaterialAlunoEntity> findAllByMatriculaAndIsFinalizado(MatriculaEntity matricula, Boolean isFinalizado);
 }

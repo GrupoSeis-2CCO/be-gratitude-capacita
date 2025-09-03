@@ -52,7 +52,7 @@ public class CursoAdapter implements CursoGateway {
 
     @Override
     public Boolean existsByTitulo(String titulo) {
-        return repository.existsByTitulo(titulo);
+        return repository.existsByTituloCurso(titulo);
     }
 
     @Override

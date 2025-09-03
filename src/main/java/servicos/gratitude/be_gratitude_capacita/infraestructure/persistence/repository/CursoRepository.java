@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface CursoRepository extends JpaRepository <CursoEntity, Integer>{
     Optional<CursoEntity> findByTituloCurso(String tituloCurso);
-    Boolean existsByTitulo(String titulo);
+    Boolean existsByTituloCurso(String titulo);
 }

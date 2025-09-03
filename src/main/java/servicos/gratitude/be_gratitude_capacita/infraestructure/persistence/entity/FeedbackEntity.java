@@ -3,11 +3,12 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ent
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class FeedbackEntity {
     @Id
-    private CursoEntity fkCurso;
+    private Integer fkCurso;
 
     private Integer estrelas;
     private String motivo;
@@ -15,11 +16,14 @@ public class FeedbackEntity {
     @ManyToOne
     private UsuarioEntity fkUsuario;
 
-    public CursoEntity getFkCurso() {
+    @ManyToOne(optional = false)
+    private CursoEntity curso;
+
+    public Integer getFkCurso() {
         return fkCurso;
     }
 
-    public void setFkCurso(CursoEntity fkCurso) {
+    public void setFkCurso(Integer fkCurso) {
         this.fkCurso = fkCurso;
     }
 
@@ -45,5 +49,13 @@ public class FeedbackEntity {
 
     public void setFkUsuario(UsuarioEntity fkUsuario) {
         this.fkUsuario = fkUsuario;
+    }
+
+    public CursoEntity getCurso() {
+        return curso;
+    }
+
+    public void setCurso(CursoEntity curso) {
+        this.curso = curso;
     }
 }
