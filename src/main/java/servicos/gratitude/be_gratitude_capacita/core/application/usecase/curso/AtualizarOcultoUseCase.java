@@ -20,15 +20,8 @@ public class AtualizarOcultoUseCase {
         if (Objects.isNull(cursoParaAtualizar)){
             throw new NaoEncontradoException("Não foi encontrado um curso para o id informado");
         }
+        cursoParaAtualizar.setOcultado(!cursoParaAtualizar.getOcultado());
 
-        Curso curso = new Curso();
-        curso.setTituloCurso(cursoParaAtualizar.getTituloCurso());
-        curso.setDescricao(cursoParaAtualizar.getDescricao());
-        curso.setImagem(cursoParaAtualizar.getImagem());
-        curso.setDuracaoEstimada(cursoParaAtualizar.getDuracaoEstimada());
-        curso.setIdCurso(idCurso);
-        curso.setOcultado(!cursoParaAtualizar.getOcultado());
-
-        return cursoGateway.save(curso);
+        return cursoGateway.save(cursoParaAtualizar);
     }
 }

@@ -10,7 +10,6 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Confl
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario.*;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Usuario;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity;
 
 import java.util.List;
 
@@ -20,20 +19,20 @@ public class UsuarioController {
 
     private final CriarUsuarioUseCase criarUsuarioUseCase;
     private final ListarUsuariosUseCase listarUsuariosUseCase;
-    private final PesquisarPorNomeUseCase pesquisarPorNomeUseCase;
+    private final PesquisarPorNomeDeUsuarioUseCase pesquisarPorNomeDeUsuarioUseCase;
     private final DeletarUsuarioUseCase deletarUsuarioUseCase;
-    private final AtualizarAcessoUseCase atualizarAcessoUseCase;
+    private final AtualizarAcessoUsuarioUseCase atualizarAcessoUsuarioUseCase;
     private final BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase;
-    private final AtualizarSenhaUseCase atualizarSenhaUseCase;
+    private final AtualizarSenhaUsuarioUseCase atualizarSenhaUsuarioUseCase;
 
-    public UsuarioController(CriarUsuarioUseCase criarUsuarioUseCase, ListarUsuariosUseCase listarUsuariosUseCase, PesquisarPorNomeUseCase pesquisarPorNomeUseCase, DeletarUsuarioUseCase deletarUsuarioUseCase, AtualizarAcessoUseCase atualizarAcessoUseCase, BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase, AtualizarSenhaUseCase atualizarSenhaUseCase) {
+    public UsuarioController(CriarUsuarioUseCase criarUsuarioUseCase, ListarUsuariosUseCase listarUsuariosUseCase, PesquisarPorNomeDeUsuarioUseCase pesquisarPorNomeDeUsuarioUseCase, DeletarUsuarioUseCase deletarUsuarioUseCase, AtualizarAcessoUsuarioUseCase atualizarAcessoUsuarioUseCase, BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase, AtualizarSenhaUsuarioUseCase atualizarSenhaUsuarioUseCase) {
         this.criarUsuarioUseCase = criarUsuarioUseCase;
         this.listarUsuariosUseCase = listarUsuariosUseCase;
-        this.pesquisarPorNomeUseCase = pesquisarPorNomeUseCase;
+        this.pesquisarPorNomeDeUsuarioUseCase = pesquisarPorNomeDeUsuarioUseCase;
         this.deletarUsuarioUseCase = deletarUsuarioUseCase;
-        this.atualizarAcessoUseCase = atualizarAcessoUseCase;
+        this.atualizarAcessoUsuarioUseCase = atualizarAcessoUsuarioUseCase;
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
-        this.atualizarSenhaUseCase = atualizarSenhaUseCase;
+        this.atualizarSenhaUsuarioUseCase = atualizarSenhaUsuarioUseCase;
     }
 
     @PostMapping
@@ -64,7 +63,7 @@ public class UsuarioController {
     public ResponseEntity<List<Usuario>> pesquisarPorNome(
             @RequestParam String nome
     ){
-        List<Usuario> responses = pesquisarPorNomeUseCase.execute(nome);
+        List<Usuario> responses = pesquisarPorNomeDeUsuarioUseCase.execute(nome);
 
         if (responses.isEmpty()){
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -92,7 +91,7 @@ public class UsuarioController {
             @PathVariable Integer idUsuario
     ){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(atualizarAcessoUseCase.execute(idUsuario));
+            return ResponseEntity.status(HttpStatus.OK).body(atualizarAcessoUsuarioUseCase.execute(idUsuario));
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e
@@ -119,7 +118,7 @@ public class UsuarioController {
             @PathVariable Integer idUsuario
     ){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(atualizarSenhaUseCase.execute(request, idUsuario));
+            return ResponseEntity.status(HttpStatus.OK).body(atualizarSenhaUsuarioUseCase.execute(request, idUsuario));
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e

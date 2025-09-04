@@ -23,7 +23,7 @@ public class AtualizarCursoUseCase {
 
         Curso cursoComMesmoTitulo = cursoGateway.findByTitulo(command.tituloCurso());
 
-        if (!Objects.isNull(cursoComMesmoTitulo) && (cursoComMesmoTitulo.getIdCurso() != idCurso)){
+        if (Objects.nonNull(cursoComMesmoTitulo) && (cursoComMesmoTitulo.getIdCurso() != idCurso)){
             throw new ConflitoException("Já existe um curso com esse título");
         }
 

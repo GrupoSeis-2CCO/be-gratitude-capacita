@@ -7,6 +7,10 @@ import java.util.List;
 
 public interface VideoGateway {
     Video save(Video video);
+    Boolean existsByUrl(String url);
+    Boolean existsByNome(String nome);
+    Video findByUrl(String url);
+    Video findByNome(String nome);
     List<Video> findAllByCurso(Curso curso);
     Video findById(Integer id);
     Boolean existsById(Integer id);

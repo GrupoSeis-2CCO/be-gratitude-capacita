@@ -1,20 +1,18 @@
 package servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario;
 
+import servicos.gratitude.be_gratitude_capacita.core.application.command.usuario.AtualizarSenhaCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Usuario;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.UsuarioGateway;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-public class AtualizarAcessoUseCase {
+public class AtualizarSenhaUsuarioUseCase {
     private final UsuarioGateway usuarioGateway;
 
-    public AtualizarAcessoUseCase(UsuarioGateway usuarioGateway) {
+    public AtualizarSenhaUsuarioUseCase(UsuarioGateway usuarioGateway) {
         this.usuarioGateway = usuarioGateway;
     }
 
-    public Usuario execute(Integer idUsuario){
+    public Usuario execute(AtualizarSenhaCommand command, Integer idUsuario){
         if (!usuarioGateway.existsById(idUsuario)){
             throw new NaoEncontradoException("Não foi encontrado um usuário com o id informado");
         }
@@ -28,10 +26,10 @@ public class AtualizarAcessoUseCase {
         usuarioAtualizado.setFkCargo(usuarioDoBanco.getFkCargo());
         usuarioAtualizado.setEmail(usuarioDoBanco.getEmail());
         usuarioAtualizado.setDataEntrada(usuarioDoBanco.getDataEntrada());
-        usuarioAtualizado.setSenha(usuarioDoBanco.getSenha());
+        usuarioAtualizado.setUltimoAcesso(usuarioDoBanco.getUltimoAcesso() );
 
-        usuarioAtualizado.setUltimoAcesso(LocalDateTime.now());
+        usuarioAtualizado.setSenha(command.senha());
 
-        return usuarioGateway.save(usuarioAtualizado);
+        return usuarioAtualizado;
     }
 }

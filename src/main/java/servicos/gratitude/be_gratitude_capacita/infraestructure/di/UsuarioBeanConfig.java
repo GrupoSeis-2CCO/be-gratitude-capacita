@@ -15,13 +15,13 @@ public class UsuarioBeanConfig {
     }
 
     @Bean
-    public AtualizarAcessoUseCase atualizarAcessoUseCase(UsuarioAdapter usuarioAdapter){
-        return new AtualizarAcessoUseCase(usuarioAdapter);
+    public AtualizarAcessoUsuarioUseCase atualizarAcessoUseCase(UsuarioAdapter usuarioAdapter){
+        return new AtualizarAcessoUsuarioUseCase(usuarioAdapter);
     }
 
     @Bean
-    public AtualizarSenhaUseCase atualizarSenhaUseCase(UsuarioAdapter usuarioAdapter){
-        return new AtualizarSenhaUseCase(usuarioAdapter);
+    public AtualizarSenhaUsuarioUseCase atualizarSenhaUseCase(UsuarioAdapter usuarioAdapter){
+        return new AtualizarSenhaUsuarioUseCase(usuarioAdapter);
     }
 
     @Bean
@@ -40,7 +40,7 @@ public class UsuarioBeanConfig {
     }
 
     @Bean
-    public PesquisarPorNomeUseCase pesquisarPorNomeUseCase(UsuarioAdapter usuarioAdapter){
-        return new PesquisarPorNomeUseCase(usuarioAdapter);
+    public PesquisarPorNomeDeUsuarioUseCase pesquisarPorNomeUseCase(UsuarioAdapter usuarioAdapter){
+        return new PesquisarPorNomeDeUsuarioUseCase(usuarioAdapter);
     }
 }
