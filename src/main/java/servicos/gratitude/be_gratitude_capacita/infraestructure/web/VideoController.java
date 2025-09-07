@@ -40,6 +40,10 @@ public class VideoController {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, e.getMessage(), e
             );
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
+            );
         }
     }
 
