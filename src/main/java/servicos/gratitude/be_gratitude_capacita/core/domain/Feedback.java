@@ -1,16 +1,17 @@
 package servicos.gratitude.be_gratitude_capacita.core.domain;
 
 public class Feedback {
-    private Curso fkCurso;
+    private Integer fkCurso;
     private Integer estrelas;
     private String motivo;
     private Usuario fkUsuario;
+    private Curso curso;
 
-    public Curso getFkCurso() {
+    public Integer getFkCurso() {
         return fkCurso;
     }
 
-    public void setFkCurso(Curso fkCurso) {
+    public void setFkCurso(Integer fkCurso) {
         this.fkCurso = fkCurso;
     }
 
@@ -36,5 +37,13 @@ public class Feedback {
 
     public void setFkUsuario(Usuario fkUsuario) {
         this.fkUsuario = fkUsuario;
+    }
+
+    public Curso getCurso() {
+        return curso;
+    }
+
+    public void setCurso(Curso curso) {
+        this.curso = curso;
     }
 }
