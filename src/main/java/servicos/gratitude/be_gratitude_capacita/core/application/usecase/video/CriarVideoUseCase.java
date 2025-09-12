@@ -35,7 +35,7 @@ public class CriarVideoUseCase {
         Integer maiorOrdem = 0;
 
         for (Video videoDaVez : videosDoCurso) {
-            if (videoDaVez.getOrdemVideo() > maiorOrdem){
+            if (videoDaVez.getOrdemVideo() >= maiorOrdem){
                 maiorOrdem = videoDaVez.getOrdemVideo();
             }
         }
@@ -48,7 +48,7 @@ public class CriarVideoUseCase {
         video.setDataAtualizacaoVideo(LocalDateTime.now());
         video.setFkCurso(curso);
         video.setVideoOculto(true);
-        video.setOrdemVideo(maiorOrdem);
+        video.setOrdemVideo(maiorOrdem + 1);
 
         return videoGateway.save(video);
     }

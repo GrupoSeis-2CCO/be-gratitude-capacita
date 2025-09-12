@@ -33,7 +33,7 @@ public class CriarApostilaUseCase {
         Integer maiorOrdem = 0;
 
         for (Apostila apostilaDaVez : apostilasDoCurso) {
-            if (apostilaDaVez.getOrdemApostila() > maiorOrdem){
+            if (apostilaDaVez.getOrdemApostila() >= maiorOrdem){
                 maiorOrdem = apostilaDaVez.getOrdemApostila();
             }
         }
@@ -49,7 +49,7 @@ public class CriarApostilaUseCase {
         apostila.setDataPostadoApostila(LocalDateTime.now());
         apostila.setDataAtualizacaoApostila(LocalDateTime.now());
         apostila.setApostilaOculto(true);
-        apostila.setOrdemApostila(maiorOrdem);
+        apostila.setOrdemApostila(maiorOrdem + 1);
 
         return apostilaGateway.save(apostila);
     }

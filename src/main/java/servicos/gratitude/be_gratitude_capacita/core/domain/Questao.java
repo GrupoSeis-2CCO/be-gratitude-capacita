@@ -9,7 +9,6 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.Questao
 public class Questao {
     private QuestaoCompoundKey idQuestaoComposto;
     private String enunciado;
-    private Integer numeroQuestao;
     private Avaliacao avaliacao;
     private Alternativa fkAlternativaCorreta;
 
@@ -27,14 +26,6 @@ public class Questao {
 
     public void setEnunciado(String enunciado) {
         this.enunciado = enunciado;
-    }
-
-    public Integer getNumeroQuestao() {
-        return numeroQuestao;
-    }
-
-    public void setNumeroQuestao(Integer numeroQuestao) {
-        this.numeroQuestao = numeroQuestao;
     }
 
     public Avaliacao getAvaliacao() {
