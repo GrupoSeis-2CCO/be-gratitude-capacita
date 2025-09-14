@@ -9,10 +9,8 @@ import java.util.List;
 
 public interface MatriculaGateway {
     Matricula save(Matricula matricula);
-    List<Matricula> findAll();
     List<Matricula> findAllByUsuario(Usuario usuario);
     List<Matricula> findAllByCurso(Curso curso);
-    List<Matricula> findAllByCompleto(Boolean completo);
     Matricula findById(MatriculaCompoundKey idComposto);
     Boolean existsById(MatriculaCompoundKey idComposto);
     void deleteById(MatriculaCompoundKey idComposto);

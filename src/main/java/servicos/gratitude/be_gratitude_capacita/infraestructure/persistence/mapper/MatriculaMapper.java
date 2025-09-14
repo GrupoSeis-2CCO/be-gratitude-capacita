@@ -56,7 +56,7 @@ public class MatriculaMapper {
         return entities;
     }
 
-    public static List<Matricula> toDomain(List<MatriculaEntity> entities){
+    public static List<Matricula> toDomains(List<MatriculaEntity> entities){
         List<Matricula> matriculas = new ArrayList<>();
 
         for (MatriculaEntity entityDaVez : entities) {

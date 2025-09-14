@@ -27,7 +27,7 @@ public class MaterialAlunoMapper {
         materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entity.getIdMaterialAlunoComposto()));
         materialAluno.setUltimoAcesso(entity.getUltimoAcesso());
         materialAluno.setFinalizado(entity.getFinalizado());
-        materialAluno.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
+        materialAluno.setMatricula(MatriculaMapper.toDomains(entity.getMatricula()));
         materialAluno.setFkVideo(VideoMapper.toDomain(entity.getFkVideo()));
         materialAluno.setFkApostila(ApostilaMapper.toDomain(entity.getFkApostila()));
 
@@ -62,7 +62,7 @@ public class MaterialAlunoMapper {
         materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entityDaVez.getIdMaterialAlunoComposto()));
         materialAluno.setUltimoAcesso(entityDaVez.getUltimoAcesso());
         materialAluno.setFinalizado(entityDaVez.getFinalizado());
-        materialAluno.setMatricula(MatriculaMapper.toDomain(entityDaVez.getMatricula()));
+        materialAluno.setMatricula(MatriculaMapper.toDomains(entityDaVez.getMatricula()));
         materialAluno.setFkVideo(VideoMapper.toDomain(entityDaVez.getFkVideo()));
         materialAluno.setFkApostila(ApostilaMapper.toDomain(entityDaVez.getFkApostila()));
 
