@@ -11,11 +11,11 @@ import servicos.gratitude.be_gratitude_capacita.core.gateways.QuestaoGateway;
 import java.util.List;
 import java.util.Objects;
 
-public class CriarChaveCompostaQuestao {
+public class CriarNovaChaveCompostaQuestaoUseCase {
     private final QuestaoGateway questaoGateway;
     private final AvaliacaoGateway avaliacaoGateway;
 
-    public CriarChaveCompostaQuestao(QuestaoGateway questaoGateway, AvaliacaoGateway avaliacaoGateway) {
+    public CriarNovaChaveCompostaQuestaoUseCase(QuestaoGateway questaoGateway, AvaliacaoGateway avaliacaoGateway) {
         this.questaoGateway = questaoGateway;
         this.avaliacaoGateway = avaliacaoGateway;
     }

@@ -3,7 +3,6 @@ package servicos.gratitude.be_gratitude_capacita.core.application.usecase.compou
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ValorInvalidoException;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa;
-import servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Questao;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey;
@@ -13,11 +12,11 @@ import servicos.gratitude.be_gratitude_capacita.core.gateways.QuestaoGateway;
 import java.util.List;
 import java.util.Objects;
 
-public class CriarChaveCompostaAlternativa {
+public class CriarNovaChaveCompostaAlternativaUseCase {
     private final AlternativaGateway alternativaGateway;
     private final QuestaoGateway questaoGateway;
 
-    public CriarChaveCompostaAlternativa(AlternativaGateway alternativaGateway, QuestaoGateway questaoGateway) {
+    public CriarNovaChaveCompostaAlternativaUseCase(AlternativaGateway alternativaGateway, QuestaoGateway questaoGateway) {
         this.alternativaGateway = alternativaGateway;
         this.questaoGateway = questaoGateway;
     }

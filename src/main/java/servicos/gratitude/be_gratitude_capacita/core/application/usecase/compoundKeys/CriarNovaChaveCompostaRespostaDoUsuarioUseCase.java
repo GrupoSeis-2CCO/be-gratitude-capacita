@@ -2,21 +2,17 @@ package servicos.gratitude.be_gratitude_capacita.core.application.usecase.compou
 
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ValorInvalidoException;
-import servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa;
-import servicos.gratitude.be_gratitude_capacita.core.domain.MaterialAluno;
-import servicos.gratitude.be_gratitude_capacita.core.domain.Matricula;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.*;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.AlternativaGateway;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.TentativaGateway;
 
-import java.util.List;
 import java.util.Objects;
 
-public class CriarChaveCompostaRespostaDoUsuario {
+public class CriarNovaChaveCompostaRespostaDoUsuarioUseCase {
     private final TentativaGateway tentativaGateway;
     private final AlternativaGateway alternativaGateway;
 
-    public CriarChaveCompostaRespostaDoUsuario(TentativaGateway tentativaGateway, AlternativaGateway alternativaGateway) {
+    public CriarNovaChaveCompostaRespostaDoUsuarioUseCase(TentativaGateway tentativaGateway, AlternativaGateway alternativaGateway) {
         this.tentativaGateway = tentativaGateway;
         this.alternativaGateway = alternativaGateway;
     }

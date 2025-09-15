@@ -2,10 +2,8 @@ package servicos.gratitude.be_gratitude_capacita.core.application.usecase.compou
 
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ValorInvalidoException;
-import servicos.gratitude.be_gratitude_capacita.core.domain.MaterialAluno;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Matricula;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Tentativa;
-import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.MaterialAlunoCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.MatriculaCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.TentativaCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.MatriculaGateway;
@@ -14,11 +12,11 @@ import servicos.gratitude.be_gratitude_capacita.core.gateways.TentativaGateway;
 import java.util.List;
 import java.util.Objects;
 
-public class CriarChaveCompostaTentativa {
+public class CriarNovaChaveCompostaTentativaUseCase {
     private final MatriculaGateway matriculaGateway;
     private final TentativaGateway tentativaGateway;
 
-    public CriarChaveCompostaTentativa(MatriculaGateway matriculaGateway, TentativaGateway tentativaGateway) {
+    public CriarNovaChaveCompostaTentativaUseCase(MatriculaGateway matriculaGateway, TentativaGateway tentativaGateway) {
         this.matriculaGateway = matriculaGateway;
         this.tentativaGateway = tentativaGateway;
     }

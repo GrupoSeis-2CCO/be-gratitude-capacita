@@ -10,4 +10,5 @@ public interface TentativaGateway {
     Tentativa save(Tentativa tentativa);
     List<Tentativa> findAllByMatricula(Matricula matricula);
     Tentativa findById(TentativaCompoundKey idComposto);
+    Boolean existsById(TentativaCompoundKey idComposto);
 }

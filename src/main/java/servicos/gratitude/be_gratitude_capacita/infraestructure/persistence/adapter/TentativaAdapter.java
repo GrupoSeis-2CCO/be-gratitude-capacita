@@ -42,4 +42,9 @@ public class TentativaAdapter implements TentativaGateway {
 
         return entity.map(TentativaMapper::toDomain).orElse(null);
     }
+
+    @Override
+    public Boolean existsById(TentativaCompoundKey idComposto) {
+        return tentativaRepository.existsById(TentativaCompoundKeyMapper.toEntity(idComposto));
+    }
 }
