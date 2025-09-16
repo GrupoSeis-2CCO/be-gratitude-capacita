@@ -13,7 +13,6 @@ public class QuestaoMapper {
 
         entity.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(questao.getIdQuestaoComposto()));
         entity.setEnunciado(questao.getEnunciado());
-        entity.setNumeroQuestao(questao.getNumeroQuestao());
         entity.setFkAlternativaCorreta(AlternativaMapper.toEntity(questao.getFkAlternativaCorreta()));
         entity.setAvaliacaoEntity(AvaliacaoMapper.toEntity(questao.getAvaliacao()));
 
@@ -25,7 +24,6 @@ public class QuestaoMapper {
 
         questao.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toDomain(entity.getIdQuestaoComposto()));
         questao.setEnunciado(entity.getEnunciado());
-        questao.setNumeroQuestao(entity.getNumeroQuestao());
         questao.setFkAlternativaCorreta(AlternativaMapper.toDomain(entity.getFkAlternativaCorreta()));
         questao.setAvaliacao(AvaliacaoMapper.toDomain(entity.getAvaliacaoEntity()));
 
@@ -40,7 +38,6 @@ public class QuestaoMapper {
 
         entity.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(questaoDaVez.getIdQuestaoComposto()));
         entity.setEnunciado(questaoDaVez.getEnunciado());
-        entity.setNumeroQuestao(questaoDaVez.getNumeroQuestao());
         entity.setFkAlternativaCorreta(AlternativaMapper.toEntity(questaoDaVez.getFkAlternativaCorreta()));
         entity.setAvaliacaoEntity(AvaliacaoMapper.toEntity(questaoDaVez.getAvaliacao()));
 
@@ -58,7 +55,6 @@ public class QuestaoMapper {
 
         questao.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toDomain(entityDaVez.getIdQuestaoComposto()));
         questao.setEnunciado(entityDaVez.getEnunciado());
-        questao.setNumeroQuestao(entityDaVez.getNumeroQuestao());
         questao.setFkAlternativaCorreta(AlternativaMapper.toDomain(entityDaVez.getFkAlternativaCorreta()));
         questao.setAvaliacao(AvaliacaoMapper.toDomain(entityDaVez.getAvaliacaoEntity()));
 

@@ -33,6 +33,31 @@ public class RespostaDoUsuarioController {
     private final CriarNovaChaveCompostaRespostaDoUsuarioUseCase criarNovaChaveCompostaRespostaDoUsuarioUseCase;
     private final BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase;
 
+    public RespostaDoUsuarioController(
+            CriarRespostaDoUsuarioUseCase criarRespostaDoUsuarioUseCase,
+            ListarRespostasDoUsuarioUseCase listarRespostasDoUsuarioUseCase,
+            MontarChaveCompostaTentativaUseCase montarChaveCompostaTentativaUseCase,
+            EncontrarTentativaPorId encontrarTentativaPorId,
+            MontarChaveCompostaAlternativaUseCase montarChaveCompostaAlternativaUseCase,
+            EncontrarAlternativaPorIdUseCase encontrarAlternativaPorIdUseCase,
+            MontarChaveCompostaMatriculaUseCase montarChaveCompostaMatriculaUseCase,
+            MontarChaveCompostaQuestaoUseCase montarChaveCompostaQuestaoUseCase,
+            CriarNovaChaveCompostaRespostaDoUsuarioUseCase criarNovaChaveCompostaRespostaDoUsuarioUseCase,
+            BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase
+    ) {
+        this.criarRespostaDoUsuarioUseCase = criarRespostaDoUsuarioUseCase;
+        this.listarRespostasDoUsuarioUseCase = listarRespostasDoUsuarioUseCase;
+        this.montarChaveCompostaTentativaUseCase = montarChaveCompostaTentativaUseCase;
+        this.encontrarTentativaPorId = encontrarTentativaPorId;
+        this.montarChaveCompostaAlternativaUseCase = montarChaveCompostaAlternativaUseCase;
+        this.encontrarAlternativaPorIdUseCase = encontrarAlternativaPorIdUseCase;
+        this.montarChaveCompostaMatriculaUseCase = montarChaveCompostaMatriculaUseCase;
+        this.montarChaveCompostaQuestaoUseCase = montarChaveCompostaQuestaoUseCase;
+        this.criarNovaChaveCompostaRespostaDoUsuarioUseCase = criarNovaChaveCompostaRespostaDoUsuarioUseCase;
+        this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
+    }
+
+
 
 
     @PostMapping

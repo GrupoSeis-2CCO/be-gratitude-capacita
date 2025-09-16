@@ -24,7 +24,7 @@ public class TentativaMapper {
 
         tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entity.getIdTentativaComposto()));
         tentativa.setDtTentativa(entity.getDtTentativa());
-        tentativa.setMatricula(MatriculaMapper.toDomains(entity.getMatricula()));
+        tentativa.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
         tentativa.setAvaliacao(AvaliacaoMapper.toDomain(entity.getAvaliacao()));
 
         return tentativa;
@@ -55,7 +55,7 @@ public class TentativaMapper {
 
         tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityDaVez.getIdTentativaComposto()));
         tentativa.setDtTentativa(entityDaVez.getDtTentativa());
-        tentativa.setMatricula(MatriculaMapper.toDomains(entityDaVez.getMatricula()));
+        tentativa.setMatricula(MatriculaMapper.toDomain(entityDaVez.getMatricula()));
         tentativa.setAvaliacao(AvaliacaoMapper.toDomain(entityDaVez.getAvaliacao()));
 
         tentativas.add(tentativa);

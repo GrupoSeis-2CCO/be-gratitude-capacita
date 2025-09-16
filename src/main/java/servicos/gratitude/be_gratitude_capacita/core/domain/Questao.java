@@ -11,6 +11,7 @@ public class Questao {
     private String enunciado;
     private Avaliacao avaliacao;
     private Alternativa fkAlternativaCorreta;
+    private Integer numeroQuestao;
 
     public QuestaoCompoundKey getIdQuestaoComposto() {
         return idQuestaoComposto;
@@ -42,5 +43,12 @@ public class Questao {
 
     public void setFkAlternativaCorreta(Alternativa fkAlternativaCorreta) {
         this.fkAlternativaCorreta = fkAlternativaCorreta;
+    }
+    public Integer getNumeroQuestao() {
+        return numeroQuestao;
+    }
+
+    public void setNumeroQuestao(Integer numeroQuestao) {
+        this.numeroQuestao = numeroQuestao;
     }
 }

@@ -32,4 +32,9 @@ public class CursoBeanConfig {
     public ListarCursoUseCase listarCursoUseCase(CursoAdapter cursoAdapter){
         return new ListarCursoUseCase(cursoAdapter);
     }
+
+    @Bean
+    public EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase(CursoAdapter cursoAdapter){
+        return new EncontrarCursoPorIdUseCase(cursoAdapter);
+    }
 }

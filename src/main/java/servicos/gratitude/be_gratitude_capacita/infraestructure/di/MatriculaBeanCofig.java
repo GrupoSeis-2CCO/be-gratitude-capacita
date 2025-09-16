@@ -34,7 +34,12 @@ public class MatriculaBeanCofig {
     }
 
     @Bean
+    public EncontrarMatriculaPorIdUseCase encontrarMatriculaPorIdUseCase(MatriculaAdapter matriculaAdapter){
+        return new EncontrarMatriculaPorIdUseCase(matriculaAdapter);
+    }
+    @Bean
     public ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase(MatriculaAdapter matriculaAdapter){
         return new ListarMatriculaPorCursoUseCase(matriculaAdapter);
     }
+
 }

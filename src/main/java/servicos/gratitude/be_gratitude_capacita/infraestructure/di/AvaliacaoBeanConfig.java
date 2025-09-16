@@ -2,8 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.di;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.AtualizarAcertosMinimosAvaliacaoUseCase;
-import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.CriarAvaliacaoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.*;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.AvaliacaoAdapter;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.CursoAdapter;
 
@@ -18,5 +17,9 @@ public class AvaliacaoBeanConfig {
     @Bean
     public AtualizarAcertosMinimosAvaliacaoUseCase atualizarAcertosMinimosAvaliacaoUseCase(AvaliacaoAdapter avaliacaoAdapter){
         return new AtualizarAcertosMinimosAvaliacaoUseCase(avaliacaoAdapter);
+    }
+    @Bean
+    public EncontrarAvaliacaoPorIdUseCase encontrarAvaliacaoPorIdUseCase(AvaliacaoAdapter avaliacaoAdapter){
+        return new EncontrarAvaliacaoPorIdUseCase(avaliacaoAdapter);
     }
 }
