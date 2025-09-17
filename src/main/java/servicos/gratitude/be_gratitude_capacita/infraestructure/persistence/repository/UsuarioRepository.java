@@ -8,6 +8,11 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Integer> {
     List<UsuarioEntity> findAllByNomeContainsIgnoreCase(String nome);
+
     Boolean existsByEmail(String email);
+
     Boolean existsByCpf(String cpf);
+
+    // Para autenticação JWT
+    Optional<UsuarioEntity> findByEmailAndSenha(String email, String senha);
 }

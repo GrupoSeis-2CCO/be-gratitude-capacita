@@ -2,6 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.core.domain;
 
 import java.time.LocalDateTime;
 
+
 public class Usuario {
     private Integer idUsuario;
     private String nome;

@@ -1,6 +1,10 @@
+
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Usuario;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.UsuarioGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.CargoEntity;
@@ -15,6 +19,7 @@ import java.util.Optional;
 
 @Service
 public class UsuarioAdapter implements UsuarioGateway {
+    private static final Logger log = LoggerFactory.getLogger(UsuarioAdapter.class);
     private final UsuarioRepository usuarioRepository;
 
     public UsuarioAdapter(UsuarioRepository usuarioRepository) {
@@ -23,10 +28,35 @@ public class UsuarioAdapter implements UsuarioGateway {
 
     @Override
     public Usuario save(Usuario usuario) {
+        // Garante que a senha será salva como hash BCrypt
+        String senhaOriginal = usuario.getSenha();
+        if (senhaOriginal != null && !senhaOriginal.startsWith("$2a$")) { // evita re-hash
+            usuario.setSenha(org.springframework.security.crypto.bcrypt.BCrypt.hashpw(senhaOriginal, org.springframework.security.crypto.bcrypt.BCrypt.gensalt()));
+        }
         UsuarioEntity entity = UsuarioMapper.toEntity(usuario);
         usuarioRepository.save(entity);
-
         return UsuarioMapper.toDomain(entity);
+    }
+
+    @Override
+    public Usuario autenticar(String email, String senha) {
+        log.info("Tentando autenticar usuário: {}", email);
+        Optional<UsuarioEntity> entityOpt = usuarioRepository.findAll().stream()
+                .filter(u -> u.getEmail() != null && u.getEmail().trim().equalsIgnoreCase(email.trim()))
+                .findFirst();
+        if (entityOpt.isPresent()) {
+            String hash = entityOpt.get().getSenha();
+            log.debug("Hash salvo no banco: {}", hash);
+            if (BCrypt.checkpw(senha, hash)) {
+                log.info("Usuário autenticado com sucesso: {}", email);
+                return UsuarioMapper.toDomain(entityOpt.get());
+            } else {
+                log.warn("Senha inválida para {}", email);
+            }
+        } else {
+            log.warn("Usuário com email {} não encontrado no banco.", email);
+        }
+        return null;
     }
 
     @Override

@@ -1,5 +1,9 @@
 package servicos.gratitude.be_gratitude_capacita.core.domain;
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
 public class Cargo {
     private Integer idCargo;
     private String nomeCargo;
