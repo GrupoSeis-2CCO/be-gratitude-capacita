@@ -31,7 +31,8 @@ public class UsuarioAdapter implements UsuarioGateway {
         // Garante que a senha será salva como hash BCrypt
         String senhaOriginal = usuario.getSenha();
         if (senhaOriginal != null && !senhaOriginal.startsWith("$2a$")) { // evita re-hash
-            usuario.setSenha(org.springframework.security.crypto.bcrypt.BCrypt.hashpw(senhaOriginal, org.springframework.security.crypto.bcrypt.BCrypt.gensalt()));
+            usuario.setSenha(org.springframework.security.crypto.bcrypt.BCrypt.hashpw(senhaOriginal,
+                    org.springframework.security.crypto.bcrypt.BCrypt.gensalt()));
         }
         UsuarioEntity entity = UsuarioMapper.toEntity(usuario);
         usuarioRepository.save(entity);

@@ -13,6 +13,5 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Integer>
 
     Boolean existsByCpf(String cpf);
 
-    // Para autenticação JWT
     Optional<UsuarioEntity> findByEmailAndSenha(String email, String senha);
 }
