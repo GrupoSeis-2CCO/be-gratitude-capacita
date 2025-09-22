@@ -13,6 +13,7 @@ import java.io.IOException;
 
 @Service
 public class S3Service {
+        private final S3Client s3Client = S3Client.create();
 
         @Value("${aws.s3.bucket.bronze}")
         private String bucketBronze;
@@ -26,12 +27,6 @@ public class S3Service {
         @Value("${aws.s3.region}")
         private String region;
 
-        @Value("${aws.accessKeyId}")
-        private String accessKeyId;
-
-        @Value("${aws.secretAccessKey}")
-        private String secretAccessKey;
-
         /**
          * Envia arquivo para o bucket Bronze, Silver ou Gold.
          * 
@@ -43,8 +38,6 @@ public class S3Service {
         public String uploadFile(MultipartFile file, String tipoBucket) throws IOException {
                 S3Client s3 = S3Client.builder()
                                 .region(Region.of(region))
-                                .credentialsProvider(StaticCredentialsProvider.create(
-                                                AwsBasicCredentials.create(accessKeyId, secretAccessKey)))
                                 .build();
 
                 // Extrai apenas o nome do arquivo, sem caminho
