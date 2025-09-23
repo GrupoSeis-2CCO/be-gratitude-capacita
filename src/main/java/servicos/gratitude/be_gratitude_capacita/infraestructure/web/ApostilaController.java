@@ -10,6 +10,8 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Confl
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.apostila.*;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Apostila;
+import servicos.gratitude.be_gratitude_capacita.core.domain.Page;
+import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
 
 import java.util.List;
 
@@ -21,91 +23,107 @@ public class ApostilaController {
     private final AtualizarOcultoApostilaUseCase atualizarOcultoApostilaUseCase;
     private final DeletarApostilaUseCase deletarApostilaUseCase;
     private final ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase;
+    private final ListarApostilaPorCursoPaginadoUseCase listarApostilaPorCursoPaginadoUseCase;
 
-    public ApostilaController(CriarApostilaUseCase criarApostilaUseCase, AtualizarDadosApostilaUseCase atualizarDadosApostilaUseCase, AtualizarOcultoApostilaUseCase atualizarOcultoApostilaUseCase, DeletarApostilaUseCase deletarApostilaUseCase, ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase) {
+    public ApostilaController(CriarApostilaUseCase criarApostilaUseCase,
+            AtualizarDadosApostilaUseCase atualizarDadosApostilaUseCase,
+            AtualizarOcultoApostilaUseCase atualizarOcultoApostilaUseCase,
+            DeletarApostilaUseCase deletarApostilaUseCase, ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase,
+            ListarApostilaPorCursoPaginadoUseCase listarApostilaPorCursoPaginadoUseCase) {
         this.criarApostilaUseCase = criarApostilaUseCase;
         this.atualizarDadosApostilaUseCase = atualizarDadosApostilaUseCase;
         this.atualizarOcultoApostilaUseCase = atualizarOcultoApostilaUseCase;
         this.deletarApostilaUseCase = deletarApostilaUseCase;
         this.listarApostilaPorCursoUseCase = listarApostilaPorCursoUseCase;
+        this.listarApostilaPorCursoPaginadoUseCase = listarApostilaPorCursoPaginadoUseCase;
     }
 
     @PostMapping
     public ResponseEntity<Apostila> cadastrarApostila(
-            @RequestBody CriarApostilaCommand request
-    ){
+            @RequestBody CriarApostilaCommand request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(criarApostilaUseCase.execute(request));
-        } catch (ConflitoException e){
+        } catch (ConflitoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, e.getMessage(), e
-            );
-        } catch (NaoEncontradoException e){
+                    HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage(), e
-            );
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
     @GetMapping("/{fkCurso}")
     public ResponseEntity<List<Apostila>> listarApostilaPorCurso(
-            @PathVariable Integer fkCurso
-    ) {
+            @PathVariable Integer fkCurso) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(listarApostilaPorCursoUseCase.execute(fkCurso));
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage(), e
-            );
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/{fkCurso}/paginated")
+    public ResponseEntity<Page<Apostila>> listarApostilaPorCursoPaginado(
+            @PathVariable Integer fkCurso,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        try {
+            Pageable pageable = Pageable.of(page, size, sortBy, sortDirection);
+            Page<Apostila> apostilasPage = listarApostilaPorCursoPaginadoUseCase.execute(fkCurso, pageable);
+
+            if (apostilasPage.empty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            return ResponseEntity.ok(apostilasPage);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
     @PutMapping("/atualizar-dados/{idApostila}")
     public ResponseEntity<Apostila> atualizarDadosApostila(
             @RequestBody AtualizarApostilaCommand request,
-            @PathVariable Integer idApostila
-    ){
+            @PathVariable Integer idApostila) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(atualizarDadosApostilaUseCase.execute(request, idApostila));
-        } catch (ConflitoException e){
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(atualizarDadosApostilaUseCase.execute(request, idApostila));
+        } catch (ConflitoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, e.getMessage(), e
-            );
-        } catch (NaoEncontradoException e){
+                    HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage(), e
-            );
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
     @PutMapping("/atualizar-oculto/{idApostila}")
     public ResponseEntity<Apostila> atualizarOcultoApostila(
-            @PathVariable Integer idApostila
-    ){
+            @PathVariable Integer idApostila) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(atualizarOcultoApostilaUseCase.execute(idApostila));
-        } catch (ConflitoException e){
+        } catch (ConflitoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, e.getMessage(), e
-            );
-        } catch (NaoEncontradoException e){
+                    HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage(), e
-            );
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
     @DeleteMapping("/{idAPostila}")
     public ResponseEntity deletarApostila(
-            @PathVariable Integer idApostila
-    ){
+            @PathVariable Integer idApostila) {
         try {
             deletarApostilaUseCase.execute(idApostila);
             return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (NaoEncontradoException e){
+        } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage(), e
-            );
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 

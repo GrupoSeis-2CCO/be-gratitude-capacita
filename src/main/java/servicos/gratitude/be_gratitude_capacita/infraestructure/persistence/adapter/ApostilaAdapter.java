@@ -1,8 +1,12 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Apostila;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
+import servicos.gratitude.be_gratitude_capacita.core.domain.Page;
+import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.ApostilaGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.ApostilaEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.ApostilaMapper;
@@ -30,6 +34,30 @@ public class ApostilaAdapter implements ApostilaGateway {
     @Override
     public List<Apostila> findAllByCurso(Curso curso) {
         return ApostilaMapper.toDomains(apostilaRepository.findAllByFkCurso(CursoMapper.toEntity(curso)));
+    }
+
+    @Override
+    public Page<Apostila> findAllByCurso(Curso curso, Pageable pageable) {
+        // Precisa implementar método paginado no repository
+        // Por enquanto, vou simular usando findAll com paginação
+        PageRequest pageRequest = createPageRequest(pageable);
+        org.springframework.data.domain.Page<ApostilaEntity> springPage = apostilaRepository
+                .findAllByFkCurso(CursoMapper.toEntity(curso), pageRequest);
+
+        List<Apostila> apostilas = ApostilaMapper.toDomains(springPage.getContent());
+
+        return Page.of(apostilas, pageable.page(), pageable.size(), springPage.getTotalElements());
+    }
+
+    private PageRequest createPageRequest(Pageable pageable) {
+        if (pageable.sortBy() != null && pageable.sortDirection() != null) {
+            Sort.Direction direction = "DESC".equalsIgnoreCase(pageable.sortDirection())
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+            Sort sort = Sort.by(direction, pageable.sortBy());
+            return PageRequest.of(pageable.page(), pageable.size(), sort);
+        }
+        return PageRequest.of(pageable.page(), pageable.size());
     }
 
     @Override

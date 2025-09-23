@@ -10,27 +10,34 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adap
 public class ApostilaBeanConfig {
 
     @Bean
-    public CriarApostilaUseCase criarApostilaUseCase(ApostilaAdapter apostilaAdapter, CursoAdapter cursoAdapter){
+    public CriarApostilaUseCase criarApostilaUseCase(ApostilaAdapter apostilaAdapter, CursoAdapter cursoAdapter) {
         return new CriarApostilaUseCase(apostilaAdapter, cursoAdapter);
     }
 
     @Bean
-    public AtualizarDadosApostilaUseCase atualizarDadosApostilaUseCase(ApostilaAdapter apostilaAdapter){
+    public AtualizarDadosApostilaUseCase atualizarDadosApostilaUseCase(ApostilaAdapter apostilaAdapter) {
         return new AtualizarDadosApostilaUseCase(apostilaAdapter);
     }
 
     @Bean
-    public AtualizarOcultoApostilaUseCase atualizarOcultoApostilaUseCase(ApostilaAdapter apostilaAdapter){
+    public AtualizarOcultoApostilaUseCase atualizarOcultoApostilaUseCase(ApostilaAdapter apostilaAdapter) {
         return new AtualizarOcultoApostilaUseCase(apostilaAdapter);
     }
 
     @Bean
-    public DeletarApostilaUseCase deletarApostilaUseCase(ApostilaAdapter apostilaAdapter){
+    public DeletarApostilaUseCase deletarApostilaUseCase(ApostilaAdapter apostilaAdapter) {
         return new DeletarApostilaUseCase(apostilaAdapter);
     }
 
     @Bean
-    public ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase(ApostilaAdapter apostilaAdapter, CursoAdapter cursoAdapter){
+    public ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase(ApostilaAdapter apostilaAdapter,
+            CursoAdapter cursoAdapter) {
         return new ListarApostilaPorCursoUseCase(apostilaAdapter, cursoAdapter);
+    }
+
+    @Bean
+    public ListarApostilaPorCursoPaginadoUseCase listarApostilaPorCursoPaginadoUseCase(ApostilaAdapter apostilaAdapter,
+            CursoAdapter cursoAdapter) {
+        return new ListarApostilaPorCursoPaginadoUseCase(apostilaAdapter, cursoAdapter);
     }
 }

@@ -1,5 +1,7 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Apostila;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.ApostilaEntity;
@@ -10,6 +12,8 @@ import java.util.Optional;
 
 public interface ApostilaRepository extends JpaRepository<ApostilaEntity, Integer> {
     List<ApostilaEntity> findAllByFkCurso(CursoEntity fkCurso);
+
+    Page<ApostilaEntity> findAllByFkCurso(CursoEntity fkCurso, Pageable pageable);
 
     Boolean existsByNomeApostilaOriginal(String nome);
 

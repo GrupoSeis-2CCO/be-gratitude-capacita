@@ -9,32 +9,37 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adap
 public class CursoBeanConfig {
 
     @Bean
-    public CriarCursoUseCase criarCursoUseCase(CursoAdapter cursoAdapter){
+    public CriarCursoUseCase criarCursoUseCase(CursoAdapter cursoAdapter) {
         return new CriarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public AtualizarCursoUseCase atualizarCursoUseCase(CursoAdapter cursoAdapter){
+    public AtualizarCursoUseCase atualizarCursoUseCase(CursoAdapter cursoAdapter) {
         return new AtualizarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public AtualizarOcultoUseCase atualizarOcultoUseCase(CursoAdapter cursoAdapter){
+    public AtualizarOcultoUseCase atualizarOcultoUseCase(CursoAdapter cursoAdapter) {
         return new AtualizarOcultoUseCase(cursoAdapter);
     }
 
     @Bean
-    public DeletarCursoUseCase deletarCursoUseCase(CursoAdapter cursoAdapter){
+    public DeletarCursoUseCase deletarCursoUseCase(CursoAdapter cursoAdapter) {
         return new DeletarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public ListarCursoUseCase listarCursoUseCase(CursoAdapter cursoAdapter){
+    public ListarCursoUseCase listarCursoUseCase(CursoAdapter cursoAdapter) {
         return new ListarCursoUseCase(cursoAdapter);
     }
 
     @Bean
-    public EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase(CursoAdapter cursoAdapter){
+    public ListarCursoPaginadoUseCase listarCursoPaginadoUseCase(CursoAdapter cursoAdapter) {
+        return new ListarCursoPaginadoUseCase(cursoAdapter);
+    }
+
+    @Bean
+    public EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase(CursoAdapter cursoAdapter) {
         return new EncontrarCursoPorIdUseCase(cursoAdapter);
     }
 }
