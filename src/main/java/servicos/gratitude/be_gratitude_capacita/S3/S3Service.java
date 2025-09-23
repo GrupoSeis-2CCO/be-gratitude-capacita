@@ -11,9 +11,16 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.ApostilaRepository;
+
 @Service
 public class S3Service {
         private final S3Client s3Client = S3Client.create();
+
+        @Autowired
+        private ApostilaRepository apostilaRepository;
 
         @Value("${aws.s3.bucket.bronze}")
         private String bucketBronze;
@@ -67,5 +74,53 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
 
                 return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + uniqueFilename;
+        }
+
+        /**
+         * Atualiza apenas a URL do arquivo da apostila no banco de dados.
+         * 
+         * @param idApostila id da apostila
+         * @param url        nova URL do arquivo
+         */
+        @Transactional
+        public void patchAtualizarUrlArquivo(Integer idApostila, String url) {
+                System.out.println("=== S3SERVICE.patchAtualizarUrlArquivo ===");
+                System.out.println("Parâmetros recebidos:");
+                System.out.println("  - idApostila: " + idApostila);
+                System.out.println("  - url: " + url);
+
+                try {
+                        // Primeiro vamos verificar se a apostila existe
+                        boolean exists = apostilaRepository.existsById(idApostila);
+                        System.out.println("Apostila com ID " + idApostila + " existe? " + exists);
+
+                        if (!exists) {
+                                System.out.println("ERRO: Apostila com ID " + idApostila + " não encontrada!");
+                                throw new RuntimeException("Apostila não encontrada com ID: " + idApostila);
+                        }
+
+                        System.out.println("Chamando apostilaRepository.atualizarUrlArquivo...");
+                        int rowsAffected = apostilaRepository.atualizarUrlArquivo(idApostila, url);
+                        System.out.println("Linhas afetadas pelo update: " + rowsAffected);
+
+                        if (rowsAffected == 0) {
+                                System.out.println(
+                                                "ATENÇÃO: Nenhuma linha foi atualizada! Mesmo com a apostila existindo.");
+                        } else {
+                                System.out.println("Update executado com sucesso!");
+                        }
+
+                        // Vamos verificar se a URL foi realmente atualizada
+                        var apostilaAtualizada = apostilaRepository.findById(idApostila);
+                        if (apostilaAtualizada.isPresent()) {
+                                System.out.println("URL atual na base após update: "
+                                                + apostilaAtualizada.get().getUrlArquivo());
+                        }
+
+                } catch (Exception e) {
+                        System.out.println("ERRO no repository: " + e.getMessage());
+                        e.printStackTrace();
+                        throw e;
+                }
         }
 }

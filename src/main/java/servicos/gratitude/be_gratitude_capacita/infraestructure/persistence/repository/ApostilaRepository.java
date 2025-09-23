@@ -10,6 +10,14 @@ import java.util.Optional;
 
 public interface ApostilaRepository extends JpaRepository<ApostilaEntity, Integer> {
     List<ApostilaEntity> findAllByFkCurso(CursoEntity fkCurso);
+
     Boolean existsByNomeApostilaOriginal(String nome);
+
     Optional<ApostilaEntity> findByNomeApostilaOriginal(String nome);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("UPDATE ApostilaEntity a SET a.urlArquivo = :url WHERE a.idApostila = :id")
+    int atualizarUrlArquivo(@org.springframework.data.repository.query.Param("id") Integer id,
+            @org.springframework.data.repository.query.Param("url") String url);
 }

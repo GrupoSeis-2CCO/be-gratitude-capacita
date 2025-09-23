@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "apostila")
 public class ApostilaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,8 +19,11 @@ public class ApostilaEntity {
     private LocalDateTime dataAtualizacaoApostila;
     private Boolean isApostilaOculto;
     private Integer ordemApostila;
+    @Column(name = "url_arquivo")
+    private String urlArquivo;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "FK_curso")
     private CursoEntity fkCurso;
 
     public Integer getIdApostila() {
@@ -100,5 +104,13 @@ public class ApostilaEntity {
 
     public void setFkCurso(CursoEntity fkCurso) {
         this.fkCurso = fkCurso;
+    }
+
+    public String getUrlArquivo() {
+        return urlArquivo;
+    }
+
+    public void setUrlArquivo(String urlArquivo) {
+        this.urlArquivo = urlArquivo;
     }
 }
