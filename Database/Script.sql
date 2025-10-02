@@ -64,8 +64,8 @@ CREATE TABLE matricula (
     FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
 );
 
-INSERT INTO matricula (fk_usuario, fk_curso) VALUES 
-(2, 2), (1, 1);
+-- INSERT INTO matricula (fk_usuario, fk_curso) VALUES 
+-- (2, 2), (1, 1);
 
 -- select * from matricula;
 
