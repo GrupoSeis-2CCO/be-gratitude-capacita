@@ -1,4 +1,4 @@
--- Drop database Capacita;
+ --Drop database Capacita;
 create database capacita;
 use Capacita;
 -- Tabela cargo
@@ -7,10 +7,10 @@ CREATE TABLE cargo (
     nome_cargo VARCHAR(50) NOT NULL
 );
 
-INSERT INTO cargo (nome_cargo) VALUES 
-('Colaborador'), ('Funcionário');
+-- INSERT INTO cargo (nome_cargo) VALUES 
+-- ('Colaborador'), ('Funcionário');
 
-select * from cargo;
+-- select * from cargo;
 
 -- Tabela usuario
 CREATE TABLE usuario (
@@ -27,12 +27,12 @@ CREATE TABLE usuario (
 );
 
 
-INSERT INTO usuario (nome, cpf, email, senha, fk_cargo) VALUES 
-('João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
-('Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
-('Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 3);
+--INSERT INTO usuario (nome, cpf, email, senha, fk_cargo) VALUES 
+--('João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
+--('Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
+--('Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 3);
 
-Select * from Usuario;
+--Select * from Usuario;
 
 CREATE TABLE curso (
     id_curso INT AUTO_INCREMENT ,
@@ -49,7 +49,7 @@ INSERT INTO curso (titulo_curso, descricao, imagem, ocultado, duracao_estimada) 
 ('Spring Boot', 'API REST com Spring Boot', 'spring.jpg', 0, 40),
 ('MySQL Essencial', 'Fundamentos do banco de dados MySQL', 'mysql.jpg', 0, 30);
 
-select * from curso;
+--select * from curso;
 
 -- Tabela matricula
 CREATE TABLE matricula (
@@ -65,9 +65,9 @@ CREATE TABLE matricula (
 );
 
 INSERT INTO matricula (fk_usuario, fk_curso) VALUES 
-(2, 2), (3, 2), (1, 1);
+(2, 2), (1, 1);
 
-select * from matricula;
+-- select * from matricula;
 
 -- Tabela video
 CREATE TABLE video (
