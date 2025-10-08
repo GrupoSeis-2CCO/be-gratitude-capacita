@@ -1,6 +1,6 @@
--- Drop database Capacita;
--- create database capacita;
--- use Capacita;
+DROP DATABASE IF EXISTS capacita;
+create database capacita;
+use capacita;
 
 -- Tabela cargo
 CREATE TABLE cargo (
@@ -8,10 +8,10 @@ CREATE TABLE cargo (
     nome_cargo VARCHAR(50) NOT NULL
 );
 
--- INSERT INTO cargo (nome_cargo) VALUES 
--- ('Colaborador'), ('Funcionário');
+INSERT INTO cargo (nome_cargo) VALUES 
+('Colaborador'), ('Funcionário');
 
--- select * from cargo;
+select * from cargo;
 
 -- Tabela usuario
 CREATE TABLE usuario (
@@ -28,12 +28,12 @@ CREATE TABLE usuario (
 );
 
 
--- INSERT INTO usuario (nome, cpf, email, senha, fk_cargo) VALUES 
--- ('João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
--- ('Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
--- ('Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 3);
+INSERT INTO usuario (nome, cpf, email, senha, fk_cargo) VALUES 
+('João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
+('Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
+('Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1);
 
--- Select * from Usuario;
+Select * from usuario;
 
 CREATE TABLE curso (
     id_curso INT AUTO_INCREMENT ,
@@ -65,10 +65,10 @@ CREATE TABLE matricula (
     FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
 );
 
--- INSERT INTO matricula (fk_usuario, fk_curso) VALUES 
--- (2, 2), (1, 1);
+INSERT INTO matricula (fk_usuario, fk_curso) VALUES 
+(2, 2), (1, 1);
 
--- select * from matricula;
+select * from matricula;
 
 -- Tabela video
 CREATE TABLE video (
@@ -130,9 +130,9 @@ CREATE TABLE material_aluno (
 );
 
 INSERT INTO material_aluno (fk_usuario, fk_cargo, fk_video, fk_apostila) VALUES 
-(1, 1, 1, 1), (2, 2, 2, 2), (3, 2, 3, 3);
+(1, 1, 1, 1), (2, 2, 2, 2), (2, 1, 3, 3);
 
--- select * from material_aluno;
+select * from material_aluno;
 
 -- Tabela avaliacao
 CREATE TABLE avaliacao (  
@@ -145,7 +145,7 @@ CREATE TABLE avaliacao (
 INSERT INTO avaliacao (nota_minima, fk_curso) VALUES 
 (7.5, 1), (6.0, 2), (8.0, 3);
 
--- select * from avaliacao;
+select * from avaliacao;
 
 -- Tabela alternativa
 CREATE TABLE alternativa (
@@ -163,7 +163,7 @@ INSERT INTO alternativa (fk_avaliacao, texto, ordem_alternativa) VALUES
 (1, 'Alternativa B', 2), 
 (2, 'Alternativa C', 1);
 
--- select * from alternativa;
+select * from alternativa;
 
 CREATE TABLE tentativa (
     id_tentativa INT AUTO_INCREMENT ,
@@ -181,7 +181,10 @@ CREATE TABLE tentativa (
 INSERT INTO tentativa (fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
 (1, 1, '2025-06-01 10:00:00', 1),
 (2, 2, '2025-06-02 14:30:00', 2),
-(3, 1, '2025-06-03 09:15:00', 1);
+(1, 1, '2025-06-03 09:15:00', 1);
+
+select * from tentativa;
+
 
 CREATE TABLE questao (
     id_questao INT AUTO_INCREMENT PRIMARY KEY,
@@ -197,6 +200,8 @@ INSERT INTO questao (fk_avaliacao, enunciado, numero_questao, fk_alternativa_cor
 (1, 'O que é JVM?', 1, 2),
 (1, 'Qual comando compila um arquivo Java?', 2, 3),
 (2, 'Para que serve o @RestController no Spring?', 1, 4);
+
+SELECT * FROM questao;
 
 -- Tabela resposta_usuario
 CREATE TABLE resposta_do_usuario ( 
@@ -215,10 +220,14 @@ CREATE TABLE resposta_do_usuario (
     FOREIGN KEY (FK_alternativa) REFERENCES alternativa(id_alternativa)
 );
 
+-- Ajuste os valores de FK_tentativa para corresponder aos id_tentativa existentes na tabela tentativa
+-- Supondo que os três inserts anteriores em tentativa geraram id_tentativa 1, 2 e 3, os valores abaixo estão corretos.
 INSERT INTO resposta_do_usuario (FK_usuario, FK_curso, FK_tentativa, FK_avaliacao, FK_questao, FK_alternativa) VALUES 
-(2, 2, 1, 1,3,2), (2, 2, 1, 2,2,1), (3, 3, 2, 3,1,2);
+(1, 1, 1, 1, 1, 1),
+(2, 2, 2, 2, 2, 2),
+(1, 1, 3, 1, 2, 3);
 
--- select * from resposta_do_usuario;
+select * from resposta_do_usuario;
 
 -- Tabela feedback
 CREATE TABLE feedback (
@@ -231,9 +240,9 @@ CREATE TABLE feedback (
     FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
 );
 
-INSERT INTO feedback (fk_curso, estrelas, motivo, fk_usuario) VALUES 
-(1, 5, 'Excelente!', 1),
-(2, 4, 'Muito bom', 2),
-(3, 3, 'Regular', 3);
+INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES 
+(1, 1, 5, 'Excelente!'),
+(2, 2, 4, 'Muito bom'),
+(2, 3, 3, 'Regular');
 
--- select * from feedback;
+select * from feedback;
