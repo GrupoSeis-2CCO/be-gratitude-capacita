@@ -53,7 +53,7 @@ jobs:
             sudo wget -O /opt/app/app.jar https://github.com/GrupoSeis-2CCO/be-gratitude-capacita/releases/download/NEW/be-gratitude-capacita-0.0.1-SNAPSHOT.jar
             
             # Ajustar permissões
-            sudo chown ubuntu:ubuntu /opt/app/app.jar
+            sudo chown root:root /opt/app/app.jar
             sudo chmod +x /opt/app/app.jar
             
             # Reiniciar o serviço
