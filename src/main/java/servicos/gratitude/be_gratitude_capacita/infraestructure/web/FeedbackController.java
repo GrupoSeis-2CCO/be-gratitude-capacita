@@ -11,14 +11,13 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Valor
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.CriarFeedbackUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
-import servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Feedback;
-import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey;
-import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.FeedbackResponse;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/feedbacks")
 public class FeedbackController {
@@ -33,13 +32,13 @@ public class FeedbackController {
     }
 
     @PostMapping
-    public ResponseEntity<Feedback> cadastrarFeedback(
+    public ResponseEntity<FeedbackResponse> cadastrarFeedback(
             @RequestBody CriarFeedbackCommand request
     ){
         try {
             Curso curso = encontrarCursoPorIdUseCase.execute(request.idCurso());
             Feedback feedback = criarFeedbackUseCase.execute(request, curso);
-            return ResponseEntity.status(HttpStatus.CREATED).body(feedback);
+        return ResponseEntity.status(HttpStatus.CREATED).body(FeedbackResponse.fromDomain(feedback));
         } catch (ValorInvalidoException e){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
@@ -55,8 +54,8 @@ public class FeedbackController {
         }
     }
 
-    @PostMapping("/{idCurso}")
-    public ResponseEntity<List<Feedback>> listarFeedbackPorCurso(
+    @GetMapping("/curso/{idCurso}")
+    public ResponseEntity<List<FeedbackResponse>> listarFeedbackPorCurso(
             @PathVariable Integer idCurso
     ){
         try {
@@ -67,7 +66,7 @@ public class FeedbackController {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return ResponseEntity.status(HttpStatus.OK).body(feedbacks);
+            return ResponseEntity.status(HttpStatus.OK).body(FeedbackResponse.fromDomains(feedbacks));
         } catch (ValorInvalidoException e){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e

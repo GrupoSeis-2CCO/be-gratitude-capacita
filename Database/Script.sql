@@ -241,8 +241,7 @@ CREATE TABLE feedback (
 );
 
 INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES 
-(1, 1, 5, 'Excelente!'),
-(2, 2, 4, 'Muito bom'),
-(2, 3, 3, 'Regular');
+(1, 1, 5, 'BOMzão!'),
+
 
 select * from feedback;

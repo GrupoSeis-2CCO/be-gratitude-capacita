@@ -5,7 +5,6 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Feedback;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.FeedbackGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.FeedbackEntity;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.CursoMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.FeedbackMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.FeedbackRepository;
 
@@ -28,7 +27,7 @@ public class FeedbackAdapter implements FeedbackGateway {
     }
 
     @Override
-    public List<Feedback> findAllByCurso(Curso fkCurso) {
-        return FeedbackMapper.toDomains(feedbackRepository.findAllByFkCurso(CursoMapper.toEntity(fkCurso)));
+    public List<Feedback> findAllByCurso(Curso curso) {
+        return FeedbackMapper.toDomains(feedbackRepository.findAllByFkCurso(curso.getIdCurso()));
     }
 }
