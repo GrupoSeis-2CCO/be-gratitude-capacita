@@ -1,14 +1,30 @@
 package servicos.gratitude.be_gratitude_capacita.JWTImplement.autenticacao;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 
-@Data
 public class UsuarioLoginDto {
 
-    @Schema(description = "Email do usuario", example = "john@doe.com")
+    public UsuarioLoginDto(String email, String senha) {
+        this.email = email;
+        this.senha = senha;
+    }
+
     private String email;
 
-    @Schema(description = "Senha do usuario", example = "123456")
     private String senha;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 }
