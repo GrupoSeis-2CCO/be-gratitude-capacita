@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.feedback.CriarFeedbackCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
@@ -11,17 +13,17 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Valor
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.CriarFeedbackUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
-import servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Feedback;
-import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey;
-import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.FeedbackResponse;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/feedbacks")
 public class FeedbackController {
+    private static final Logger log = LoggerFactory.getLogger(FeedbackController.class);
     private final CriarFeedbackUseCase criarFeedbackUseCase;
     private final ListarFeedbacksPorCurso listarFeedbacksPorCurso;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
@@ -33,13 +35,13 @@ public class FeedbackController {
     }
 
     @PostMapping
-    public ResponseEntity<Feedback> cadastrarFeedback(
+    public ResponseEntity<FeedbackResponse> cadastrarFeedback(
             @RequestBody CriarFeedbackCommand request
     ){
         try {
             Curso curso = encontrarCursoPorIdUseCase.execute(request.idCurso());
             Feedback feedback = criarFeedbackUseCase.execute(request, curso);
-            return ResponseEntity.status(HttpStatus.CREATED).body(feedback);
+        return ResponseEntity.status(HttpStatus.CREATED).body(FeedbackResponse.fromDomain(feedback));
         } catch (ValorInvalidoException e){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
@@ -55,19 +57,26 @@ public class FeedbackController {
         }
     }
 
-    @PostMapping("/{idCurso}")
-    public ResponseEntity<List<Feedback>> listarFeedbackPorCurso(
+    @GetMapping("/curso/{idCurso}")
+    public ResponseEntity<List<FeedbackResponse>> listarFeedbackPorCurso(
             @PathVariable Integer idCurso
     ){
         try {
             Curso curso = encontrarCursoPorIdUseCase.execute(idCurso);
             List<Feedback> feedbacks = listarFeedbacksPorCurso.execute(curso);
 
+            // inject curso (with title) into each feedback so the response DTO can include cursoTitulo
+            if (feedbacks != null) {
+                feedbacks.forEach(f -> f.setCurso(curso));
+            }
+
+            log.info("Encontrados {} feedbacks para o curso {}", feedbacks == null ? 0 : feedbacks.size(), idCurso);
+
             if (feedbacks.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return ResponseEntity.status(HttpStatus.OK).body(feedbacks);
+            return ResponseEntity.status(HttpStatus.OK).body(FeedbackResponse.fromDomains(feedbacks));
         } catch (ValorInvalidoException e){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e

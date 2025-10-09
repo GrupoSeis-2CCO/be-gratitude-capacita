@@ -1,23 +1,33 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.FeedbackId;
 
 @Entity
+@Table(name = "feedback")
+@IdClass(FeedbackId.class)
 public class FeedbackEntity {
+
     @Id
+    @Column(name = "FK_curso")
     private Integer fkCurso;
 
-    private Integer estrelas;
-    private String motivo;
-
+    @Id
     @ManyToOne
+    @JoinColumn(name = "FK_usuario")
     private UsuarioEntity fkUsuario;
 
-    @ManyToOne(optional = false)
-    private CursoEntity curso;
+    @Column(name = "estrelas")
+    private Integer estrelas;
+
+    @Column(name = "motivo")
+    private String motivo;
 
     public Integer getFkCurso() {
         return fkCurso;
@@ -25,6 +35,14 @@ public class FeedbackEntity {
 
     public void setFkCurso(Integer fkCurso) {
         this.fkCurso = fkCurso;
+    }
+
+    public UsuarioEntity getFkUsuario() {
+        return fkUsuario;
+    }
+
+    public void setFkUsuario(UsuarioEntity fkUsuario) {
+        this.fkUsuario = fkUsuario;
     }
 
     public Integer getEstrelas() {
@@ -41,21 +59,5 @@ public class FeedbackEntity {
 
     public void setMotivo(String motivo) {
         this.motivo = motivo;
-    }
-
-    public UsuarioEntity getFkUsuario() {
-        return fkUsuario;
-    }
-
-    public void setFkUsuario(UsuarioEntity fkUsuario) {
-        this.fkUsuario = fkUsuario;
-    }
-
-    public CursoEntity getCurso() {
-        return curso;
-    }
-
-    public void setCurso(CursoEntity curso) {
-        this.curso = curso;
     }
 }
