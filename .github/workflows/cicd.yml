@@ -1,9 +1,9 @@
-name: CI/CD para EC2 pública e privada
+name: CI/CD Ocean
 
 on:
   push:
     branches:
-      - main # O branch que acionará o deploy
+      - main
 
 jobs:
   build_and_deploy:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
 
-      # 2. Configuração do ambiente Java/Maven
+      # 2. Configurar ambiente Java/Maven
       - name: BE - Configurar JDK
         uses: actions/setup-java@v4
         with:
@@ -22,16 +22,12 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      # 3. (Opcional) Execução dos testes automatizados
-      # - name: BE - Executar Testes automatizados
-      #   run: mvn clean test
-
-      # 4. Geração do .jar
+      # 3. Gerar o artefato .jar
       - name: BE - Gerar Artefato .JAR
         run: mvn clean package -DskipTests=true
         working-directory: ./
 
-      # 5. Dando o mesmo nome sempre ao .jar
+      # 4. Renomear JAR
       - name: BE - Renomear JAR para app_loko.jar
         run: |
           set -e
@@ -40,26 +36,27 @@ jobs:
           echo "Renomeado para: target/app_loko.jar"
         working-directory: ./
 
-      # 6. Copiar JAR diretamente para o local de produção (/usr/share/api)
+      # 5. Enviar o .jar para o servidor remoto via SSH + rsync
       - name: BE - Copiar JAR para /usr/share/api (rsync com sudo remoto)
         uses: easingthemes/ssh-deploy@main
         with:
-          DROPLET_SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.DROPLET_SSH_KEY }}   # <-- seu secret
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: /usr/share/api/
-          ARGS: "-rltgoDzvO --delete --rsync-path=\"sudo mkdir -p /usr/share/api && sudo rsync\""
           SOURCE: "./target/app_loko.jar"
+          ARGS: "-rltgoDzvO --delete --rsync-path=\"sudo mkdir -p /usr/share/api && sudo rsync\""
 
-      # 7. Reiniciar o serviço na Droplet
-      - name: BE - Reiniciar serviço na Droplet
+      # 6. Reiniciar o serviço Spring Boot
+      - name: BE - Reiniciar serviço Spring Boot
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}   # mesmo secret reutilizado
           script: |
             set -e
-            echo "Reiniciando serviço 'api' na Droplet"
-            sudo docker compose restart api || sudo docker-compose restart api
-            echo "Serviço reiniciado em: ${{ secrets.REMOTE_HOST }}"
+            echo "Reiniciando serviço spring-app..."
+            sudo systemctl restart spring-app
+            sudo systemctl status spring-app --no-pager
+            echo "Spring Boot reiniciado com sucesso!"
