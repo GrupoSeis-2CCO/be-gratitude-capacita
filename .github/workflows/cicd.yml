@@ -1,4 +1,4 @@
-name: CI/CD Ocean
+name: CI/CD Oceann
 
 on:
   push:
