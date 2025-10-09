@@ -14,23 +14,22 @@ jobs:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
 
-      # 2. Configuração do ambiente Java/Maven (inicia aqui - front-end ignorado)
+      # 2. Configuração do ambiente Java/Maven
       - name: BE - Configurar JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin' # ou a distribuição que preferir
+          distribution: 'temurin'
           java-version: '21'
-          cache: 'maven' # Configura cache do Maven para acelerar builds futuros
+          cache: 'maven'
 
-      # 3. Execução dos testes automatizados do projeto (opcional)
+      # 3. (Opcional) Execução dos testes automatizados
       # - name: BE - Executar Testes automatizados
       #   run: mvn clean test
-      #   working-directory: ./backend
 
       # 4. Geração do .jar
       - name: BE - Gerar Artefato .JAR
-        run: mvn package -DskipTests=true
-        working-directory: ./backend
+        run: mvn clean package -DskipTests=true
+        working-directory: ./
 
       # 5. Dando o mesmo nome sempre ao .jar
       - name: BE - Renomear JAR para app_loko.jar
@@ -39,22 +38,20 @@ jobs:
           JAR_NAME=$(ls target/*.jar | head -n 1)
           mv "$JAR_NAME" target/app_loko.jar
           echo "Renomeado para: target/app_loko.jar"
-        working-directory: ./backend
+        working-directory: ./
 
-      # 6. Copiar JAR diretamente para o local de produção (/usr/share/api) usando rsync com sudo remoto
+      # 6. Copiar JAR diretamente para o local de produção (/usr/share/api)
       - name: BE - Copiar JAR para /usr/share/api (rsync com sudo remoto)
         uses: easingthemes/ssh-deploy@main
         with:
           DROPLET_SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          # alvo final no servidor (rsync criará o arquivo app_loko.jar neste diretório)
           TARGET: /usr/share/api/
-          # ARGS: usa --rsync-path para criar o diretório com sudo e executar rsync como sudo
           ARGS: "-rltgoDzvO --delete --rsync-path=\"sudo mkdir -p /usr/share/api && sudo rsync\""
-          SOURCE: "./backend/target/app_loko.jar"
+          SOURCE: "./target/app_loko.jar"
 
-      # 7. Reiniciar o serviço na Droplet (apenas reinício; upload já foi direto para /usr/share/api)
+      # 7. Reiniciar o serviço na Droplet
       - name: BE - Reiniciar serviço na Droplet
         uses: appleboy/ssh-action@v1.0.3
         with:
