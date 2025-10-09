@@ -241,7 +241,13 @@ CREATE TABLE feedback (
 );
 
 INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES 
-(1, 1, 5, 'BOMzão!'),
+(1, 1, 5, 'Bonzão!'),
+(2, 2, 4, 'Muito bom, mas pode melhorar.');
+use capacita;
+select * from feedback
+join usuario on feedback.fk_usuario = usuario.id_usuario;
+
+SELECT COUNT(*) FROM feedback;
+SELECT * FROM feedback WHERE fk_curso = 1;
 
 
-select * from feedback;

@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.feedback.CriarFeedbackCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/feedbacks")
 public class FeedbackController {
+    private static final Logger log = LoggerFactory.getLogger(FeedbackController.class);
     private final CriarFeedbackUseCase criarFeedbackUseCase;
     private final ListarFeedbacksPorCurso listarFeedbacksPorCurso;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
@@ -61,6 +64,13 @@ public class FeedbackController {
         try {
             Curso curso = encontrarCursoPorIdUseCase.execute(idCurso);
             List<Feedback> feedbacks = listarFeedbacksPorCurso.execute(curso);
+
+            // inject curso (with title) into each feedback so the response DTO can include cursoTitulo
+            if (feedbacks != null) {
+                feedbacks.forEach(f -> f.setCurso(curso));
+            }
+
+            log.info("Encontrados {} feedbacks para o curso {}", feedbacks == null ? 0 : feedbacks.size(), idCurso);
 
             if (feedbacks.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
