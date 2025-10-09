@@ -9,9 +9,8 @@ import java.util.Objects;
 
 public class CursoMapper {
 
-    public static CursoEntity toEntity(Curso curso){
-
-        if (Objects.isNull(curso)){
+    public static CursoEntity toEntity(Curso curso) {
+        if (Objects.isNull(curso)) {
             return null;
         }
 
@@ -21,14 +20,15 @@ public class CursoMapper {
         entity.setImagem(curso.getImagem());
         entity.setDuracaoEstimada(curso.getDuracaoEstimada());
         entity.setOcultado(curso.getOcultado());
-        entity.setIdCurso(curso.getIdCurso());
+        if (curso.getIdCurso() != null) {
+            entity.setIdCurso(curso.getIdCurso().intValue());
+        }
 
         return entity;
     }
 
-    public static Curso toDomain(CursoEntity entity){
-
-        if (Objects.isNull(entity)){
+    public static Curso toDomain(CursoEntity entity) {
+        if (Objects.isNull(entity)) {
             return null;
         }
 
@@ -38,14 +38,16 @@ public class CursoMapper {
         curso.setImagem(entity.getImagem());
         curso.setDuracaoEstimada(entity.getDuracaoEstimada());
         curso.setOcultado(entity.getOcultado());
-        curso.setIdCurso(entity.getIdCurso());
+        if (entity.getIdCurso() != null) {
+            curso.setIdCurso(entity.getIdCurso().longValue());
+        }
 
         return curso;
     }
 
-    public static List<CursoEntity> toEntities(List<Curso> cursos){
+    public static List<CursoEntity> toEntities(List<Curso> cursos) {
 
-        if (Objects.isNull(cursos)){
+        if (Objects.isNull(cursos)) {
             return null;
         }
 
@@ -53,13 +55,14 @@ public class CursoMapper {
 
         for (Curso cursoDaVez : cursos) {
             CursoEntity entity = new CursoEntity();
-
             entity.setTituloCurso(cursoDaVez.getTituloCurso());
             entity.setDescricao(cursoDaVez.getDescricao());
             entity.setImagem(cursoDaVez.getImagem());
             entity.setDuracaoEstimada(cursoDaVez.getDuracaoEstimada());
             entity.setOcultado(cursoDaVez.getOcultado());
-            entity.setIdCurso(cursoDaVez.getIdCurso());
+            if (cursoDaVez.getIdCurso() != null) {
+                entity.setIdCurso(cursoDaVez.getIdCurso().intValue());
+            }
 
             entities.add(entity);
         }
@@ -67,9 +70,9 @@ public class CursoMapper {
         return entities;
     }
 
-    public static List<Curso> toDomains(List<CursoEntity> entities){
+    public static List<Curso> toDomains(List<CursoEntity> entities) {
 
-        if (Objects.isNull(entities)){
+        if (Objects.isNull(entities)) {
             return null;
         }
 
@@ -83,7 +86,9 @@ public class CursoMapper {
             curso.setImagem(entityDaVez.getImagem());
             curso.setDuracaoEstimada(entityDaVez.getDuracaoEstimada());
             curso.setOcultado(entityDaVez.getOcultado());
-            curso.setIdCurso(entityDaVez.getIdCurso());
+            if (entityDaVez.getIdCurso() != null) {
+                curso.setIdCurso(entityDaVez.getIdCurso().longValue());
+            }
 
             cursos.add(curso);
         }

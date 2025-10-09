@@ -20,7 +20,7 @@ public class CriarCursoUseCase {
         }
 
         Curso curso = new Curso();
-        curso.setTituloCurso(command.tituloCurso());
+                curso.setTitulo(curso.getTitulo());
         curso.setDescricao(command.descricao());
         curso.setImagem(command.imagem());
         curso.setDuracaoEstimada(command.duracaoEstimada());

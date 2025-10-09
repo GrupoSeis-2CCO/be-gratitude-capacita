@@ -6,12 +6,16 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FeedbackMapper {
-    public static FeedbackEntity toEntity(Feedback feedback){
-        FeedbackEntity entity = new FeedbackEntity();
+    public static FeedbackEntity toEntity(Feedback feedback) {
+        if (Objects.isNull(feedback)) {
+            return null;
+        }
 
-        entity.setFkCurso(feedback.getFkCurso());
+        FeedbackEntity entity = new FeedbackEntity();
+        entity.setFkCurso(feedback.getFkCurso().intValue());
         entity.setEstrelas(feedback.getEstrelas());
         entity.setMotivo(feedback.getMotivo());
         entity.setFkUsuario(UsuarioMapper.toEntity(feedback.getFkUsuario()));
@@ -20,11 +24,15 @@ public class FeedbackMapper {
     }
 
     public static Feedback toDomain(FeedbackEntity entity){
+        if (Objects.isNull(entity)) {
+            return null;
+        }
+
         Feedback feedback = new Feedback();
 
-        // set minimal curso domain with id only (title can be loaded elsewhere if needed)
+        // map curso id only
         Curso curso = new Curso();
-        curso.setIdCurso(entity.getFkCurso());
+        curso.setIdCurso(entity.getFkCurso().longValue());
         feedback.setCurso(curso);
 
         feedback.setFkCurso(entity.getFkCurso());
@@ -55,10 +63,11 @@ public class FeedbackMapper {
         List<Feedback> feedbacks = new ArrayList<>();
 
         for (FeedbackEntity entityDaVez : entities) {
+            if (Objects.isNull(entityDaVez)) continue;
             Feedback feedback = new Feedback();
 
             Curso curso = new Curso();
-            curso.setIdCurso(entityDaVez.getFkCurso());
+            curso.setIdCurso(entityDaVez.getFkCurso().longValue());
             feedback.setCurso(curso);
 
             feedback.setFkCurso(entityDaVez.getFkCurso());

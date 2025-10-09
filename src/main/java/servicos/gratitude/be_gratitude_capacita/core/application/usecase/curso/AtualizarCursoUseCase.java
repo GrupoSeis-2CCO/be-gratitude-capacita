@@ -15,19 +15,20 @@ public class AtualizarCursoUseCase {
         this.cursoGateway = cursoGateway;
     }
 
-    public Curso execute(AtualizarCursoCommand command, Integer idCurso){
+    public Curso execute(AtualizarCursoCommand command, Long idCurso) {
+        Integer idAsInt = idCurso == null ? null : idCurso.intValue();
 
-        if (!cursoGateway.existsById(idCurso)){
+        if (!cursoGateway.existsById(idAsInt)) {
             throw new NaoEncontradoException("Não encontrado curso com id informado");
         }
 
         Curso cursoComMesmoTitulo = cursoGateway.findByTitulo(command.tituloCurso());
 
-        if (Objects.nonNull(cursoComMesmoTitulo) && (cursoComMesmoTitulo.getIdCurso() != idCurso)){
+        if (Objects.nonNull(cursoComMesmoTitulo) && !cursoComMesmoTitulo.getIdCurso().equals(idCurso)) {
             throw new ConflitoException("Já existe um curso com esse título");
         }
 
-        Curso cursoNoBanco = cursoGateway.findById(idCurso);
+        Curso cursoNoBanco = cursoGateway.findById(idAsInt);
 
         Curso curso = new Curso();
         curso.setTituloCurso(command.tituloCurso());

@@ -1,27 +1,27 @@
 package servicos.gratitude.be_gratitude_capacita.core.domain;
 
 public class Curso {
-    private Integer idCurso;
-    private String tituloCurso;
+    private Long id;
+    private String titulo;
     private String descricao;
     private String imagem;
     private Boolean ocultado;
     private Integer duracaoEstimada;
 
-    public Integer getIdCurso() {
-        return idCurso;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdCurso(Integer idCurso) {
-        this.idCurso = idCurso;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getTituloCurso() {
-        return tituloCurso;
+    public String getTitulo() {
+        return titulo;
     }
 
-    public void setTituloCurso(String tituloCurso) {
-        this.tituloCurso = tituloCurso;
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
     }
 
     public String getDescricao() {
@@ -54,5 +54,21 @@ public class Curso {
 
     public void setDuracaoEstimada(Integer duracaoEstimada) {
         this.duracaoEstimada = duracaoEstimada;
+    }
+
+    public Long getIdCurso() {
+        return this.id;
+    }
+
+    public void setIdCurso(Long idCurso) {
+        this.id = idCurso;
+    }
+
+    public String getTituloCurso() {
+        return this.titulo;
+    }
+
+    public void setTituloCurso(String tituloCurso) {
+        this.titulo = tituloCurso;
     }
 }

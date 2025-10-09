@@ -1,5 +1,6 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,8 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.*
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Page;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.responses.ParticipanteCursoResponse;
+import servicos.gratitude.be_gratitude_capacita.service.CursoService;
 
 import java.util.List;
 
@@ -24,7 +27,11 @@ public class CursoController {
     private final ListarCursoPaginadoUseCase listarCursoPaginadoUseCase;
     private final AtualizarCursoUseCase atualizarCursoUseCase;
     private final AtualizarOcultoUseCase atualizarOcultoUseCase;
+    private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
     private final DeletarCursoUseCase deletarCursoUseCase;
+
+    @Autowired
+    private CursoService cursoService;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -32,13 +39,15 @@ public class CursoController {
             ListarCursoPaginadoUseCase listarCursoPaginadoUseCase,
             AtualizarCursoUseCase atualizarCursoUseCase,
             AtualizarOcultoUseCase atualizarOcultoUseCase,
-            DeletarCursoUseCase deletarCursoUseCase) {
+            DeletarCursoUseCase deletarCursoUseCase,
+            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
         this.atualizarCursoUseCase = atualizarCursoUseCase;
         this.atualizarOcultoUseCase = atualizarOcultoUseCase;
         this.deletarCursoUseCase = deletarCursoUseCase;
+        this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
     }
 
     @PostMapping
@@ -81,7 +90,7 @@ public class CursoController {
 
     @PutMapping("/{idCurso}")
     public ResponseEntity<Curso> atualizarCurso(
-            @PathVariable Integer idCurso,
+            @PathVariable Long idCurso,
             @RequestBody AtualizarCursoCommand request) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(atualizarCursoUseCase.execute(request, idCurso));
@@ -96,9 +105,9 @@ public class CursoController {
 
     @PutMapping("/atualizarOculto/{idCurso}")
     public ResponseEntity<Curso> atualizarOculto(
-            @PathVariable Integer idCurso) {
+            @PathVariable Long idCurso) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(atualizarOcultoUseCase.execute(idCurso));
+            return ResponseEntity.status(HttpStatus.OK).body(atualizarOcultoUseCase.execute(idCurso.intValue()));
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -107,13 +116,29 @@ public class CursoController {
 
     @DeleteMapping("/{idCurso}")
     public ResponseEntity deletarCurso(
-            @PathVariable Integer idCurso) {
+            @PathVariable Long idCurso) {
         try {
-            deletarCursoUseCase.execute(idCurso);
+            deletarCursoUseCase.execute(idCurso.intValue());
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/{idCurso}/participantes")
+    public ResponseEntity<List<ParticipanteCursoResponse>> getParticipantes(@PathVariable Long idCurso) {
+        List<ParticipanteCursoResponse> participantes = cursoService.getParticipantes(idCurso);
+        return ResponseEntity.ok(participantes);
+    }
+
+    @GetMapping("/curso/{idCurso}")
+    public ResponseEntity<Curso> buscarCurso(@PathVariable Long idCurso) {
+        try {
+            Curso curso = encontrarCursoPorIdUseCase.execute(idCurso.intValue());
+            return ResponseEntity.ok(curso);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 }

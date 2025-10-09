@@ -1,8 +1,5 @@
 package servicos.gratitude.be_gratitude_capacita.core.domain;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.MatriculaCompoundKey;
 
 import java.time.LocalDateTime;

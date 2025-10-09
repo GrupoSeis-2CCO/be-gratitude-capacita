@@ -20,7 +20,7 @@ public class CriarFeedbackUseCase {
         this.usuarioGateway = usuarioGateway;
     }
 
-    public Feedback execute(CriarFeedbackCommand command, Curso curso){
+    public Feedback execute(CriarFeedbackCommand command, Curso curso) {
         if (
                 Objects.isNull(command) ||
                 Objects.isNull(curso) ||
@@ -29,7 +29,7 @@ public class CriarFeedbackUseCase {
                 (command.fkUsuario() != null && command.fkUsuario() <= 0)
         ) {
             throw new ValorInvalidoException("Valores inválidos para campos obrigatórios");
-        } else if (command.fkUsuario() != null && !usuarioGateway.existsById(command.fkUsuario())){
+        } else if (command.fkUsuario() != null && !usuarioGateway.existsById(command.fkUsuario())) {
             throw new NaoEncontradoException("Não encontrado usuário para o id informado");
         }
 
@@ -42,7 +42,9 @@ public class CriarFeedbackUseCase {
         Feedback feedback = new Feedback();
 
         feedback.setCurso(curso);
-        feedback.setFkCurso(curso.getIdCurso());
+        if (curso.getIdCurso() != null) {
+            feedback.setFkCurso(curso.getIdCurso().intValue());
+        }
         feedback.setEstrelas(command.estrelas());
         feedback.setFkUsuario(usuario);
         feedback.setMotivo(command.motivo());

@@ -35,8 +35,8 @@ public class FeedbackAdapter implements FeedbackGateway {
 
     @Override
     public List<Feedback> findAllByCurso(Curso curso) {
-        Integer idCurso = curso.getIdCurso();
-        List<FeedbackEntity> entities = feedbackRepository.findAllByFkCurso(idCurso);
+        Long idCurso = curso.getIdCurso();
+        List<FeedbackEntity> entities = feedbackRepository.findAllByFkCurso(idCurso.intValue());
         if (entities == null) {
             log.info("FeedbackAdapter: repository returned null for curso {}", idCurso);
         } else {
@@ -49,84 +49,6 @@ public class FeedbackAdapter implements FeedbackGateway {
                 }
             }
         }
-
-        List<Feedback> domains = FeedbackMapper.toDomains(entities == null ? List.of() : entities);
-        // if JPA returned empty but DB has rows, try native fallback
-        if ((entities == null || entities.isEmpty())) {
-            try {
-                List<Object[]> rows = feedbackRepository.findAllByFkCursoNative(idCurso);
-                if (rows != null && !rows.isEmpty()) {
-                    log.info("FeedbackAdapter: native query returned {} rows for curso {}", rows.size(), idCurso);
-                    // map rows -> Feedback
-                    List<Feedback> nativeMapped = new java.util.ArrayList<>();
-                    for (Object[] r : rows) {
-                        Feedback f = new Feedback();
-                        // r: FK_curso, FK_usuario, estrelas, motivo
-                        Integer fkCurso = r[0] == null ? null : ((Number) r[0]).intValue();
-                        Integer fkUsuario = r[1] == null ? null : ((Number) r[1]).intValue();
-                        Integer estrelas = r[2] == null ? null : ((Number) r[2]).intValue();
-                        String motivo = r[3] == null ? null : r[3].toString();
-
-                        f.setFkCurso(fkCurso);
-                        f.setEstrelas(estrelas);
-                        f.setMotivo(motivo);
-                        // minimal usuario domain
-                        if (fkUsuario != null) {
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
-                            u.setIdUsuario(fkUsuario);
-                            f.setFkUsuario(u);
-                        }
-                        // set curso domain
-                        servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
-                        c.setIdCurso(fkCurso);
-                        f.setCurso(c);
-
-                        nativeMapped.add(f);
-                    }
-                    return nativeMapped;
-                }
-            } catch (Exception ex) {
-                log.warn("FeedbackAdapter: native fallback failed: {}", ex.getMessage());
-            }
-
-            // If native fallback via JPA didn't return rows, try JdbcTemplate directly
-            try {
-                List<Feedback> jdbcRows = jdbcTemplate.query("SELECT FK_curso, FK_usuario, estrelas, motivo FROM feedback WHERE FK_curso = ?",
-                        new Object[]{idCurso}, (rs, rowNum) -> {
-                            Feedback f = new Feedback();
-                            Integer fkCurso = rs.getInt("FK_curso");
-                            int fkUsuario = rs.getInt("FK_usuario");
-                            int estrelas = rs.getInt("estrelas");
-                            String motivo = rs.getString("motivo");
-                            f.setFkCurso(fkCurso);
-                            f.setEstrelas(estrelas);
-                            f.setMotivo(motivo);
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
-                            u.setIdUsuario(fkUsuario);
-                            f.setFkUsuario(u);
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
-                            c.setIdCurso(fkCurso);
-                            f.setCurso(c);
-                            return f;
-                        });
-                log.info("FeedbackAdapter: JdbcTemplate fallback returned {} rows for curso {}", jdbcRows.size(), idCurso);
-                jdbcRows.forEach(f -> log.debug("Jdbc fallback mapped curso={}, usuarioId={}, estrelas={}, motivo={}", f.getFkCurso(), f.getFkUsuario() == null ? null : f.getFkUsuario().getIdUsuario(), f.getEstrelas(), f.getMotivo()));
-                if (jdbcRows != null && !jdbcRows.isEmpty()) return jdbcRows;
-            } catch (DataAccessException dae) {
-                log.warn("FeedbackAdapter: JdbcTemplate fallback failed: {}", dae.getMessage());
-            }
-        }
-        // inject curso object into domain feedbacks
-        if (domains != null) {
-            domains.forEach(d -> {
-                if (d.getCurso() == null) {
-                    Curso c = new Curso();
-                    c.setIdCurso(idCurso);
-                    d.setCurso(c);
-                }
-            });
-        }
-
-        return domains;
+        return FeedbackMapper.toDomains(entities);
     }
 }

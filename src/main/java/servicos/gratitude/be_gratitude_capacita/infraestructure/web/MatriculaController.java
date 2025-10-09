@@ -57,7 +57,9 @@ public class MatriculaController {
             Curso curso = encontrarCursoPorIdUseCase.execute(request.fkCurso());
 
             MatriculaCompoundKey idMatriculaComposto = new MatriculaCompoundKey();
-            idMatriculaComposto.setFkCurso(curso.getIdCurso());
+            if (curso.getIdCurso() != null) {
+                idMatriculaComposto.setFkCurso(curso.getIdCurso().intValue());
+            }
             idMatriculaComposto.setFkUsuario(usuario.getIdUsuario());
 
             Matricula matricula = criarMatriculaUseCase.execute(request, idMatriculaComposto, usuario, curso);
@@ -86,16 +88,15 @@ public class MatriculaController {
     }
 
 
-    @GetMapping("/curso/{fkCurso}")
-    public ResponseEntity<List<Matricula>> listarPorCurso(@PathVariable Integer fkCurso) {
+    @GetMapping("/curso/{idCurso}")
+    public ResponseEntity<List<Matricula>> listarPorCurso(@PathVariable Long idCurso) {
         try {
-            Curso curso = encontrarCursoPorIdUseCase.execute(fkCurso);
+            Curso curso = new Curso();
+            curso.setIdCurso(idCurso);
             List<Matricula> matriculas = listarMatriculaPorCursoUseCase.execute(curso);
             return ResponseEntity.ok(matriculas);
-        } catch (ValorInvalidoException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (NaoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 

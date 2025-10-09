@@ -67,4 +67,20 @@ public class CursoEntity {
     public void setDuracaoEstimada(Integer duracaoEstimada) {
         this.duracaoEstimada = duracaoEstimada;
     }
+
+    public String getTitulo() {
+        return this.tituloCurso;
+    }
+
+    public void setTitulo(String titulo) {
+        this.tituloCurso = titulo;
+    }
+
+    public Integer getId() {
+        return this.idCurso;
+    }
+
+    public void setId(Integer id) {
+        this.idCurso = id;
+    }
 }
