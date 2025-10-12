@@ -1,9 +1,9 @@
-name: CI/CD Ocean
+name: CI/CD para DigitalOcean pública
 
 on:
   push:
     branches:
-      - main
+      - main # O branch que acionará o deploy
 
 jobs:
   build_and_deploy:
@@ -14,49 +14,50 @@ jobs:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
 
-      # 2. Configurar ambiente Java/Maven
+      # 2. Configuração do ambiente Java/Maven (inicia aqui - front-end ignorado)
       - name: BE - Configurar JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'temurin' # ou a distribuição que preferir
           java-version: '21'
-          cache: 'maven'
+          cache: 'maven' # Configura cache do Maven para acelerar builds futuros
 
-      # 3. Gerar o artefato .jar
+      # 4. Geração do .jar
       - name: BE - Gerar Artefato .JAR
-        run: mvn clean package -DskipTests=true
-        working-directory: ./
+        run: mvn package -DskipTests=true
+        working-directory: ./backend
 
-      # 4. Renomear JAR
+      # 5. Dando o mesmo nome sempre ao .jar
       - name: BE - Renomear JAR para app_loko.jar
         run: |
           set -e
           JAR_NAME=$(ls target/*.jar | head -n 1)
           mv "$JAR_NAME" target/app_loko.jar
           echo "Renomeado para: target/app_loko.jar"
-        working-directory: ./
+        working-directory: ./backend
 
-      # 5. Enviar o .jar para o servidor remoto via SSH + rsync
+      # 6. Copiar JAR diretamente para o local de produção (/usr/share/api) usando rsync com sudo remoto
       - name: BE - Copiar JAR para /usr/share/api (rsync com sudo remoto)
         uses: easingthemes/ssh-deploy@main
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.DROPLET_SSH_KEY }}   # <-- seu secret
+          DROPLET_SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          # alvo final no servidor (rsync criará o arquivo app_loko.jar neste diretório)
           TARGET: /usr/share/api/
-          SOURCE: "./target/app_loko.jar"
+          # ARGS: usa --rsync-path para criar o diretório com sudo e executar rsync como sudo
           ARGS: "-rltgoDzvO --delete --rsync-path=\"sudo mkdir -p /usr/share/api && sudo rsync\""
+          SOURCE: "./backend/target/app_loko.jar"
 
-      # 6. Reiniciar o serviço Spring Boot
-      - name: BE - Reiniciar serviço Spring Boot
+      # 7. Reiniciar o serviço na Droplet (apenas reinício; upload já foi direto para /usr/share/api)
+      - name: BE - Reiniciar serviço na Droplet
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}   # mesmo secret reutilizado
+          key: ${{ secrets.DO_SSH_KEY }}
           script: |
             set -e
-            echo "Reiniciando serviço spring-app..."
-            sudo systemctl restart spring-app
-            sudo systemctl status spring-app --no-pager
-            echo "Spring Boot reiniciado com sucesso!"
+            echo "Reiniciando serviço 'api' na Droplet"
+            sudo docker compose restart api || sudo docker-compose restart api
+            echo "Serviço reiniciado em: ${{ secrets.REMOTE_HOST }}"
