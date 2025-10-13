@@ -1,4 +1,4 @@
-name: CI/CD para DigitalOcean pública
+name: CI/CD para DigitalOcean
 
 on:
   push:
