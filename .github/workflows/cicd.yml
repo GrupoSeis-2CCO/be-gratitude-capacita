@@ -82,6 +82,7 @@ jobs:
             echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> "$ENV_FILE"
             echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> "$ENV_FILE"
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> "$ENV_FILE"
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> "$ENV_FILE"
             echo "HIBERNATE_DDL_AUTO=none" >> "$ENV_FILE"
             echo "SHOW_SQL=false" >> "$ENV_FILE"
             
