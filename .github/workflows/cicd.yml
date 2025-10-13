@@ -14,6 +14,17 @@ jobs:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
 
+      # Debug: listar arquivos para verificar estrutura do repositório no runner
+      - name: Debug - Mostrar estrutura do repositório
+        run: |
+          echo "Diretório de trabalho do runner: $(pwd)"
+          echo "Listagem do repositório:" 
+          ls -la
+          echo "Listagem do conteúdo (recursiva curta):"
+          find . -maxdepth 2 -type d -print -exec ls -la {} \;
+          echo "Verificando se './backend' existe:" 
+          if [ -d "./backend" ]; then echo "OK: ./backend encontrado"; ls -la ./backend; else echo "ERRO: ./backend NÃO encontrado"; fi
+          
       # 2. Configuração do ambiente Java/Maven (inicia aqui - front-end ignorado)
       - name: BE - Configurar JDK
         uses: actions/setup-java@v4
