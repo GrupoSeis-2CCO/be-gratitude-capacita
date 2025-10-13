@@ -70,7 +70,28 @@ jobs:
             
             echo "Usando compose: $COMPOSE_FILE"
             
-            # Reinicia o serviço especificando o arquivo compose
-            sudo docker compose -f "$COMPOSE_FILE" restart api || sudo docker-compose -f "$COMPOSE_FILE" restart api
+            # Cria/atualiza arquivo .env no mesmo diretório do compose com variáveis do banco
+            COMPOSE_DIR=$(dirname "$COMPOSE_FILE")
+            ENV_FILE="$COMPOSE_DIR/.env"
+            
+            echo "Criando/atualizando arquivo .env em: $ENV_FILE"
+            # Use explicit echo lines instead of an indented heredoc to avoid YAML indentation
+            # being included in the remote file (which would corrupt the .env).
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > "$ENV_FILE"
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> "$ENV_FILE"
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> "$ENV_FILE"
+            echo "HIBERNATE_DDL_AUTO=none" >> "$ENV_FILE"
+            echo "SHOW_SQL=false" >> "$ENV_FILE"
+            
+            echo "Arquivo .env criado/atualizado com secrets do GitHub"
+            
+            # Reinicia o serviço (down + up para garantir que o .env seja lido)
+            sudo docker compose -f "$COMPOSE_FILE" down || true
+            sudo docker compose -f "$COMPOSE_FILE" up -d
             
             echo "Serviço reiniciado em: ${{ secrets.REMOTE_HOST }}"
+            
+            # Aguarda alguns segundos e mostra logs
+            sleep 5
+            echo "Logs do container (últimas 50 linhas):"
+            sudo docker compose -f "$COMPOSE_FILE" logs --tail=50 api
