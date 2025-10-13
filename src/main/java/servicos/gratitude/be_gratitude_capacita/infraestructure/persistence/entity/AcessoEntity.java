@@ -1,13 +1,22 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class AcessoEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idAcesso;
     private LocalDateTime dataAcesso;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_usuario")
     private UsuarioEntity fkUsuario;
 
     public Integer getIdAcesso() {
