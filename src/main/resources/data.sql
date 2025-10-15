@@ -57,20 +57,21 @@ INSERT INTO usuario (
 -- Dados iniciais para tabela matricula
 
 INSERT INTO matricula (fk_usuario, fk_curso, FK_inicio, ultimo_senso, completo, data_finalizado) VALUES
-  (1, 1, '2025-01-11 08:00:00', '2025-01-22 06:00:00', 0, NULL);
+  (1, 1, '2025-01-11 08:00:00', '2025-01-22 06:00:00', 0, NULL),
+  (2, 2, '2025-01-12 09:00:00', '2025-01-18 09:30:00', 1, '2025-01-20 15:00:00');
 
 -- Novos participantes do curso 1
 -- Nunca acessou, tem material
 INSERT INTO matricula (fk_usuario, fk_curso, FK_inicio, ultimo_senso, completo, data_finalizado) VALUES
-  (10, 1, '2025-02-01 08:00:00', NULL, 0, NULL), -- Sem último acesso / sem nota
+  (10, 1, '2025-02-01 08:00:00', '2025-02-05 10:00:00', 1, '2025-02-10 10:00:00'), -- agora concluído
   (11, 1, '2025-02-02 08:00:00', '2025-02-10 10:00:00', 1, '2025-02-15 12:00:00'),
-  (12, 1, '2025-02-03 08:00:00', NULL, 0, NULL), -- Sem último acesso / sem nota
+  (12, 1, '2025-02-03 08:00:00', '2025-02-12 11:20:00', 1, '2025-02-16 11:20:00'), -- agora concluído
   (13, 1, '2025-02-04 08:00:00', '2025-02-14 12:00:00', 0, NULL),
   (14, 1, '2025-02-05 08:00:00', '2025-02-20 13:00:00', 1, '2025-02-25 14:00:00'),
-  (15, 1, '2025-02-06 08:00:00', '2025-02-21 14:00:00', 0, NULL),
-  (16, 1, '2025-02-07 08:00:00', NULL, 0, NULL), -- Sem último acesso / sem nota
+  (15, 1, '2025-02-06 08:00:00', '2025-02-21 14:00:00', 1, '2025-02-26 14:00:00'), -- agora concluído
+  (16, 1, '2025-02-07 08:00:00', '2025-02-18 09:00:00', 1, '2025-02-20 09:00:00'), -- agora concluído
   (17, 1, '2025-02-08 08:00:00', '2025-02-22 15:00:00', 1, '2025-02-28 16:00:00'),
-  (19, 1, '2025-02-10 08:00:00', '2025-02-24 09:45:00', 0, NULL);
+  (19, 1, '2025-02-10 08:00:00', '2025-02-24 09:45:00', 1, '2025-02-27 09:45:00'); -- agora concluído
 
 
 
@@ -87,26 +88,26 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (3, 'Apostila 3.pdf', 'apostila3_armazenada.pdf', 'apostila 3', 2542, 1, 3, 3)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
-INSERT INTO material_aluno (fk_usuario, fk_cargo, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+INSERT INTO material_aluno (FK_usuario, FK_cargo, FK_video, FK_apostila, finalizada, ultimo_acesso) VALUES
   (10, 1, 1, 1, 0, NULL),
   (11, 1, 1, 1, 1, '2025-02-10 10:15:00'),
-  (12, 2, 1, 2, 1, '2025-02-12 11:20:00'),
+  (12, 1, 1, 2, 1, '2025-02-12 11:20:00'),
   (13, 1, 1, 1, 1, '2025-02-14 12:10:00'),
-  (14, 2, 1, 2, 1, '2025-02-20 13:10:00'),
+  (14, 1, 1, 2, 1, '2025-02-20 13:10:00'),
   (15, 1, 1, 1, 1, '2025-02-21 14:25:00'),
-  (16, 2, 1, 2, 0, NULL),
+  (16, 1, 1, 2, 0, NULL),
   (17, 1, 1, 1, 1, '2025-02-22 15:55:00'),
   (19, 1, 1, 1, 0, '2025-02-24 09:45:00')
-ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+ON DUPLICATE KEY UPDATE FK_video = VALUES(FK_video), FK_apostila = VALUES(FK_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- ...existing code...
 -- Dados iniciais para tabela apostila (removido duplicidade)
 -- Já inserido anteriormente
-INSERT INTO material_aluno (fk_usuario, fk_cargo, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+INSERT INTO material_aluno (FK_usuario, FK_cargo, FK_video, FK_apostila, finalizada, ultimo_acesso) VALUES
 (1, 1, 1, 1, 1, '2025-01-22 06:00:00'),
 (2, 2, 2, 2, 1, '2025-01-18 09:30:00'),
-(2, 1, 3, 3, 0, NULL)
-ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+(2, 2, 3, 3, 0, NULL)
+ON DUPLICATE KEY UPDATE FK_video = VALUES(FK_video), FK_apostila = VALUES(FK_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela alternativa
 INSERT INTO alternativa (id_alternativa, fk_avaliacao, texto, ordem_alternativa) VALUES

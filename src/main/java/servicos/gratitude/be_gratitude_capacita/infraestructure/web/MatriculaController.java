@@ -18,6 +18,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.Par
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.materialAluno.ListarMaterialPorMatriculaUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorMatriculaUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import java.util.List;
@@ -69,29 +70,43 @@ public class MatriculaController {
         try {
             Curso curso = encontrarCursoPorIdUseCase.execute(fkCurso);
             List<Matricula> matriculas = listarMatriculaPorCursoUseCase.execute(curso);
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> _feedbacksTemp;
+            try {
+                _feedbacksTemp = listarFeedbacksPorCurso.execute(curso);
+            } catch (Exception e) {
+                _feedbacksTemp = Collections.emptyList();
+            }
+            final List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksDoCurso = _feedbacksTemp;
+
             List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
                 Usuario usuario = matricula.getUsuario();
-                // Materiais concluídos
-                int materiaisConcluidos = 0;
+                // Quantidade de cursos concluídos pelo usuário (usado no front como "materiaisConcluidos")
+                int materiaisConcluidos;
                 try {
-                    materiaisConcluidos = (int) listarMaterialPorMatriculaUseCase.execute(matricula)
-                        .stream().filter(MaterialAluno::getFinalizado).count();
-                } catch (Exception e) { materiaisConcluidos = 0; }
-
-                // Avaliação média (exemplo: média das estrelas dos feedbacks do curso para o usuário)
-                Double avaliacao = null;
-                try {
-                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacks = listarFeedbacksPorCurso.execute(curso);
-                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksUsuario = feedbacks.stream()
-                        .filter(f -> f.getFkUsuario() != null && f.getFkUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
-                        .collect(Collectors.toList());
-                    if (!feedbacksUsuario.isEmpty()) {
-                        avaliacao = feedbacksUsuario.stream().mapToInt(servicos.gratitude.be_gratitude_capacita.core.domain.Feedback::getEstrelas).average().orElse(Double.NaN);
-                    }
-                } catch (Exception e) { avaliacao = null; }
+                    List<Matricula> todasMatriculasDoUsuario = listarMatriculaPorUsuarioUseCase.execute(usuario);
+                    materiaisConcluidos = (int) todasMatriculasDoUsuario.stream()
+                            .filter(m -> Boolean.TRUE.equals(m.getCompleto()))
+                            .count();
+                } catch (Exception e) {
+                    materiaisConcluidos = 0;
+                }
 
                 // Último acesso
                 java.time.LocalDateTime ultimoAcesso = matricula.getUltimoAcesso();
+
+                // Avaliação média (média das estrelas dos feedbacks do curso para o usuário)
+                Double avaliacao = null;
+                if (ultimoAcesso != null) {
+                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksUsuario = feedbacksDoCurso.stream()
+                        .filter(f -> f.getFkUsuario() != null && f.getFkUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                        .collect(Collectors.toList());
+                    if (!feedbacksUsuario.isEmpty()) {
+                        avaliacao = feedbacksUsuario.stream()
+                                .mapToInt(servicos.gratitude.be_gratitude_capacita.core.domain.Feedback::getEstrelas)
+                                .average()
+                                .orElse(Double.NaN);
+                    }
+                }
 
                 return new ParticipanteCursoResponse(
                     usuario.getIdUsuario(),

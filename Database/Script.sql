@@ -88,15 +88,15 @@ CREATE TABLE apostila (
 
 -- Tabela materia_aluno
 CREATE TABLE material_aluno (
-    FK_usuario INT,
-    FK_cargo INT,
+    id_material_aluno INT NOT NULL,
+    FK_usuario INT NOT NULL,
+    FK_curso INT NOT NULL,
     finalizada TINYINT(1) DEFAULT 0,
     ultimo_acesso DATETIME,
     FK_video INT,
     FK_apostila INT,
-    PRIMARY KEY (FK_usuario, FK_cargo),
-    FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (FK_cargo) REFERENCES cargo(id_cargo),
+    PRIMARY KEY (id_material_aluno, FK_usuario, FK_curso),
+    FOREIGN KEY (FK_usuario, FK_curso) REFERENCES matricula(FK_usuario, FK_curso),
     FOREIGN KEY (FK_video) REFERENCES video(id_video),
     FOREIGN KEY (FK_apostila) REFERENCES apostila(id_apostila)
 );
