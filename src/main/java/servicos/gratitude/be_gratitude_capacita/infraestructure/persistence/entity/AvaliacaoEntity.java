@@ -3,6 +3,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ent
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "avaliacao")
 public class AvaliacaoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

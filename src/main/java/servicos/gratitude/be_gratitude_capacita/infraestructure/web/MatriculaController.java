@@ -14,6 +14,12 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario
 import servicos.gratitude.be_gratitude_capacita.core.domain.*;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.MatriculaCompoundKey;
 
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.ParticipanteCursoResponse;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.materialAluno.ListarMaterialPorMatriculaUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorMatriculaUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
+import java.util.stream.Collectors;
+
 import java.util.List;
 
 @RestController
@@ -28,6 +34,10 @@ public class MatriculaController {
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
     private final BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase;
 
+    private final ListarMaterialPorMatriculaUseCase listarMaterialPorMatriculaUseCase;
+    private final ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase;
+    private final ListarFeedbacksPorCurso listarFeedbacksPorCurso;
+
     public MatriculaController(
             CriarMatriculaUseCase criarMatriculaUseCase,
             AtualizarUltimoAcessoMatriculaUseCase atualizarUltimoAcessoMatriculaUseCase,
@@ -36,7 +46,10 @@ public class MatriculaController {
             ListarMatriculaPorUsuarioUseCase listarMatriculaPorUsuarioUseCase,
             ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
             BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase,
-            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase
+            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase,
+            ListarMaterialPorMatriculaUseCase listarMaterialPorMatriculaUseCase,
+            ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase,
+            ListarFeedbacksPorCurso listarFeedbacksPorCurso
     ) {
         this.criarMatriculaUseCase = criarMatriculaUseCase;
         this.atualizarUltimoAcessoMatriculaUseCase = atualizarUltimoAcessoMatriculaUseCase;
@@ -46,6 +59,57 @@ public class MatriculaController {
         this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
+        this.listarMaterialPorMatriculaUseCase = listarMaterialPorMatriculaUseCase;
+        this.listarTentativaPorMatriculaUseCase = listarTentativaPorMatriculaUseCase;
+        this.listarFeedbacksPorCurso = listarFeedbacksPorCurso;
+    }
+
+    @GetMapping("/curso/{fkCurso}/participantes")
+    public ResponseEntity<List<ParticipanteCursoResponse>> listarParticipantesPorCurso(@PathVariable Integer fkCurso) {
+        try {
+            Curso curso = encontrarCursoPorIdUseCase.execute(fkCurso);
+            List<Matricula> matriculas = listarMatriculaPorCursoUseCase.execute(curso);
+            List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
+                Usuario usuario = matricula.getUsuario();
+                // Materiais concluídos
+                int materiaisConcluidos = 0;
+                try {
+                    materiaisConcluidos = (int) listarMaterialPorMatriculaUseCase.execute(matricula)
+                        .stream().filter(MaterialAluno::getFinalizado).count();
+                } catch (Exception e) { materiaisConcluidos = 0; }
+
+                // Avaliação média (exemplo: média das estrelas dos feedbacks do curso para o usuário)
+                Double avaliacao = null;
+                try {
+                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacks = listarFeedbacksPorCurso.execute(curso);
+                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksUsuario = feedbacks.stream()
+                        .filter(f -> f.getFkUsuario() != null && f.getFkUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                        .collect(Collectors.toList());
+                    if (!feedbacksUsuario.isEmpty()) {
+                        avaliacao = feedbacksUsuario.stream().mapToInt(servicos.gratitude.be_gratitude_capacita.core.domain.Feedback::getEstrelas).average().orElse(Double.NaN);
+                    }
+                } catch (Exception e) { avaliacao = null; }
+
+                // Último acesso
+                java.time.LocalDateTime ultimoAcesso = matricula.getUltimoAcesso();
+
+                return new ParticipanteCursoResponse(
+                    usuario.getIdUsuario(),
+                    usuario.getNome(),
+                    materiaisConcluidos,
+                    avaliacao,
+                    ultimoAcesso
+                );
+            }).collect(Collectors.toList());
+            if (participantes.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(participantes);
+        } catch (ValorInvalidoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
     }
 
     @PostMapping

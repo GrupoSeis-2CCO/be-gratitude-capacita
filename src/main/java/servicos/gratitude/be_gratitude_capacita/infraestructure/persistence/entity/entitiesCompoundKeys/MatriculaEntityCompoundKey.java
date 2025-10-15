@@ -5,9 +5,14 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
+
+import jakarta.persistence.Column;
 @Embeddable
+
 public class MatriculaEntityCompoundKey implements Serializable {
+    @Column(name = "fk_usuario")
     private Integer fkUsuario;
+    @Column(name = "fk_curso")
     private Integer fkCurso;
 
     public Integer getFkUsuario() {
