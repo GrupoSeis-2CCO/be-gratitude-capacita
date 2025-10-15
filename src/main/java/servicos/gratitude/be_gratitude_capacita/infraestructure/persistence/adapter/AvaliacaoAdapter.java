@@ -43,4 +43,9 @@ public class AvaliacaoAdapter implements AvaliacaoGateway {
     public Boolean existsByCurso(Curso curso) {
         return avaliacaoRepository.existsByFkCurso(CursoMapper.toEntity(curso));
     }
+
+    @Override
+    public java.util.List<Avaliacao> findAllByCurso(Curso curso) {
+        return AvaliacaoMapper.toDomain(avaliacaoRepository.findAllByFkCurso(CursoMapper.toEntity(curso)));
+    }
 }

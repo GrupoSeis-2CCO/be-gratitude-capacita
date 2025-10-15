@@ -91,21 +91,24 @@ public class FeedbackAdapter implements FeedbackGateway {
 
             // If native fallback via JPA didn't return rows, try JdbcTemplate directly
             try {
-                List<Feedback> jdbcRows = jdbcTemplate.query("SELECT FK_curso, FK_usuario, estrelas, motivo FROM feedback WHERE FK_curso = ?",
+                List<Feedback> jdbcRows = jdbcTemplate.query("SELECT fk_curso, fk_usuario, estrelas, motivo FROM feedback WHERE fk_curso = ?",
                         new Object[]{idCurso}, (rs, rowNum) -> {
                             Feedback f = new Feedback();
-                            Integer fkCurso = rs.getInt("FK_curso");
-                            int fkUsuario = rs.getInt("FK_usuario");
-                            int estrelas = rs.getInt("estrelas");
-                            String motivo = rs.getString("motivo");
-                            f.setFkCurso(fkCurso);
-                            f.setEstrelas(estrelas);
-                            f.setMotivo(motivo);
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
-                            u.setIdUsuario(fkUsuario);
-                            f.setFkUsuario(u);
+                            Integer fkCursoRow = rs.getObject("fk_curso") == null ? null : rs.getInt("fk_curso");
+                            Integer fkUsuarioRow = rs.getObject("fk_usuario") == null ? null : rs.getInt("fk_usuario");
+                            Integer estrelasRow = rs.getObject("estrelas") == null ? null : rs.getInt("estrelas");
+                            String motivoRow = rs.getString("motivo");
+
+                            f.setFkCurso(fkCursoRow);
+                            f.setEstrelas(estrelasRow);
+                            f.setMotivo(motivoRow);
+                            if (fkUsuarioRow != null) {
+                                servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
+                                u.setIdUsuario(fkUsuarioRow);
+                                f.setFkUsuario(u);
+                            }
                             servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
-                            c.setIdCurso(fkCurso);
+                            c.setIdCurso(fkCursoRow);
                             f.setCurso(c);
                             return f;
                         });

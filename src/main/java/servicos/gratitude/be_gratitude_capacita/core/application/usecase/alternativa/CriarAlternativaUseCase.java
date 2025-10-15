@@ -36,7 +36,10 @@ public class CriarAlternativaUseCase {
             throw new ConflitoException("Já existe uma questao com o id informado");
         }
 
-        Questao questao = questaoGateway.findById(idAlternativaComposto.getIdQuestaoComposto());
+    servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey questaoCompoundKey = new servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey();
+    questaoCompoundKey.setIdQuestao(idAlternativaComposto.getIdQuestao());
+    questaoCompoundKey.setFkAvaliacao(idAlternativaComposto.getIdAvaliacao());
+    Questao questao = questaoGateway.findById(questaoCompoundKey);
 
         List<Alternativa> alternativasDaQuestao = alternativaGateway.findAllByQuestao(questao);
         Integer maiorOrdem = 0;

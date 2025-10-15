@@ -36,18 +36,18 @@ public class AlternativaAdapter implements AlternativaGateway {
 
     @Override
     public Alternativa findById(AlternativaCompoundKey idComposto) {
-        Optional<AlternativaEntity> entity = alternativaRepository.findById(AlternativaCompoundKeyMapper.toEntity(idComposto));
+        Optional<AlternativaEntity> entity = alternativaRepository.findById(idComposto.getIdAlternativa());
 
         return entity.map(AlternativaMapper::toDomain).orElse(null);
     }
 
     @Override
     public Boolean existsById(AlternativaCompoundKey idComposto) {
-        return alternativaRepository.existsById(AlternativaCompoundKeyMapper.toEntity(idComposto));
+        return alternativaRepository.existsById(idComposto.getIdAlternativa());
     }
 
     @Override
     public void deleteById(AlternativaCompoundKey idComposto) {
-        alternativaRepository.deleteById(AlternativaCompoundKeyMapper.toEntity(idComposto));
+        alternativaRepository.deleteById(idComposto.getIdAlternativa());
     }
 }

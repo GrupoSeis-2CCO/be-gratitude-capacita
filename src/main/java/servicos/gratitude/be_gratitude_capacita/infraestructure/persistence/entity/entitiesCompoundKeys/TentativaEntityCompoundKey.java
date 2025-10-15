@@ -7,6 +7,7 @@ import java.util.Objects;
 
 @Embeddable
 public class TentativaEntityCompoundKey implements Serializable {
+    @jakarta.persistence.Column(name = "id_tentativa")
     private Integer idTentativa;
     private MatriculaEntityCompoundKey idMatriculaComposto;
 

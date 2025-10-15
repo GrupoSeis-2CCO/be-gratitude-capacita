@@ -7,7 +7,9 @@ import java.util.Objects;
 
 @Embeddable
 public class QuestaoEntityCompoundKey implements Serializable {
+    @jakarta.persistence.Column(name = "id_questao")
     private Integer idQuestao;
+    @jakarta.persistence.Column(name = "fk_avaliacao")
     private Integer fkAvaliacao;
 
     public Integer getIdQuestao() {

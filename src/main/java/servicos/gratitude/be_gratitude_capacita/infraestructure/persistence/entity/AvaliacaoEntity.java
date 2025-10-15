@@ -3,14 +3,18 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ent
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "avaliacao")
 public class AvaliacaoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_avaliacao")
     private Integer idAvaliacao;
 
+    @Column(name = "nota_minima")
     private Integer acertosMinimos;
 
     @OneToOne(optional = false)
+    @JoinColumn(name = "FK_curso")
     private CursoEntity fkCurso;
 
     public Integer getIdAvaliacao() {

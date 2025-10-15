@@ -78,7 +78,8 @@ CREATE TABLE apostila (
     data_postado_apostila DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao_apostila DATETIME,  
     is_apostila_oculto TINYINT(1) DEFAULT 0,  
-    ordem_apostila INT,  
+    ordem_apostila INT,
+    url_arquivo VARCHAR(255) DEFAULT NULL,
     FK_curso INT NOT NULL,
     FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
 );
@@ -86,17 +87,16 @@ CREATE TABLE apostila (
 -- select * from apostila;
 
 
--- Tabela materia_aluno
+-- Tabela material_aluno (um registro por material visualizado/registrado por matrícula)
 CREATE TABLE material_aluno (
-    FK_usuario INT,
-    FK_cargo INT,
+    id_material_aluno INT PRIMARY KEY AUTO_INCREMENT,
+    FK_usuario INT NOT NULL,
+    FK_curso INT NOT NULL,
+    FK_video INT DEFAULT NULL,
+    FK_apostila INT DEFAULT NULL,
     finalizada TINYINT(1) DEFAULT 0,
     ultimo_acesso DATETIME,
-    FK_video INT,
-    FK_apostila INT,
-    PRIMARY KEY (FK_usuario, FK_cargo),
-    FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (FK_cargo) REFERENCES cargo(id_cargo),
+    FOREIGN KEY (FK_usuario, FK_curso) REFERENCES matricula(FK_usuario, FK_curso),
     FOREIGN KEY (FK_video) REFERENCES video(id_video),
     FOREIGN KEY (FK_apostila) REFERENCES apostila(id_apostila)
 );

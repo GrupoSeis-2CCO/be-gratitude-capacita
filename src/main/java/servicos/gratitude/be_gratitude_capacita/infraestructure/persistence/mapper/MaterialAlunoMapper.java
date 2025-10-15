@@ -28,8 +28,12 @@ public class MaterialAlunoMapper {
         materialAluno.setUltimoAcesso(entity.getUltimoAcesso());
         materialAluno.setFinalizado(entity.getFinalizado());
         materialAluno.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
-        materialAluno.setFkVideo(VideoMapper.toDomain(entity.getFkVideo()));
-        materialAluno.setFkApostila(ApostilaMapper.toDomain(entity.getFkApostila()));
+    // Avoid initializing lazy proxies for Video/Apostila here —
+    // the participants endpoint only needs finalizado/ultimoAcesso.
+    // Mapping the full Video/Apostila would trigger a DB load and
+    // may cause SQL errors if the schema differs. Set to null for now.
+    materialAluno.setFkVideo(null);
+    materialAluno.setFkApostila(null);
 
         return materialAluno;
     }
@@ -63,8 +67,9 @@ public class MaterialAlunoMapper {
         materialAluno.setUltimoAcesso(entityDaVez.getUltimoAcesso());
         materialAluno.setFinalizado(entityDaVez.getFinalizado());
         materialAluno.setMatricula(MatriculaMapper.toDomain(entityDaVez.getMatricula()));
-        materialAluno.setFkVideo(VideoMapper.toDomain(entityDaVez.getFkVideo()));
-        materialAluno.setFkApostila(ApostilaMapper.toDomain(entityDaVez.getFkApostila()));
+    // Avoid initializing lazy proxies when converting lists — keep lightweight.
+    materialAluno.setFkVideo(null);
+    materialAluno.setFkApostila(null);
 
         materiaisAluno.add(materialAluno);
         }

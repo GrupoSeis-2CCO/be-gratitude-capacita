@@ -4,11 +4,15 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.TentativaEntityCompoundKey;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "tentativa")
 public class TentativaEntity {
     @EmbeddedId
     private TentativaEntityCompoundKey idTentativaComposto;
@@ -17,9 +21,14 @@ public class TentativaEntity {
 
     @ManyToOne(optional = false)
     @MapsId("idMatriculaComposto")
+    @JoinColumns({
+        @JoinColumn(name = "fk_usuario", referencedColumnName = "fk_usuario"),
+        @JoinColumn(name = "fk_curso", referencedColumnName = "fk_curso")
+    })
     private MatriculaEntity matricula;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_avaliacao")
     private AvaliacaoEntity avaliacao;
 
     public TentativaEntityCompoundKey getIdTentativaComposto() {

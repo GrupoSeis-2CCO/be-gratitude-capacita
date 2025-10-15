@@ -7,8 +7,12 @@ import java.util.Objects;
 
 @Embeddable
 public class AlternativaEntityCompoundKey implements Serializable {
+    @jakarta.persistence.Column(name = "id_alternativa")
     private Integer idAlternativa;
-    private QuestaoEntityCompoundKey idQuestaoComposto;
+    @jakarta.persistence.Column(name = "FK_questao")
+    private Integer idQuestao;
+    @jakarta.persistence.Column(name = "FK_avaliacao")
+    private Integer idAvaliacao;
 
     public Integer getIdAlternativa() {
         return idAlternativa;
@@ -17,13 +21,20 @@ public class AlternativaEntityCompoundKey implements Serializable {
     public void setIdAlternativa(Integer idAlternativa) {
         this.idAlternativa = idAlternativa;
     }
-
-    public QuestaoEntityCompoundKey getIdQuestaoComposto() {
-        return idQuestaoComposto;
+    public Integer getIdQuestao() {
+        return idQuestao;
     }
 
-    public void setIdQuestaoComposto(QuestaoEntityCompoundKey idQuestaoComposto) {
-        this.idQuestaoComposto = idQuestaoComposto;
+    public void setIdQuestao(Integer idQuestao) {
+        this.idQuestao = idQuestao;
+    }
+
+    public Integer getIdAvaliacao() {
+        return idAvaliacao;
+    }
+
+    public void setIdAvaliacao(Integer idAvaliacao) {
+        this.idAvaliacao = idAvaliacao;
     }
 
     @Override
@@ -31,11 +42,11 @@ public class AlternativaEntityCompoundKey implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AlternativaEntityCompoundKey that = (AlternativaEntityCompoundKey) o;
-        return Objects.equals(idAlternativa, that.idAlternativa) && Objects.equals(idQuestaoComposto, that.idQuestaoComposto);
+        return Objects.equals(idAlternativa, that.idAlternativa) && Objects.equals(idQuestao, that.idQuestao) && Objects.equals(idAvaliacao, that.idAvaliacao);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idAlternativa, idQuestaoComposto);
+        return Objects.hash(idAlternativa, idQuestao, idAvaliacao);
     }
 }

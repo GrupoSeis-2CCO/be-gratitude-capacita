@@ -4,18 +4,28 @@ import jakarta.persistence.*;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.QuestaoEntityCompoundKey;
 
 @Entity
+@Table(name = "questao")
 public class QuestaoEntity {
     @EmbeddedId
+    @AttributeOverrides({
+        @AttributeOverride(name = "idQuestao", column = @Column(name = "id_questao")),
+        @AttributeOverride(name = "fkAvaliacao", column = @Column(name = "fk_avaliacao"))
+    })
     private QuestaoEntityCompoundKey idQuestaoComposto;
 
+    @Column(name = "enunciado")
     private String enunciado;
+
+    @Column(name = "numero_questao")
     private Integer numeroQuestao;
 
     @ManyToOne(optional = false)
     @MapsId("fkAvaliacao")
+    @JoinColumn(name = "fk_avaliacao", referencedColumnName = "id_avaliacao")
     private AvaliacaoEntity avaliacao;
 
-    @OneToOne
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "fk_alternativa_correta", referencedColumnName = "id_alternativa")
     private AlternativaEntity fkAlternativaCorreta;
 
     public QuestaoEntityCompoundKey getIdQuestaoComposto() {

@@ -2,7 +2,8 @@ package servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys;
 
 public class AlternativaCompoundKey {
     private Integer idAlternativa;
-    private QuestaoCompoundKey idQuestaoComposto;
+    private Integer idQuestao;
+    private Integer idAvaliacao;
 
     public Integer getIdAlternativa() {
         return idAlternativa;
@@ -12,11 +13,19 @@ public class AlternativaCompoundKey {
         this.idAlternativa = idAlternativa;
     }
 
-    public QuestaoCompoundKey getIdQuestaoComposto() {
-        return idQuestaoComposto;
+    public Integer getIdQuestao() {
+        return idQuestao;
     }
 
-    public void setIdQuestaoComposto(QuestaoCompoundKey idQuestaoComposto) {
-        this.idQuestaoComposto = idQuestaoComposto;
+    public void setIdQuestao(Integer idQuestao) {
+        this.idQuestao = idQuestao;
+    }
+
+    public Integer getIdAvaliacao() {
+        return idAvaliacao;
+    }
+
+    public void setIdAvaliacao(Integer idAvaliacao) {
+        this.idAvaliacao = idAvaliacao;
     }
 }

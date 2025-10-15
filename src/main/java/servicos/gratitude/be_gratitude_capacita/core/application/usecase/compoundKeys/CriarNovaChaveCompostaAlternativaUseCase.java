@@ -43,9 +43,10 @@ public class CriarNovaChaveCompostaAlternativaUseCase {
             }
         }
 
-        AlternativaCompoundKey idComposto = new AlternativaCompoundKey();
-        idComposto.setIdQuestaoComposto(questaoCompoundKey);
-        idComposto.setIdAlternativa(maiorId + 1);
+    AlternativaCompoundKey idComposto = new AlternativaCompoundKey();
+    idComposto.setIdQuestao(questaoCompoundKey.getIdQuestao());
+    idComposto.setIdAvaliacao(questaoCompoundKey.getFkAvaliacao());
+    idComposto.setIdAlternativa(maiorId + 1);
 
         return idComposto;
     }

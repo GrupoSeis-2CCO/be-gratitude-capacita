@@ -1,5 +1,6 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
@@ -7,6 +8,7 @@ import java.util.Objects;
 
 @Embeddable
 public class MaterialAlunoEntityCompoundKey implements Serializable {
+    @Column(name = "id_material_aluno")
     private Integer idMaterialAluno;
     private MatriculaEntityCompoundKey idMatriculaComposto;
 

@@ -10,8 +10,10 @@ import java.util.List;
 public class AlternativaMapper {
     public static AlternativaEntity toEntity(Alternativa alternativa){
         AlternativaEntity entity = new AlternativaEntity();
-
-        entity.setAlternativaChaveComposta(AlternativaCompoundKeyMapper.toEntity(alternativa.getAlternativaChaveComposta()));
+        if (alternativa.getAlternativaChaveComposta() != null) {
+            servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.AlternativaEntityCompoundKey k = AlternativaCompoundKeyMapper.toEntity(alternativa.getAlternativaChaveComposta());
+            entity.setAlternativaChaveComposta(k);
+        }
         entity.setTexto(alternativa.getTexto());
         entity.setOrdem(alternativa.getOrdem());
         entity.setQuestao(QuestaoMapper.toEntity(alternativa.getQuestao()));
@@ -21,8 +23,9 @@ public class AlternativaMapper {
 
     public static Alternativa toDomain(AlternativaEntity entity){
         Alternativa alternativa = new Alternativa();
-
-        alternativa.setAlternativaChaveComposta(AlternativaCompoundKeyMapper.toDomain(entity.getAlternativaChaveComposta()));
+        if (entity.getAlternativaChaveComposta() != null) {
+            alternativa.setAlternativaChaveComposta(AlternativaCompoundKeyMapper.toDomain(entity.getAlternativaChaveComposta()));
+        }
         alternativa.setTexto(entity.getTexto());
         alternativa.setOrdem(entity.getOrdem());
         alternativa.setQuestao(QuestaoMapper.toDomain(entity.getQuestao()));

@@ -15,12 +15,12 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 public class FeedbackEntity {
 
     @Id
-    @Column(name = "FK_curso")
+    @Column(name = "fk_curso")
     private Integer fkCurso;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "FK_usuario")
+    @JoinColumn(name = "fk_usuario")
     private UsuarioEntity fkUsuario;
 
     @Column(name = "estrelas")
