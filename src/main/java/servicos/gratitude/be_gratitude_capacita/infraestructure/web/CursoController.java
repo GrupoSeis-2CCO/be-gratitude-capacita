@@ -12,6 +12,10 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.*
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Page;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.video.ListarVideoPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.apostila.ListarApostilaPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.MaterialResponse;
 
 import java.util.List;
 
@@ -25,6 +29,9 @@ public class CursoController {
     private final AtualizarCursoUseCase atualizarCursoUseCase;
     private final AtualizarOcultoUseCase atualizarOcultoUseCase;
     private final DeletarCursoUseCase deletarCursoUseCase;
+    private final ListarVideoPorCursoUseCase listarVideoPorCursoUseCase;
+    private final ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase;
+    private final ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -32,13 +39,45 @@ public class CursoController {
             ListarCursoPaginadoUseCase listarCursoPaginadoUseCase,
             AtualizarCursoUseCase atualizarCursoUseCase,
             AtualizarOcultoUseCase atualizarOcultoUseCase,
-            DeletarCursoUseCase deletarCursoUseCase) {
+            DeletarCursoUseCase deletarCursoUseCase,
+            ListarVideoPorCursoUseCase listarVideoPorCursoUseCase,
+            ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase,
+            ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
         this.atualizarCursoUseCase = atualizarCursoUseCase;
         this.atualizarOcultoUseCase = atualizarOcultoUseCase;
         this.deletarCursoUseCase = deletarCursoUseCase;
+        this.listarVideoPorCursoUseCase = listarVideoPorCursoUseCase;
+        this.listarApostilaPorCursoUseCase = listarApostilaPorCursoUseCase;
+        this.listarAvaliacaoPorCursoUseCase = listarAvaliacaoPorCursoUseCase;
+    }
+
+    @GetMapping("/{idCurso}/materiais")
+    public ResponseEntity<List<MaterialResponse>> listarMateriaisDoCurso(@PathVariable Integer idCurso) {
+        try {
+            // Videos
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Video> videos = listarVideoPorCursoUseCase.execute(idCurso);
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Apostila> apostilas = listarApostilaPorCursoUseCase.execute(idCurso);
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
+
+            List<MaterialResponse> out = new java.util.ArrayList<>();
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
+                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo()));
+            }
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
+                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null));
+            }
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                out.add(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));
+            }
+
+            if (out.isEmpty()) return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(out);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao listar materiais do curso", e);
+        }
     }
 
     @PostMapping

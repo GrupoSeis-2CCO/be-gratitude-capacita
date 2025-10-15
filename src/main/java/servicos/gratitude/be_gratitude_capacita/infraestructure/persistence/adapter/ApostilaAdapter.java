@@ -3,6 +3,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ada
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Apostila;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Page;
@@ -12,6 +13,8 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.ApostilaMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.CursoMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.ApostilaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MaterialAlunoRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.ApostilaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +22,11 @@ import java.util.Optional;
 @Service
 public class ApostilaAdapter implements ApostilaGateway {
     private final ApostilaRepository apostilaRepository;
+    private final MaterialAlunoRepository materialAlunoRepository;
 
-    public ApostilaAdapter(ApostilaRepository apostilaRepository) {
+    public ApostilaAdapter(ApostilaRepository apostilaRepository, MaterialAlunoRepository materialAlunoRepository) {
         this.apostilaRepository = apostilaRepository;
+        this.materialAlunoRepository = materialAlunoRepository;
     }
 
     @Override
@@ -85,7 +90,13 @@ public class ApostilaAdapter implements ApostilaGateway {
     }
 
     @Override
+    @Transactional
     public void deleteById(Integer id) {
-        deleteById(id);
+        // Primeiro removemos registros dependentes na tabela material_aluno para evitar violação de FK
+        ApostilaEntity ae = new ApostilaEntity();
+        ae.setIdApostila(id);
+        materialAlunoRepository.deleteAllByFkApostila(ae);
+        // Agora deletamos a apostila
+        apostilaRepository.deleteById(id);
     }
 }

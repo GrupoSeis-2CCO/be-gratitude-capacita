@@ -13,5 +13,6 @@ public interface VideoRepository extends JpaRepository<VideoEntity, Integer> {
     Boolean existsByUrlVideo(String url);
     Boolean existsByNomeVideo(String nome);
     Optional<VideoEntity> findByUrlVideo(String url);
-    Optional<VideoEntity> findByNomeVideo(String nome);
+    // allow multiple results in DB; adapter will pick the first if duplicates exist
+    List<VideoEntity> findAllByNomeVideo(String nome);
 }
