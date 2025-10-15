@@ -12,6 +12,23 @@ INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_
   (3, 'MySQL Essencial', 'Fundamentos do banco de dados MySQL', 'mysql.jpg', 0, 30)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
+-- Adicionar um novo curso e conteúdo para John Doe
+INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
+  (4, 'Node.js Básico', 'Curso introdutório de Node.js', 'nodejs.jpg', 0, 25)
+ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
+
+-- Vídeo e apostila de exemplo para o curso 4
+INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
+  (5, 'Introdução ao Node.js', 'Apresentação do ambiente Node.js', 'http://exemplo.com/video_node1', 1, 4)
+ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
+
+INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
+  (5, 'Nodejs-Apostila.pdf', 'nodejs_apostila.pdf', 'Material do curso Node.js Básico', 512000, 0, 1, 4)
+ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
+
+-- Matricular John Doe (se existir) no curso 4 e adicionar materiais iniciais
+-- (matriculas do John Doe para curso 4 serão adicionadas mais abaixo, depois de garantirmos que o usuário existe)
+
 -- Garantir que avaliações base existem antes de qualquer tentativa
 INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (1, 7.5, 1),
@@ -43,6 +60,7 @@ ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(e
 
 -- Dados adicionais de usuario (com timestamps e senhas específicas)
 INSERT INTO usuario (
+    id_usuario,
     nome,
     cpf,
     email,
@@ -51,7 +69,7 @@ INSERT INTO usuario (
     data_entrada,
     ultimo_acesso
 ) VALUES
-('John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+(20, 'John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   nome = VALUES(nome),
   cpf = VALUES(cpf),
@@ -60,6 +78,15 @@ ON DUPLICATE KEY UPDATE
   fk_cargo = VALUES(fk_cargo),
   data_entrada = VALUES(data_entrada),
   ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Agora que John Doe está garantido, matriculamos no curso 4 e adicionamos material
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado)
+  SELECT id_usuario, 4, '2025-04-01 08:00:00', '2025-04-01 08:00:00', 0, NULL FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
+
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
+  SELECT id_usuario, 4, 5, 5, 0, NULL FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 INSERT INTO usuario (
     nome,
@@ -117,10 +144,11 @@ ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ult
 
 
 -- Dados iniciais para tabela video
-INSERT INTO video (nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-('Introdução', 'video1', 'http://exemplo.com/video1', 1, 1),
-('Aula 1', 'video2', 'http://exemplo.com/video2', 2, 2),
-('Aula 2', 'video3', 'http://exemplo.com/video3', 3, 3);
+INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
+  (1, 'Introdução', 'video1', 'http://exemplo.com/video1', 1, 1),
+  (2, 'Aula 1', 'video2', 'http://exemplo.com/video2', 2, 2),
+  (3, 'Aula 2', 'video3', 'http://exemplo.com/video3', 3, 3)
+ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
 
 -- Adiciona um vídeo extra para o curso 1 (teste)
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
