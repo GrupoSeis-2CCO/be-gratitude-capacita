@@ -64,10 +64,10 @@ public class CursoController {
 
             List<MaterialResponse> out = new java.util.ArrayList<>();
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
-                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo()));
+                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo(), v.getOrdemVideo()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
-                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null));
+                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null, a.getOrdemApostila()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
                 out.add(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));
@@ -77,6 +77,39 @@ public class CursoController {
             return ResponseEntity.ok(out);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao listar materiais do curso", e);
+        }
+    }
+
+    @GetMapping("/{idCurso}/materiais/{idMaterial}")
+    public ResponseEntity<MaterialResponse> obterMaterialDoCurso(@PathVariable Integer idCurso, @PathVariable Integer idMaterial) {
+        try {
+            // Videos
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Video> videos = listarVideoPorCursoUseCase.execute(idCurso);
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
+                if (v.getIdVideo() != null && v.getIdVideo().equals(idMaterial)) {
+                    return ResponseEntity.ok(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo()));
+                }
+            }
+
+            // Apostilas
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Apostila> apostilas = listarApostilaPorCursoUseCase.execute(idCurso);
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
+                if (a.getIdApostila() != null && a.getIdApostila().equals(idMaterial)) {
+                    return ResponseEntity.ok(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), a.getUrlArquivo()));
+                }
+            }
+
+            // Avaliacoes
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                if (av.getIdAvaliacao() != null && av.getIdAvaliacao().equals(idMaterial)) {
+                    return ResponseEntity.ok(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter material do curso", e);
         }
     }
 

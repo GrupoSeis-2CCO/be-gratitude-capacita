@@ -7,6 +7,7 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.Materia
 import servicos.gratitude.be_gratitude_capacita.core.gateways.MaterialAlunoGateway;
 
 import java.util.Objects;
+import java.time.LocalDateTime;
 
 public class FinalizarMaterialUseCase {
     private final MaterialAlunoGateway materialAlunoGateway;
@@ -25,6 +26,8 @@ public class FinalizarMaterialUseCase {
         MaterialAluno materialAlunoParaAtualizar = materialAlunoGateway.findById(idMaterialAlunoComposto);
 
         materialAlunoParaAtualizar.setFinalizado(true);
+        // set ultimoAcesso to now
+        materialAlunoParaAtualizar.setUltimoAcesso(LocalDateTime.now());
 
         return materialAlunoGateway.save(materialAlunoParaAtualizar);
     }

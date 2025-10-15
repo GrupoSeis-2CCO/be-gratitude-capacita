@@ -8,6 +8,8 @@ import java.util.List;
 
 public class ApostilaMapper {
     public static ApostilaEntity toEntity(Apostila apostila){
+        if (apostila == null) return null;
+
         ApostilaEntity entity = new ApostilaEntity();
 
         entity.setIdApostila(apostila.getIdApostila());
@@ -20,6 +22,7 @@ public class ApostilaMapper {
         entity.setTamanhoBytes(apostila.getTamanhoBytes());
         entity.setOrdemApostila(apostila.getOrdemApostila());
         entity.setFkCurso(CursoMapper.toEntity(apostila.getFkCurso()));
+    entity.setUrlArquivo(apostila.getUrlArquivo());
 
         return entity;
     }
@@ -37,6 +40,7 @@ public class ApostilaMapper {
         apostila.setTamanhoBytes(entity.getTamanhoBytes());
         apostila.setOrdemApostila(entity.getOrdemApostila());
         apostila.setFkCurso(CursoMapper.toDomain(entity.getFkCurso()));
+    apostila.setUrlArquivo(entity.getUrlArquivo());
 
         return apostila;
     }
@@ -45,6 +49,8 @@ public class ApostilaMapper {
         List<ApostilaEntity> entities = new ArrayList<>();
 
         for (Apostila apostilaDaVez : apostilas) {
+        if (apostilaDaVez == null) continue;
+
         ApostilaEntity entity = new ApostilaEntity();
 
         entity.setIdApostila(apostilaDaVez.getIdApostila());
@@ -57,6 +63,7 @@ public class ApostilaMapper {
         entity.setTamanhoBytes(apostilaDaVez.getTamanhoBytes());
         entity.setOrdemApostila(apostilaDaVez.getOrdemApostila());
         entity.setFkCurso(CursoMapper.toEntity(apostilaDaVez.getFkCurso()));
+    entity.setUrlArquivo(apostilaDaVez.getUrlArquivo());
 
         entities.add(entity);
         }
@@ -79,6 +86,7 @@ public class ApostilaMapper {
         apostila.setTamanhoBytes(entityDaVez.getTamanhoBytes());
         apostila.setOrdemApostila(entityDaVez.getOrdemApostila());
         apostila.setFkCurso(CursoMapper.toDomain(entityDaVez.getFkCurso()));
+    apostila.setUrlArquivo(entityDaVez.getUrlArquivo());
 
         apostilas.add(apostila);
         }

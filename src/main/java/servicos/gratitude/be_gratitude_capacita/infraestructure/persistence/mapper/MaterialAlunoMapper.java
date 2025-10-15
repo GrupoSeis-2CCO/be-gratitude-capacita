@@ -38,6 +38,34 @@ public class MaterialAlunoMapper {
         return materialAluno;
     }
 
+    /**
+     * Map an entity to domain and include associated Video/Apostila (may trigger lazy loads).
+     * Use when a full representation is required (for example: returning the freshly saved record).
+     */
+    public static MaterialAluno toDomainWithAssociations(MaterialAlunoEntity entity){
+        MaterialAluno materialAluno = new MaterialAluno();
+
+        materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entity.getIdMaterialAlunoComposto()));
+        materialAluno.setUltimoAcesso(entity.getUltimoAcesso());
+        materialAluno.setFinalizado(entity.getFinalizado());
+        materialAluno.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
+
+        // Map associations fully
+        try {
+            materialAluno.setFkVideo(VideoMapper.toDomain(entity.getFkVideo()));
+        } catch (Exception ignored) {
+            materialAluno.setFkVideo(null);
+        }
+
+        try {
+            materialAluno.setFkApostila(ApostilaMapper.toDomain(entity.getFkApostila()));
+        } catch (Exception ignored) {
+            materialAluno.setFkApostila(null);
+        }
+
+        return materialAluno;
+    }
+
     public static List<MaterialAlunoEntity> toEntities(List<MaterialAluno> materiaisAluno){
         List<MaterialAlunoEntity> entities = new ArrayList<>();
 

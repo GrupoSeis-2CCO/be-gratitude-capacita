@@ -12,6 +12,7 @@ public class Apostila {
     private LocalDateTime dataAtualizacaoApostila;
     private Boolean isApostilaOculto;
     private Integer ordemApostila;
+    private String urlArquivo;
     private Curso fkCurso;
 
     public Integer getIdApostila() {
@@ -92,5 +93,13 @@ public class Apostila {
 
     public void setFkCurso(Curso fkCurso) {
         this.fkCurso = fkCurso;
+    }
+
+    public String getUrlArquivo() {
+        return urlArquivo;
+    }
+
+    public void setUrlArquivo(String urlArquivo) {
+        this.urlArquivo = urlArquivo;
     }
 }

@@ -59,7 +59,9 @@ public class SecurityConfiguracao {
             "/error",
         "/matriculas/curso/*/participantes",
         "/relatorios/curso/*/engajamento",
-        "/matriculas/curso/*/participantes"
+        "/matriculas/curso/*/participantes",
+        "/cursos/*/materiais/*",
+        "/materiais-alunos/finalizar-por-material/video/**"
     };
 
     @Bean
