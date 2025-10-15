@@ -233,6 +233,52 @@ public class MatriculaController {
         }
     }
 
+    @GetMapping("/usuario/{fkUsuario}/cursos")
+    public ResponseEntity<List<servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.UsuarioCursoResponse>> listarCursosPorUsuario(@PathVariable Integer fkUsuario) {
+        try {
+            Usuario usuario = buscarUsuarioPorIdUseCase.execute(fkUsuario);
+            List<Matricula> matriculas = listarMatriculaPorUsuarioUseCase.execute(usuario);
+
+            List<servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.UsuarioCursoResponse> resp = matriculas.stream().map(m -> {
+                String nomeCurso = null;
+                if (m.getCurso() != null) {
+                    nomeCurso = m.getCurso().getTituloCurso();
+                    if (nomeCurso == null && m.getCurso().getIdCurso() != null) nomeCurso = "Curso " + m.getCurso().getIdCurso();
+                }
+
+                // cálculo simples de progresso: materiaisConcluidos / materiaisTotais (quando disponíveis)
+                String progresso = null;
+                try {
+                    List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(m);
+                    int materiaisConcluidos = (int) materiais.stream().filter(mat -> Boolean.TRUE.equals(mat.getFinalizado())).count();
+                    int materiaisTotais = materiais.size();
+                    if (materiaisTotais > 0) {
+                        progresso = String.format("%d%% Concluído", (int) Math.round((materiaisConcluidos * 100.0) / materiaisTotais));
+                    }
+                } catch (Exception e) {
+                    progresso = null;
+                }
+
+                java.time.LocalDateTime iniciado = m.getDtInscricao();
+                java.time.LocalDateTime finalizado = m.getDataFinalizacao();
+
+                return new servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.UsuarioCursoResponse(
+                        nomeCurso,
+                        progresso == null ? "Incompleto" : progresso,
+                        iniciado,
+                        finalizado
+                );
+            }).collect(Collectors.toList());
+
+            if (resp.isEmpty()) return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(resp);
+        } catch (ValorInvalidoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
 
     @GetMapping("/curso/{fkCurso}")
     public ResponseEntity<List<Matricula>> listarPorCurso(@PathVariable Integer fkCurso) {
