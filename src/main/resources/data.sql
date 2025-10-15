@@ -117,6 +117,11 @@ INSERT INTO video (nome_video, descricao_video, url_video, ordem_video, fk_curso
 ('Aula 1', 'video2', 'http://exemplo.com/video2', 2, 2),
 ('Aula 2', 'video3', 'http://exemplo.com/video3', 3, 3);
 
+-- Adiciona um vídeo extra para o curso 1 (teste)
+INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
+  (4, 'Conteúdo Extra', 'Vídeo extra do curso 1', 'http://exemplo.com/video_extra', 2, 1)
+ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
+
 -- Dados iniciais para tabela apostila
 INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
   (1, 'Apostila 1.pdf', 'apostila1_armazenada.pdf', 'apostila 1', 225252, 1, 1, 1),
@@ -124,36 +129,64 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (3, 'Apostila 3.pdf', 'apostila3_armazenada.pdf', 'apostila 3', 2542, 1, 3, 3)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
+-- Adiciona uma apostila extra para o curso 1 (teste)
+INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
+  (4, 'Apostila Extra.pdf', 'apostila4_armazenada.pdf', 'Apostila extra do curso 1', 102400, 0, 2, 1)
+ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
+
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
-  -- Para cada usuário, inserimos vários materiais (FK_video/FK_apostila) com finalizada variando 0/1
-  (10, 1, 1, 1, 1, '2025-02-05 10:00:00'),
-  (10, 1, 2, 1, 1, '2025-02-06 10:00:00'),
-  (10, 1, 3, 1, 0, NULL),
+  -- For course 1 we want exactly 1 video + 1 apostila as materials
+  -- Insert two material_aluno rows per student (one for the video, one for the apostila)
+  -- Users 10,11,12,15 will have both finalized (to reach 4/4 when combined with 2 question answers)
+  -- Other users get representative rows (may be finalized or not)
 
-  (11, 1, 1, 1, 1, '2025-02-10 10:15:00'),
-  (11, 1, 2, 1, 0, NULL),
+  -- User 10 (completed)
+  (10, 1, 1, NULL, 1, '2025-02-05 10:00:00'),
+  (10, 1, NULL, 1, 1, '2025-02-06 10:00:00'),
 
-  (12, 1, 1, 2, 1, '2025-02-12 11:20:00'),
-  (12, 1, 2, 2, 1, '2025-02-13 11:20:00'),
-  (12, 1, 3, 3, 0, NULL),
+  -- User 11 (completed)
+  (11, 1, 1, NULL, 1, '2025-02-10 10:15:00'),
+  (11, 1, NULL, 1, 1, '2025-02-11 10:00:00'),
 
-  (13, 1, 1, 1, 0, NULL),
+  -- User 12 (completed)
+  (12, 1, 1, NULL, 1, '2025-02-12 11:20:00'),
+  (12, 1, NULL, 1, 1, '2025-02-13 11:20:00'),
 
-  (14, 1, 1, 2, 1, '2025-02-20 13:10:00'),
-  (14, 1, 2, 2, 1, '2025-02-21 13:10:00'),
-  (14, 1, 3, 3, 1, '2025-02-22 13:10:00'),
+  -- User 13 (not completed)
+  (13, 1, 1, NULL, 0, NULL),
+  (13, 1, NULL, 1, 0, NULL),
 
-  (15, 1, 1, 1, 1, '2025-02-21 14:25:00'),
-  (15, 1, 2, 1, 1, '2025-02-22 14:25:00'),
+  -- User 14 (partial)
+  (14, 1, 1, NULL, 1, '2025-02-20 13:10:00'),
+  (14, 1, NULL, 1, 0, NULL),
 
-  (16, 1, 1, 2, 0, NULL),
+  -- User 15 (completed)
+  (15, 1, 1, NULL, 1, '2025-02-21 14:25:00'),
+  (15, 1, NULL, 1, 1, '2025-02-22 14:25:00'),
 
-  (17, 1, 1, 1, 1, '2025-02-22 15:55:00'),
-  (17, 1, 2, 2, 1, '2025-02-23 15:55:00'),
-  (17, 1, 3, 3, 1, '2025-02-24 15:55:00'),
-  (17, 1, NULL, 3, 1, '2025-02-25 15:55:00'),
+  -- User 16 (not completed)
+  (16, 1, 1, NULL, 0, NULL),
+  (16, 1, NULL, 1, 0, NULL),
 
-  (19, 1, 1, 1, 0, '2025-02-24 09:45:00')
+  -- User 17 (mostly completed)
+  (17, 1, 1, NULL, 1, '2025-02-22 15:55:00'),
+  (17, 1, NULL, 1, 1, '2025-02-23 15:55:00'),
+
+  -- User 19 (partial)
+  (19, 1, 1, NULL, 0, '2025-02-24 09:45:00'),
+  (19, 1, NULL, 1, 0, '2025-02-24 09:45:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Adiciona material_aluno extra para os usuários 10,11,12,15 com o novo vídeo (id_video=4) e a nova apostila (id_apostila=4)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  (10, 1, 4, NULL, 1, '2025-03-11 10:00:00'),
+  (10, 1, NULL, 4, 1, '2025-03-11 11:00:00'),
+  (11, 1, 4, NULL, 1, '2025-03-11 10:05:00'),
+  (11, 1, NULL, 4, 1, '2025-03-11 11:05:00'),
+  (12, 1, 4, NULL, 1, '2025-03-11 10:10:00'),
+  (12, 1, NULL, 4, 1, '2025-03-11 11:10:00'),
+  (15, 1, 4, NULL, 1, '2025-03-11 10:20:00'),
+  (15, 1, NULL, 4, 1, '2025-03-11 11:20:00')
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- ...existing code...
@@ -185,50 +218,61 @@ ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(
 INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
   (1, 11, 1, '2025-03-02 11:00:00', 1),
   (2, 12, 1, '2025-03-03 12:00:00', 1),
-  (3, 14, 1, '2025-03-05 14:00:00', 1),
-  (4, 13, 1, '2025-03-04 10:00:00', 1),
-  (5, 14, 1, '2025-03-05 15:00:00', 1),
   (6, 15, 1, '2025-03-06 16:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Tentativas adicionais para usuários que irão responder avaliações (curso 1)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (20, 10, 1, '2025-03-10 10:00:00', 1),
+  (21, 11, 1, '2025-03-10 11:00:00', 1),
+  (22, 12, 1, '2025-03-10 12:00:00', 1)
 ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
 -- Respostas dos usuários nessas tentativas (exemplo)
 INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
-  (11, 1, 2, 1, 1, 2),
-  (12, 1, 3, 1, 2, 1),
-  (13, 1, 4, 1, 2, 2),
-  (14, 1, 5, 1, 1, 1),
+  (11, 1, 1, 1, 1, 2),
+  (12, 1, 2, 1, 2, 1),
+  (15, 1, 6, 1, 2, 1)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Respostas adicionais para garantir que usuários 10,11,12 responderam as 2 questões do curso 1
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (10, 1, 20, 1, 1, 1),
+  (10, 1, 20, 1, 2, 1),
+  (11, 1, 21, 1, 1, 2),
+  (11, 1, 21, 1, 2, 1),
+  (12, 1, 22, 1, 1, 1),
+  (12, 1, 22, 1, 2, 1),
+  (15, 1, 6, 1, 1, 1),
   (15, 1, 6, 1, 2, 1)
 ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
 
 -- Tentativas históricas
 INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
-  (7, 1, 1, '2025-06-01 10:00:00', 1),
   (8, 2, 2, '2025-06-02 14:30:00', 2),
   (9, 1, 1, '2025-06-03 09:15:00', 1)
 ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
 -- Dados iniciais para tabela resposta_do_usuario
 INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
-  (1, 1, 7, 1, 1, 1),
-  (2, 2, 8, 2, 2, 2),
-  (1, 1, 9, 1, 2, 2)
+  (2, 2, 8, 2, 2, 2)
 ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
 -- Feedbacks originais do script
 INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES
-(1, 1, 5, 'Bonzão!'),
-(2, 2, 4, 'Muito bom, mas pode melhorar.');
+(2, 2, 4, 'Muito bom, mas pode melhorar.')
+ON DUPLICATE KEY UPDATE estrelas = VALUES(estrelas), motivo = VALUES(motivo);
 
 -- Feedbacks adicionais para o curso 1 (usuários 10..19)
+-- Only users who completed all materials (10,11,12,15) should have feedback entries for course 1
 INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES
 (10, 1, 5, 'Excelente conteúdo, muito didático.'),
 (11, 1, 4, 'Bom curso, alguns pontos rápidos.'),
 (12, 1, 3, 'Intermediário, faltaram exercícios.'),
-(13, 1, 5, 'Ótimo professor e material.'),
-(14, 1, 2, 'Ritmo acelerado, difícil acompanhar.'),
-(15, 1, 4, 'Conteúdo relevante, mas poderia ter mais exemplos.'),
-(16, 1, 1, 'Não gostei da abordagem.'),
-(17, 1, 5, 'Amei! Recomendo.'),
-(18, 1, 3, 'Ok, mas preciso praticar mais.'),
-(19, 1, 4, 'Bom resumo dos conceitos.');
+(15, 1, 4, 'Conteúdo relevante, mas poderia ter mais exemplos.')
+ON DUPLICATE KEY UPDATE estrelas = VALUES(estrelas), motivo = VALUES(motivo);
+
+-- Remove avaliações (tentativas, respostas e feedback) para usuários que NÃO têm 4 materiais no curso 1
+-- Usuários alvo: 1, 13, 14, 16, 17, 19 (mantemos 10,11,12,15 que têm 4 materiais)
+-- (Removed deletes per request; inserts for unwanted users were removed instead)

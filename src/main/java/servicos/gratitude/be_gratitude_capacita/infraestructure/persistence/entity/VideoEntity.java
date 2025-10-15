@@ -15,11 +15,13 @@ public class VideoEntity {
     private String descricaoVideo;
     private String urlVideo;
     private LocalDateTime dataPostadoVideo;
+    @Column(name = "data_atualizado_video")
     private LocalDateTime dataAtualizacaoVideo;
     private Integer ordemVideo;
     private Boolean isVideoOculto;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "FK_curso")
     private CursoEntity fkCurso;
 
     public Integer getIdVideo() {

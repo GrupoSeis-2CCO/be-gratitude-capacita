@@ -8,4 +8,5 @@ public interface AvaliacaoGateway {
     Boolean existsById(Integer id);
     Avaliacao findById(Integer id);
     Boolean existsByCurso(Curso curso);
+    java.util.List<Avaliacao> findAllByCurso(Curso curso);
 }

@@ -8,7 +8,8 @@ public class AlternativaCompoundKeyMapper {
         AlternativaEntityCompoundKey entityCompoundKey = new AlternativaEntityCompoundKey();
 
         entityCompoundKey.setIdAlternativa(alternativaCompoundKey.getIdAlternativa());
-        entityCompoundKey.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(alternativaCompoundKey.getIdQuestaoComposto()));
+        entityCompoundKey.setIdQuestao(alternativaCompoundKey.getIdQuestao());
+        entityCompoundKey.setIdAvaliacao(alternativaCompoundKey.getIdAvaliacao());
 
         return entityCompoundKey;
     }
@@ -17,7 +18,8 @@ public class AlternativaCompoundKeyMapper {
         AlternativaCompoundKey alternativaCompoundKey = new AlternativaCompoundKey();
 
         alternativaCompoundKey.setIdAlternativa(entityCompoundKey.getIdAlternativa());
-        alternativaCompoundKey.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toDomain(entityCompoundKey.getIdQuestaoComposto()));
+        alternativaCompoundKey.setIdQuestao(entityCompoundKey.getIdQuestao());
+        alternativaCompoundKey.setIdAvaliacao(entityCompoundKey.getIdAvaliacao());
 
         return alternativaCompoundKey;
     }

@@ -6,13 +6,14 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedbac
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.FeedbackAdapter;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.UsuarioAdapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.MatriculaAdapter;
 
 @Configuration
 public class FeedbackBeanConfig {
 
     @Bean
-    public CriarFeedbackUseCase criarFeedbackUseCase(FeedbackAdapter feedbackAdapter, UsuarioAdapter usuarioAdapter){
-        return new CriarFeedbackUseCase(feedbackAdapter, usuarioAdapter);
+    public CriarFeedbackUseCase criarFeedbackUseCase(FeedbackAdapter feedbackAdapter, UsuarioAdapter usuarioAdapter, MatriculaAdapter matriculaAdapter){
+        return new CriarFeedbackUseCase(feedbackAdapter, usuarioAdapter, matriculaAdapter);
     }
 
     @Bean

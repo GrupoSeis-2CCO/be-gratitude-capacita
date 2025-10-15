@@ -30,9 +30,10 @@ public class MontarChaveCompostaAlternativaUseCase {
             throw new NaoEncontradoException("Não foi encontrado questão para o id informado");
         }
 
-        AlternativaCompoundKey idComposto = new AlternativaCompoundKey();
-        idComposto.setIdQuestaoComposto(questaoCompoundKey);
-        idComposto.setIdAlternativa(idAlternativa);
+    AlternativaCompoundKey idComposto = new AlternativaCompoundKey();
+    idComposto.setIdQuestao(questaoCompoundKey.getIdQuestao());
+    idComposto.setIdAvaliacao(questaoCompoundKey.getFkAvaliacao());
+    idComposto.setIdAlternativa(idAlternativa);
 
         return idComposto;
     }

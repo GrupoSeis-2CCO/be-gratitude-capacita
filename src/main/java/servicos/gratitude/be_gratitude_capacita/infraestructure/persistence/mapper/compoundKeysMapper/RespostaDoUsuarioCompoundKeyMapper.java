@@ -6,8 +6,9 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 public class RespostaDoUsuarioCompoundKeyMapper {
     public static RespostaDoUsuarioEntityCompoundKey toEntity(RespostaDoUsuarioCompoundKey respostaDoUsuarioCompoundKey){
         RespostaDoUsuarioEntityCompoundKey entityCompoundKey = new RespostaDoUsuarioEntityCompoundKey();
-
-        entityCompoundKey.setIdAlternativaComposto(AlternativaCompoundKeyMapper.toEntity(respostaDoUsuarioCompoundKey.getIdAlternativaComposto()));
+        entityCompoundKey.setIdAlternativa(respostaDoUsuarioCompoundKey.getIdAlternativaComposto().getIdAlternativa());
+        entityCompoundKey.setIdQuestao(respostaDoUsuarioCompoundKey.getIdAlternativaComposto().getIdQuestao());
+        entityCompoundKey.setIdAvaliacao(respostaDoUsuarioCompoundKey.getIdAlternativaComposto().getIdAvaliacao());
         entityCompoundKey.setIdTentativaComposto(TentativaCompoundKeyMapper.toEntity(respostaDoUsuarioCompoundKey.getIdTentativaComposto()));
 
         return entityCompoundKey;
@@ -16,8 +17,12 @@ public class RespostaDoUsuarioCompoundKeyMapper {
     public static RespostaDoUsuarioCompoundKey toDomain(RespostaDoUsuarioEntityCompoundKey entityCompoundKey){
         RespostaDoUsuarioCompoundKey respostaDoUsuarioCompoundKey = new RespostaDoUsuarioCompoundKey();
 
-        respostaDoUsuarioCompoundKey.setIdAlternativaComposto(AlternativaCompoundKeyMapper.toDomain(entityCompoundKey.getIdAlternativaComposto()));
-        respostaDoUsuarioCompoundKey.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityCompoundKey.getIdTentativaComposto()));
+    servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey alternativaCompoundKey = new servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey();
+    alternativaCompoundKey.setIdAlternativa(entityCompoundKey.getIdAlternativa());
+    alternativaCompoundKey.setIdQuestao(entityCompoundKey.getIdQuestao());
+    alternativaCompoundKey.setIdAvaliacao(entityCompoundKey.getIdAvaliacao());
+    respostaDoUsuarioCompoundKey.setIdAlternativaComposto(alternativaCompoundKey);
+    respostaDoUsuarioCompoundKey.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityCompoundKey.getIdTentativaComposto()));
 
         return respostaDoUsuarioCompoundKey;
     }

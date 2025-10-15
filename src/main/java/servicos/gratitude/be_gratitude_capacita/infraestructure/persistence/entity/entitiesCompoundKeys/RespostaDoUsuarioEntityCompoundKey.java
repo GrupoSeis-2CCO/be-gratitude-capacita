@@ -8,7 +8,9 @@ import java.util.Objects;
 @Embeddable
 public class RespostaDoUsuarioEntityCompoundKey implements Serializable {
     private TentativaEntityCompoundKey idTentativaComposto;
-    private AlternativaEntityCompoundKey idAlternativaComposto;
+    private Integer idAlternativa;
+    private Integer idQuestao;
+    private Integer idAvaliacao;
 
     public TentativaEntityCompoundKey getIdTentativaComposto() {
         return idTentativaComposto;
@@ -18,12 +20,28 @@ public class RespostaDoUsuarioEntityCompoundKey implements Serializable {
         this.idTentativaComposto = idTentativaComposto;
     }
 
-    public AlternativaEntityCompoundKey getIdAlternativaComposto() {
-        return idAlternativaComposto;
+    public Integer getIdAlternativa() {
+        return idAlternativa;
     }
 
-    public void setIdAlternativaComposto(AlternativaEntityCompoundKey idAlternativaComposto) {
-        this.idAlternativaComposto = idAlternativaComposto;
+    public void setIdAlternativa(Integer idAlternativa) {
+        this.idAlternativa = idAlternativa;
+    }
+
+    public Integer getIdQuestao() {
+        return idQuestao;
+    }
+
+    public void setIdQuestao(Integer idQuestao) {
+        this.idQuestao = idQuestao;
+    }
+
+    public Integer getIdAvaliacao() {
+        return idAvaliacao;
+    }
+
+    public void setIdAvaliacao(Integer idAvaliacao) {
+        this.idAvaliacao = idAvaliacao;
     }
 
     @Override
@@ -31,11 +49,11 @@ public class RespostaDoUsuarioEntityCompoundKey implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RespostaDoUsuarioEntityCompoundKey that = (RespostaDoUsuarioEntityCompoundKey) o;
-        return Objects.equals(idTentativaComposto, that.idTentativaComposto) && Objects.equals(idAlternativaComposto, that.idAlternativaComposto);
+        return Objects.equals(idTentativaComposto, that.idTentativaComposto) && Objects.equals(idAlternativa, that.idAlternativa) && Objects.equals(idQuestao, that.idQuestao) && Objects.equals(idAvaliacao, that.idAvaliacao);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idTentativaComposto, idAlternativaComposto);
+        return Objects.hash(idTentativaComposto, idAlternativa, idQuestao, idAvaliacao);
     }
 }

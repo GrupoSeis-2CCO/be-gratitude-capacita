@@ -16,7 +16,12 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.Matricu
 
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.ParticipanteCursoResponse;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.materialAluno.ListarMaterialPorMatriculaUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.apostila.ListarApostilaPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.video.ListarVideoPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorMatriculaUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.questao.ListarQuestoesPorAvaliacaoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.ListarRespostasDoUsuarioUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -37,6 +42,11 @@ public class MatriculaController {
 
     private final ListarMaterialPorMatriculaUseCase listarMaterialPorMatriculaUseCase;
     private final ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase;
+    private final ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase;
+    private final ListarVideoPorCursoUseCase listarVideoPorCursoUseCase;
+    private final ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase;
+    private final ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase;
+    private final ListarRespostasDoUsuarioUseCase listarRespostasDoUsuarioUseCase;
     private final ListarFeedbacksPorCurso listarFeedbacksPorCurso;
 
     public MatriculaController(
@@ -48,9 +58,14 @@ public class MatriculaController {
             ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
             BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase,
             EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase,
-            ListarMaterialPorMatriculaUseCase listarMaterialPorMatriculaUseCase,
-            ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase,
-            ListarFeedbacksPorCurso listarFeedbacksPorCurso
+        ListarMaterialPorMatriculaUseCase listarMaterialPorMatriculaUseCase,
+        ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase,
+        ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase,
+        ListarVideoPorCursoUseCase listarVideoPorCursoUseCase,
+        ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase,
+        ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
+        ListarRespostasDoUsuarioUseCase listarRespostasDoUsuarioUseCase,
+        ListarFeedbacksPorCurso listarFeedbacksPorCurso
     ) {
         this.criarMatriculaUseCase = criarMatriculaUseCase;
         this.atualizarUltimoAcessoMatriculaUseCase = atualizarUltimoAcessoMatriculaUseCase;
@@ -62,6 +77,11 @@ public class MatriculaController {
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
         this.listarMaterialPorMatriculaUseCase = listarMaterialPorMatriculaUseCase;
         this.listarTentativaPorMatriculaUseCase = listarTentativaPorMatriculaUseCase;
+        this.listarApostilaPorCursoUseCase = listarApostilaPorCursoUseCase;
+        this.listarVideoPorCursoUseCase = listarVideoPorCursoUseCase;
+        this.listarAvaliacaoPorCursoUseCase = listarAvaliacaoPorCursoUseCase;
+        this.listarQuestoesPorAvaliacaoUseCase = listarQuestoesPorAvaliacaoUseCase;
+        this.listarRespostasDoUsuarioUseCase = listarRespostasDoUsuarioUseCase;
         this.listarFeedbacksPorCurso = listarFeedbacksPorCurso;
     }
 
@@ -78,15 +98,63 @@ public class MatriculaController {
             }
             final List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksDoCurso = _feedbacksTemp;
 
+            // pré-calcula materiais totais do curso (apostilas + videos + questões de avaliações)
+            int totalApostilas = 0;
+            int totalVideos = 0;
+            int totalQuestoes = 0;
+            try {
+                totalApostilas = listarApostilaPorCursoUseCase.execute(fkCurso).size();
+            } catch (Exception e) {
+                totalApostilas = 0;
+            }
+            try {
+                totalVideos = listarVideoPorCursoUseCase.execute(fkCurso).size();
+            } catch (Exception e) {
+                totalVideos = 0;
+            }
+            try {
+                java.util.List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(fkCurso);
+                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                    try {
+                        totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size();
+                    } catch (Exception ex) {
+                        // ignore per-avaliacao errors
+                    }
+                }
+            } catch (Exception e) {
+                totalQuestoes = 0;
+            }
+            final int materiaisTotaisDoCurso = totalApostilas + totalVideos + totalQuestoes;
+
             List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
                 Usuario usuario = matricula.getUsuario();
                 // Quantidade de materiais concluídos para esta matrícula (usado no front como "materiaisConcluidos")
                 int materiaisConcluidos;
                 try {
                     List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(matricula);
-            materiaisConcluidos = (int) materiais.stream()
-                .filter(mat -> Boolean.TRUE.equals(mat.getFinalizado()))
-                .count();
+                    materiaisConcluidos = (int) materiais.stream()
+                            .filter(mat -> Boolean.TRUE.equals(mat.getFinalizado()))
+                            .count();
+
+                    // também conta questões respondidas pelo usuário neste curso (cada questão conta como 1 material)
+                    try {
+                        List<servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario> respostas = listarRespostasDoUsuarioUseCase.execute(usuario);
+                        long respostasNoCurso = respostas.stream()
+                                .filter(r -> r != null && r.getTentativa() != null && r.getTentativa().getMatricula() != null && r.getTentativa().getMatricula().getCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso().equals(curso.getIdCurso()))
+                                .map(r -> {
+                                    if (r.getAlternativa() != null && r.getAlternativa().getQuestao() != null && r.getAlternativa().getQuestao().getIdQuestaoComposto() != null) {
+                                        return r.getAlternativa().getQuestao().getIdQuestaoComposto();
+                                    }
+                                    return null;
+                                })
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .count();
+
+                        materiaisConcluidos += (int) respostasNoCurso;
+                    } catch (Exception ex){
+                        // ignora falhas na leitura de respostas
+                    }
                 } catch (Exception e) {
                     materiaisConcluidos = 0;
                 }
@@ -112,6 +180,7 @@ public class MatriculaController {
                     usuario.getIdUsuario(),
                     usuario.getNome(),
                     materiaisConcluidos,
+                    materiaisTotaisDoCurso,
                     avaliacao,
                     ultimoAcesso
                 );

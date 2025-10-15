@@ -22,4 +22,9 @@ public class AvaliacaoBeanConfig {
     public EncontrarAvaliacaoPorIdUseCase encontrarAvaliacaoPorIdUseCase(AvaliacaoAdapter avaliacaoAdapter){
         return new EncontrarAvaliacaoPorIdUseCase(avaliacaoAdapter);
     }
+
+    @Bean
+    public servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase(AvaliacaoAdapter avaliacaoAdapter, servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.CursoAdapter cursoAdapter){
+        return new servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase(avaliacaoAdapter, cursoAdapter);
+    }
 }
