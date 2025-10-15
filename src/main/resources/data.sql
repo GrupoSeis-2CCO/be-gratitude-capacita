@@ -109,6 +109,11 @@ ON DUPLICATE KEY UPDATE
   completo = VALUES(completo),
   data_finalizado = VALUES(data_finalizado);
 
+-- Garantir que John Doe (se existir) tem matrícula no curso 1 para que inserts posteriores em material_aluno e tentativa não quebrem FKs
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado)
+  SELECT id_usuario, 1, '2025-02-01 08:00:00', '2025-03-05 14:20:00', 1, '2025-03-05 14:20:00' FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
+
 
 
 -- Dados iniciais para tabela video
@@ -276,3 +281,59 @@ ON DUPLICATE KEY UPDATE estrelas = VALUES(estrelas), motivo = VALUES(motivo);
 -- Remove avaliações (tentativas, respostas e feedback) para usuários que NÃO têm 4 materiais no curso 1
 -- Usuários alvo: 1, 13, 14, 16, 17, 19 (mantemos 10,11,12,15 que têm 4 materiais)
 -- (Removed deletes per request; inserts for unwanted users were removed instead)
+
+-- Bloco adicional para popular engajamento (material_aluno + tentativa) com mais datas
+-- Gera atividade espalhada para os usuários do curso 1 entre 2025-02-01 e 2025-03-15
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  (10,1,1,NULL,1,'2025-02-01 09:00:00'),
+  (10,1,NULL,1,1,'2025-02-02 10:00:00'),
+  (10,1,4,NULL,1,'2025-02-08 11:00:00'),
+  (10,1,NULL,4,1,'2025-02-18 12:00:00'),
+
+  (11,1,1,NULL,1,'2025-02-02 09:30:00'),
+  (11,1,NULL,1,1,'2025-02-04 10:15:00'),
+  (11,1,4,NULL,1,'2025-02-12 10:05:00'),
+  (11,1,NULL,4,1,'2025-03-01 11:05:00'),
+
+  (12,1,1,NULL,1,'2025-02-03 11:20:00'),
+  (12,1,NULL,1,1,'2025-02-06 11:20:00'),
+  (12,1,4,NULL,1,'2025-02-16 10:10:00'),
+  (12,1,NULL,4,1,'2025-03-11 11:10:00'),
+
+  (13,1,1,NULL,0,NULL),
+  (13,1,NULL,1,0,NULL),
+
+  (14,1,1,NULL,1,'2025-02-05 13:10:00'),
+  (14,1,NULL,1,0,NULL),
+
+  (15,1,1,NULL,1,'2025-02-06 14:25:00'),
+  (15,1,NULL,1,1,'2025-02-07 14:25:00'),
+  (15,1,4,NULL,1,'2025-03-11 10:20:00'),
+
+  (16,1,1,NULL,0,NULL),
+  (16,1,NULL,1,0,NULL),
+
+  (17,1,1,NULL,1,'2025-02-08 15:55:00'),
+  (17,1,NULL,1,1,'2025-02-09 16:00:00'),
+
+  (19,1,1,NULL,0,'2025-02-10 09:45:00'),
+  (19,1,NULL,1,0,'2025-02-11 09:45:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Tentativas adicionais distribuídas
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (30, 10, 1, '2025-02-01 10:30:00', 1),
+  (31, 10, 1, '2025-02-08 12:00:00', 1),
+  (32, 11, 1, '2025-02-04 11:00:00', 1),
+  (33, 11, 1, '2025-02-12 11:30:00', 1),
+  (34, 12, 1, '2025-02-06 12:40:00', 1),
+  (35, 15, 1, '2025-02-07 15:00:00', 1),
+  (36, 15, 1, '2025-03-10 09:50:00', 1),
+  (37, 19, 1, '2025-02-11 10:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Inserir atividades para John Doe (referenciado pelo email john@doe.com)
+-- MaterialAluno: apenas insere se o usuário existir
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
+  SELECT id_usuario, 1, 1, NULL, 1, '2025-02-03 09:30:00' FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
