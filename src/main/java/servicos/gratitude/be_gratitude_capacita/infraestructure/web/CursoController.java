@@ -64,10 +64,10 @@ public class CursoController {
 
             List<MaterialResponse> out = new java.util.ArrayList<>();
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
-                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo()));
+                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo(), v.getOrdemVideo()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
-                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null));
+                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null, a.getOrdemApostila()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
                 out.add(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));

@@ -6,15 +6,21 @@ public class MaterialResponse {
     private String titulo;
     private String descricao;
     private String url; // quando aplicável
+    private Integer ordem; // ordem do material (quando aplicável)
 
     public MaterialResponse() {}
 
     public MaterialResponse(Integer id, String tipo, String titulo, String descricao, String url) {
+        this(id, tipo, titulo, descricao, url, null);
+    }
+
+    public MaterialResponse(Integer id, String tipo, String titulo, String descricao, String url, Integer ordem) {
         this.id = id;
         this.tipo = tipo;
         this.titulo = titulo;
         this.descricao = descricao;
         this.url = url;
+        this.ordem = ordem;
     }
 
     public Integer getId() { return id; }
@@ -23,9 +29,12 @@ public class MaterialResponse {
     public String getDescricao() { return descricao; }
     public String getUrl() { return url; }
 
+    public Integer getOrdem() { return ordem; }
+
     public void setId(Integer id) { this.id = id; }
     public void setTipo(String tipo) { this.tipo = tipo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public void setUrl(String url) { this.url = url; }
+    public void setOrdem(Integer ordem) { this.ordem = ordem; }
 }

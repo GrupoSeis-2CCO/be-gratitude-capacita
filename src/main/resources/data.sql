@@ -109,6 +109,8 @@ ON DUPLICATE KEY UPDATE
 
 -- Dados iniciais para tabela matricula
 
+select * from video;
+
 INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
   (1, 1, '2025-01-11 08:00:00', '2025-01-22 06:00:00', 0, NULL),
   (2, 2, '2025-01-12 09:00:00', '2025-01-18 09:30:00', 1, '2025-01-20 15:00:00')
