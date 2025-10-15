@@ -40,7 +40,7 @@ public class VideoAdapter implements VideoGateway {
 
     @Override
     public Boolean existsByNome(String nome) {
-        return videoRepository.existsByNomeVideo(nome);
+        return videoRepository.findAllByNomeVideo(nome) != null && !videoRepository.findAllByNomeVideo(nome).isEmpty();
     }
 
     @Override
@@ -52,9 +52,9 @@ public class VideoAdapter implements VideoGateway {
 
     @Override
     public Video findByNome(String nome) {
-        Optional<VideoEntity> entity = videoRepository.findByNomeVideo(nome);
-
-        return entity.map(VideoMapper::toDomain).orElse(null);
+        java.util.List<VideoEntity> entities = videoRepository.findAllByNomeVideo(nome);
+        if (entities == null || entities.isEmpty()) return null;
+        return VideoMapper.toDomain(entities.get(0));
     }
 
     @Override
