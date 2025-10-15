@@ -3,6 +3,8 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.rep
 import org.springframework.data.jpa.repository.JpaRepository;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MaterialAlunoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MatriculaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.ApostilaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.VideoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.MaterialAlunoEntityCompoundKey;
 
 import java.util.List;
@@ -10,4 +12,8 @@ import java.util.List;
 public interface MaterialAlunoRepository extends JpaRepository<MaterialAlunoEntity, MaterialAlunoEntityCompoundKey> {
     List<MaterialAlunoEntity> findAllByMatricula(MatriculaEntity matricula);
     List<MaterialAlunoEntity> findAllByMatriculaAndIsFinalizado(MatriculaEntity matricula, Boolean isFinalizado);
+    // delete all material_aluno rows that reference a given apostila
+    void deleteAllByFkApostila(ApostilaEntity fkApostila);
+    // delete all material_aluno rows that reference a given video
+    void deleteAllByFkVideo(VideoEntity fkVideo);
 }

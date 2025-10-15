@@ -117,10 +117,10 @@ public class ApostilaController {
 
     @DeleteMapping("/{idAPostila}")
     public ResponseEntity deletarApostila(
-            @PathVariable Integer idApostila) {
+            @PathVariable("idAPostila") Integer idApostila) {
         try {
             deletarApostilaUseCase.execute(idApostila);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.OK).build();
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e);

@@ -19,11 +19,11 @@ ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(
 
 -- Vídeo e apostila de exemplo para o curso 4
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-  (5, 'Introdução ao Node.js', 'Apresentação do ambiente Node.js', 'http://exemplo.com/video_node1', 1, 4)
+  (5, 'Introdução à Regularização Fundiária', 'Visão geral da regularização fundiária: conceitos, objetivos e impacto social.', 'http://exemplo.com/video_regulacao_intro', 1, 4)
 ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
 
 INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
-  (5, 'Nodejs-Apostila.pdf', 'nodejs_apostila.pdf', 'Material do curso Node.js Básico', 512000, 0, 1, 4)
+  (5, 'Guia de Regularização Fundiária - Introdução.pdf', 'regulacao_apostila_intro.pdf', 'Guia introdutório com conceitos e procedimentos iniciais para processos de regularização fundiária.', 512000, 0, 1, 4)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
 -- Matricular John Doe (se existir) no curso 4 e adicionar materiais iniciais
@@ -143,28 +143,28 @@ ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ult
 
 
 
--- Dados iniciais para tabela video
+-- Dados iniciais para tabela video (focado em Regularização Fundiária)
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-  (1, 'Introdução', 'video1', 'http://exemplo.com/video1', 1, 1),
-  (2, 'Aula 1', 'video2', 'http://exemplo.com/video2', 2, 2),
-  (3, 'Aula 2', 'video3', 'http://exemplo.com/video3', 3, 3)
+  (1, 'Introdução à Regularização Fundiária', 'Visão geral e contexto histórico da regularização fundiária no Brasil.', 'http://exemplo.com/video_regulacao_intro', 1, 1),
+  (2, 'Marco Legal e Políticas Públicas', 'Principais leis, políticas e instrumentos legais relacionados à regularização fundiária.', 'http://exemplo.com/video_regulacao_legal', 2, 1),
+  (3, 'Procedimentos Técnicos e Sociais', 'Etapas operacionais e participação social em processos de regularização fundiária.', 'http://exemplo.com/video_regulacao_procedimentos', 3, 1)
 ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
 
--- Adiciona um vídeo extra para o curso 1 (teste)
+-- Adiciona um vídeo extra para o curso 1 (conteúdo prático)
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-  (4, 'Conteúdo Extra', 'Vídeo extra do curso 1', 'http://exemplo.com/video_extra', 2, 1)
+  (4, 'Boas Práticas para Levantamento de Dados', 'Técnicas e checklist para levantamento de dados em campo e cadastro de áreas.', 'http://exemplo.com/video_regulacao_boaspraticas', 4, 1)
 ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
 
--- Dados iniciais para tabela apostila
+-- Dados iniciais para tabela apostila (focado em Regularização Fundiária)
 INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
-  (1, 'Apostila 1.pdf', 'apostila1_armazenada.pdf', 'apostila 1', 225252, 1, 1, 1),
-  (2, 'Apostila 2.pdf', 'apostila2_armazenada.pdf', 'apostila 2', 158000, 0, 2, 2),
-  (3, 'Apostila 3.pdf', 'apostila3_armazenada.pdf', 'apostila 3', 2542, 1, 3, 3)
+  (1, 'Manual de Introdução à Regularização Fundiária.pdf', 'regulacao_manual_intro.pdf', 'Manual com conceitos básicos e panorama geral da regularização fundiária.', 225252, 0, 1, 1),
+  (2, 'Guia Prático de Instrumentos Jurídicos.pdf', 'regulacao_guia_instrumentos.pdf', 'Guia sobre instrumentos legais e procedimentos administrativos.', 158000, 0, 2, 1),
+  (3, 'Modelos e Formulários para Cadastro.pdf', 'regulacao_modelos_formularios.pdf', 'Modelos de formulários e planilhas para apoio ao processo de cadastro de beneficiários.', 2542, 0, 3, 1)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
--- Adiciona uma apostila extra para o curso 1 (teste)
+-- Adiciona uma apostila extra para o curso 1 (material complementar)
 INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazenamento, descricao_apostila, tamanho_bytes, is_apostila_oculto, ordem_apostila, fk_curso) VALUES
-  (4, 'Apostila Extra.pdf', 'apostila4_armazenada.pdf', 'Apostila extra do curso 1', 102400, 0, 2, 1)
+  (4, 'Participação Social e Comunicação.pdf', 'regulacao_participacao.pdf', 'Recursos e orientações para mobilização social e comunicação em processos de regularização.', 102400, 0, 4, 1)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
@@ -365,3 +365,6 @@ ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_cu
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
   SELECT id_usuario, 1, 1, NULL, 1, '2025-02-03 09:30:00' FROM usuario WHERE email = 'john@doe.com'
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+
+select * from video;
