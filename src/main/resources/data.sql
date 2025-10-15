@@ -145,7 +145,7 @@ ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ult
 
 -- Dados iniciais para tabela video (focado em Regularização Fundiária)
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-  (1, 'Introdução à Regularização Fundiária', 'Visão geral e contexto histórico da regularização fundiária no Brasil.', 'http://exemplo.com/video_regulacao_intro', 1, 1),
+  (1, 'Introdução à Regularização Fundiária', 'Visão geral e contexto histórico da regularização fundiária no Brasil.', 'https://www.youtube.com/watch?v=-jkPxfTDeHw&pp=ygUZcmVndWxhcml6YcOnw6NvIGZ1bmRpYXJpYQ%3D%3D', 1, 1),
   (2, 'Marco Legal e Políticas Públicas', 'Principais leis, políticas e instrumentos legais relacionados à regularização fundiária.', 'http://exemplo.com/video_regulacao_legal', 2, 1),
   (3, 'Procedimentos Técnicos e Sociais', 'Etapas operacionais e participação social em processos de regularização fundiária.', 'http://exemplo.com/video_regulacao_procedimentos', 3, 1)
 ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
@@ -226,7 +226,7 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 -- Dados iniciais para tabela apostila (removido duplicidade)
 -- Já inserido anteriormente
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
-(1, 1, 1, 1, 1, '2025-01-22 06:00:00'),
+(1, 1, 1, 1, 0, '2025-01-22 06:00:00'),
 (2, 2, 2, 2, 1, '2025-01-18 09:30:00'),
 (2, 2, 3, 3, 0, NULL)
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
@@ -368,3 +368,4 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 
 
 select * from video;
+SELECT id_material_aluno, fk_video, fk_apostila, finalizada, ultimo_acesso, fk_curso, fk_usuario FROM material_aluno WHERE fk_usuario=1 AND fk_curso=1 ORDER BY id_material_aluno;

@@ -30,7 +30,19 @@ public class MaterialAlunoAdapter implements MaterialAlunoGateway {
     public MaterialAluno save(MaterialAluno materialAluno) {
         MaterialAlunoEntity entity = MaterialAlunoMapper.toEntity(materialAluno);
 
-        return MaterialAlunoMapper.toDomain(materialAlunoRepository.save(entity));
+        MaterialAlunoEntity saved = materialAlunoRepository.save(entity);
+
+        // reload the saved entity to ensure associations are initialized
+        try {
+            Optional<MaterialAlunoEntity> reloaded = materialAlunoRepository.findById(saved.getIdMaterialAlunoComposto());
+            if (reloaded.isPresent()) {
+                return MaterialAlunoMapper.toDomainWithAssociations(reloaded.get());
+            }
+        } catch (Exception e) {
+            logger.warn("Could not reload saved MaterialAluno entity for full mapping, returning best-effort", e);
+        }
+
+        return MaterialAlunoMapper.toDomainWithAssociations(saved);
     }
 
     @Override
@@ -50,7 +62,7 @@ public class MaterialAlunoAdapter implements MaterialAlunoGateway {
     public MaterialAluno findById(MaterialAlunoCompoundKey idComposto) {
         Optional<MaterialAlunoEntity> entity = materialAlunoRepository.findById(MaterialAlunoCompoundKeyMapper.toEntity(idComposto));
 
-        return entity.map(MaterialAlunoMapper::toDomain).orElse(null);
+        return entity.map(MaterialAlunoMapper::toDomainWithAssociations).orElse(null);
     }
 
     @Override
