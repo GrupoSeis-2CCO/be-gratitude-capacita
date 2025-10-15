@@ -1,5 +1,7 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import servicos.gratitude.be_gratitude_capacita.core.domain.MaterialAluno;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Matricula;
@@ -16,6 +18,8 @@ import java.util.Optional;
 
 @Service
 public class MaterialAlunoAdapter implements MaterialAlunoGateway {
+    private static final Logger logger = LoggerFactory.getLogger(MaterialAlunoAdapter.class);
+
     private final MaterialAlunoRepository materialAlunoRepository;
 
     public MaterialAlunoAdapter(MaterialAlunoRepository materialAlunoRepository) {
@@ -31,7 +35,15 @@ public class MaterialAlunoAdapter implements MaterialAlunoGateway {
 
     @Override
     public List<MaterialAluno> findAllByMatricula(Matricula matricula) {
-        return MaterialAlunoMapper.toDomains(materialAlunoRepository.findAllByMatricula(MatriculaMapper.toEntity(matricula)));
+        try {
+            List<servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MaterialAlunoEntity> entities = materialAlunoRepository.findAllByMatricula(MatriculaMapper.toEntity(matricula));
+            List<MaterialAluno> domains = MaterialAlunoMapper.toDomains(entities);
+            logger.info("MaterialAlunoAdapter.findAllByMatricula: matricula={} returned {} materials", matricula != null ? matricula.getIdMatriculaComposto() : null, domains.size());
+            return domains;
+        } catch (Exception e) {
+            logger.error("Error fetching MaterialAluno for matricula {}", matricula != null ? matricula.getIdMatriculaComposto() : null, e);
+            throw e;
+        }
     }
 
     @Override

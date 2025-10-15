@@ -11,6 +11,6 @@ import java.util.List;
 public interface FeedbackRepository extends JpaRepository<FeedbackEntity, FeedbackId> {
     List<FeedbackEntity> findAllByFkCurso(Integer fkCurso);
 
-    @Query(value = "SELECT FK_curso, FK_usuario, estrelas, motivo FROM feedback WHERE FK_curso = :fkCurso", nativeQuery = true)
+        @Query(value = "SELECT fk_curso, fk_usuario, estrelas, motivo FROM feedback WHERE fk_curso = :fkCurso", nativeQuery = true)
     List<Object[]> findAllByFkCursoNative(@Param("fkCurso") Integer fkCurso);
 }

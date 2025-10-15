@@ -80,13 +80,13 @@ public class MatriculaController {
 
             List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
                 Usuario usuario = matricula.getUsuario();
-                // Quantidade de cursos concluídos pelo usuário (usado no front como "materiaisConcluidos")
+                // Quantidade de materiais concluídos para esta matrícula (usado no front como "materiaisConcluidos")
                 int materiaisConcluidos;
                 try {
-                    List<Matricula> todasMatriculasDoUsuario = listarMatriculaPorUsuarioUseCase.execute(usuario);
-                    materiaisConcluidos = (int) todasMatriculasDoUsuario.stream()
-                            .filter(m -> Boolean.TRUE.equals(m.getCompleto()))
-                            .count();
+                    List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(matricula);
+            materiaisConcluidos = (int) materiais.stream()
+                .filter(mat -> Boolean.TRUE.equals(mat.getFinalizado()))
+                .count();
                 } catch (Exception e) {
                     materiaisConcluidos = 0;
                 }

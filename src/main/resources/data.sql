@@ -51,18 +51,49 @@ INSERT INTO usuario (
     data_entrada,
     ultimo_acesso
 ) VALUES
-('John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('Cintia Tanivaro', '98765432100', 'cintia@tanivaro.com', '123123', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  nome = VALUES(nome),
+  cpf = VALUES(cpf),
+  email = VALUES(email),
+  senha = VALUES(senha),
+  fk_cargo = VALUES(fk_cargo),
+  data_entrada = VALUES(data_entrada),
+  ultimo_acesso = VALUES(ultimo_acesso);
+
+INSERT INTO usuario (
+    nome,
+    cpf,
+    email,
+    senha,
+    fk_cargo,
+    data_entrada,
+    ultimo_acesso
+) VALUES
+('Cintia Tanivaro', '98765432100', 'cintia@tanivaro.com', '123123', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  nome = VALUES(nome),
+  cpf = VALUES(cpf),
+  email = VALUES(email),
+  senha = VALUES(senha),
+  fk_cargo = VALUES(fk_cargo),
+  data_entrada = VALUES(data_entrada),
+  ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela matricula
 
-INSERT INTO matricula (fk_usuario, fk_curso, FK_inicio, ultimo_senso, completo, data_finalizado) VALUES
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
   (1, 1, '2025-01-11 08:00:00', '2025-01-22 06:00:00', 0, NULL),
-  (2, 2, '2025-01-12 09:00:00', '2025-01-18 09:30:00', 1, '2025-01-20 15:00:00');
+  (2, 2, '2025-01-12 09:00:00', '2025-01-18 09:30:00', 1, '2025-01-20 15:00:00')
+ON DUPLICATE KEY UPDATE
+  fk_inicio = VALUES(fk_inicio),
+  ultimo_senso = VALUES(ultimo_senso),
+  completo = VALUES(completo),
+  data_finalizado = VALUES(data_finalizado);
 
 -- Novos participantes do curso 1
 -- Nunca acessou, tem material
-INSERT INTO matricula (fk_usuario, fk_curso, FK_inicio, ultimo_senso, completo, data_finalizado) VALUES
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
   (10, 1, '2025-02-01 08:00:00', '2025-02-05 10:00:00', 1, '2025-02-10 10:00:00'), -- agora concluído
   (11, 1, '2025-02-02 08:00:00', '2025-02-10 10:00:00', 1, '2025-02-15 12:00:00'),
   (12, 1, '2025-02-03 08:00:00', '2025-02-12 11:20:00', 1, '2025-02-16 11:20:00'), -- agora concluído
@@ -71,7 +102,12 @@ INSERT INTO matricula (fk_usuario, fk_curso, FK_inicio, ultimo_senso, completo, 
   (15, 1, '2025-02-06 08:00:00', '2025-02-21 14:00:00', 1, '2025-02-26 14:00:00'), -- agora concluído
   (16, 1, '2025-02-07 08:00:00', '2025-02-18 09:00:00', 1, '2025-02-20 09:00:00'), -- agora concluído
   (17, 1, '2025-02-08 08:00:00', '2025-02-22 15:00:00', 1, '2025-02-28 16:00:00'),
-  (19, 1, '2025-02-10 08:00:00', '2025-02-24 09:45:00', 1, '2025-02-27 09:45:00'); -- agora concluído
+  (19, 1, '2025-02-10 08:00:00', '2025-02-24 09:45:00', 1, '2025-02-27 09:45:00') -- agora concluído
+ON DUPLICATE KEY UPDATE
+  fk_inicio = VALUES(fk_inicio),
+  ultimo_senso = VALUES(ultimo_senso),
+  completo = VALUES(completo),
+  data_finalizado = VALUES(data_finalizado);
 
 
 
@@ -88,26 +124,46 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (3, 'Apostila 3.pdf', 'apostila3_armazenada.pdf', 'apostila 3', 2542, 1, 3, 3)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
-INSERT INTO material_aluno (FK_usuario, FK_cargo, FK_video, FK_apostila, finalizada, ultimo_acesso) VALUES
-  (10, 1, 1, 1, 0, NULL),
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  -- Para cada usuário, inserimos vários materiais (FK_video/FK_apostila) com finalizada variando 0/1
+  (10, 1, 1, 1, 1, '2025-02-05 10:00:00'),
+  (10, 1, 2, 1, 1, '2025-02-06 10:00:00'),
+  (10, 1, 3, 1, 0, NULL),
+
   (11, 1, 1, 1, 1, '2025-02-10 10:15:00'),
+  (11, 1, 2, 1, 0, NULL),
+
   (12, 1, 1, 2, 1, '2025-02-12 11:20:00'),
-  (13, 1, 1, 1, 1, '2025-02-14 12:10:00'),
+  (12, 1, 2, 2, 1, '2025-02-13 11:20:00'),
+  (12, 1, 3, 3, 0, NULL),
+
+  (13, 1, 1, 1, 0, NULL),
+
   (14, 1, 1, 2, 1, '2025-02-20 13:10:00'),
+  (14, 1, 2, 2, 1, '2025-02-21 13:10:00'),
+  (14, 1, 3, 3, 1, '2025-02-22 13:10:00'),
+
   (15, 1, 1, 1, 1, '2025-02-21 14:25:00'),
+  (15, 1, 2, 1, 1, '2025-02-22 14:25:00'),
+
   (16, 1, 1, 2, 0, NULL),
+
   (17, 1, 1, 1, 1, '2025-02-22 15:55:00'),
+  (17, 1, 2, 2, 1, '2025-02-23 15:55:00'),
+  (17, 1, 3, 3, 1, '2025-02-24 15:55:00'),
+  (17, 1, NULL, 3, 1, '2025-02-25 15:55:00'),
+
   (19, 1, 1, 1, 0, '2025-02-24 09:45:00')
-ON DUPLICATE KEY UPDATE FK_video = VALUES(FK_video), FK_apostila = VALUES(FK_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- ...existing code...
 -- Dados iniciais para tabela apostila (removido duplicidade)
 -- Já inserido anteriormente
-INSERT INTO material_aluno (FK_usuario, FK_cargo, FK_video, FK_apostila, finalizada, ultimo_acesso) VALUES
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
 (1, 1, 1, 1, 1, '2025-01-22 06:00:00'),
 (2, 2, 2, 2, 1, '2025-01-18 09:30:00'),
 (2, 2, 3, 3, 0, NULL)
-ON DUPLICATE KEY UPDATE FK_video = VALUES(FK_video), FK_apostila = VALUES(FK_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela alternativa
 INSERT INTO alternativa (id_alternativa, fk_avaliacao, texto, ordem_alternativa) VALUES
@@ -125,13 +181,14 @@ INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alt
 ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao), fk_alternativa_correta = VALUES(fk_alternativa_correta);
 
 -- Tentativas de avaliação dos novos participantes
+-- Ajuste: deixar alguns usuários sem tentativas (sem nota) para teste
 INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
-  (1, 10, 1, '2025-03-01 10:00:00', 1),
-  (2, 11, 1, '2025-03-02 11:00:00', 1),
-  (3, 12, 1, '2025-03-03 12:00:00', 1),
-  (4, 13, 1, '2025-03-04 13:00:00', 1),
-  (5, 14, 1, '2025-03-05 14:00:00', 1),
-  (6, 15, 1, '2025-03-06 15:00:00', 1)
+  (1, 11, 1, '2025-03-02 11:00:00', 1),
+  (2, 12, 1, '2025-03-03 12:00:00', 1),
+  (3, 14, 1, '2025-03-05 14:00:00', 1),
+  (4, 13, 1, '2025-03-04 10:00:00', 1),
+  (5, 14, 1, '2025-03-05 15:00:00', 1),
+  (6, 15, 1, '2025-03-06 16:00:00', 1)
 ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
 -- Respostas dos usuários nessas tentativas (exemplo)
@@ -142,6 +199,7 @@ INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliaca
   (14, 1, 5, 1, 1, 1),
   (15, 1, 6, 1, 2, 1)
 ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
 
 -- Tentativas históricas
 INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES

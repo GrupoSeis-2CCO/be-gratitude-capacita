@@ -39,15 +39,15 @@ CREATE TABLE curso (
 
 -- Tabela matricula
 CREATE TABLE matricula (
-    FK_usuario INT,
-    FK_curso INT,
-    FK_inicio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+    fk_usuario INT,
+    fk_curso INT,
+    fk_inicio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
     ultimo_senso DATETIME,
     completo TINYINT(1) DEFAULT 0,
     data_finalizado DATETIME,
     PRIMARY KEY (fk_usuario, fk_curso),
-    FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
+    FOREIGN KEY (fk_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (fk_curso) REFERENCES curso(id_curso)
 );
 
 select * from matricula;
@@ -62,12 +62,13 @@ CREATE TABLE video (
     data_atualizado_video DATETIME,  
     ordem_video INT,
     is_video_oculto TINYINT(1) DEFAULT 0,  
-    FK_curso INT NOT NULL,
-    FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
+    fk_curso INT NOT NULL,
+    FOREIGN KEY (fk_curso) REFERENCES curso(id_curso)
 );
 
 -- select * from video;
 
+-- Tabela apostila
 -- Tabela apostila
 CREATE TABLE apostila (
     id_apostila INT PRIMARY KEY AUTO_INCREMENT,  
@@ -78,7 +79,8 @@ CREATE TABLE apostila (
     data_postado_apostila DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao_apostila DATETIME,  
     is_apostila_oculto TINYINT(1) DEFAULT 0,  
-    ordem_apostila INT,  
+    ordem_apostila INT,
+    url_arquivo VARCHAR(255) DEFAULT NULL,
     FK_curso INT NOT NULL,
     FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
 );
@@ -88,17 +90,17 @@ CREATE TABLE apostila (
 
 -- Tabela materia_aluno
 CREATE TABLE material_aluno (
-    id_material_aluno INT NOT NULL,
-    FK_usuario INT NOT NULL,
-    FK_curso INT NOT NULL,
+    id_material_aluno INT NOT NULL AUTO_INCREMENT,
+    fk_usuario INT NOT NULL,
+    fk_curso INT NOT NULL,
     finalizada TINYINT(1) DEFAULT 0,
     ultimo_acesso DATETIME,
-    FK_video INT,
-    FK_apostila INT,
-    PRIMARY KEY (id_material_aluno, FK_usuario, FK_curso),
-    FOREIGN KEY (FK_usuario, FK_curso) REFERENCES matricula(FK_usuario, FK_curso),
-    FOREIGN KEY (FK_video) REFERENCES video(id_video),
-    FOREIGN KEY (FK_apostila) REFERENCES apostila(id_apostila)
+    fk_video INT,
+    fk_apostila INT,
+    PRIMARY KEY (id_material_aluno, fk_usuario, fk_curso),
+    FOREIGN KEY (fk_usuario, fk_curso) REFERENCES matricula(fk_usuario, fk_curso),
+    FOREIGN KEY (fk_video) REFERENCES video(id_video),
+    FOREIGN KEY (fk_apostila) REFERENCES apostila(id_apostila)
 );
 
 select * from material_aluno;
@@ -107,8 +109,8 @@ select * from material_aluno;
 CREATE TABLE avaliacao (  
     id_avaliacao INT PRIMARY KEY AUTO_INCREMENT,  
     nota_minima DECIMAL(5,2) NOT NULL,  
-    FK_curso INT NOT NULL,
-    FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
+    fk_curso INT NOT NULL,
+    FOREIGN KEY (fk_curso) REFERENCES curso(id_curso)
 );
 
 select * from avaliacao;
@@ -116,12 +118,12 @@ select * from avaliacao;
 -- Tabela alternativa
 CREATE TABLE alternativa (
     id_alternativa INT  AUTO_INCREMENT,
-    FK_questao INT,  
-    FK_avaliacao INT NOT NULL,
+    fk_questao INT,  
+    fk_avaliacao INT NOT NULL,
     texto VARCHAR(50) NOT NULL,
     ordem_alternativa INT NOT NULL,  
     primary key(id_alternativa),
-    FOREIGN KEY (FK_avaliacao) REFERENCES avaliacao(id_avaliacao)
+    FOREIGN KEY (fk_avaliacao) REFERENCES avaliacao(id_avaliacao)
 );
 
 select * from alternativa;
@@ -156,19 +158,19 @@ SELECT * FROM questao;
 
 -- Tabela resposta_usuario
 CREATE TABLE resposta_do_usuario ( 
-    FK_usuario INT NOT NULL,
-    FK_curso INT NOT NULL,
-    FK_tentativa INT,  
-    FK_avaliacao INT NOT NULL,
-    FK_questao INT,  
-    FK_alternativa INT NOT NULL,
-    PRIMARY KEY (FK_usuario, FK_curso, FK_tentativa, FK_avaliacao, FK_questao, FK_alternativa),
-    FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (FK_curso) REFERENCES curso(id_curso),
-    FOREIGN KEY (FK_tentativa) REFERENCES tentativa(id_tentativa),
-    FOREIGN KEY (FK_avaliacao) REFERENCES avaliacao(id_avaliacao),
-    FOREIGN KEY (FK_questao) REFERENCES questao(id_questao),
-    FOREIGN KEY (FK_alternativa) REFERENCES alternativa(id_alternativa)
+    fk_usuario INT NOT NULL,
+    fk_curso INT NOT NULL,
+    fk_tentativa INT,  
+    fk_avaliacao INT NOT NULL,
+    fk_questao INT,  
+    fk_alternativa INT NOT NULL,
+    PRIMARY KEY (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa),
+    FOREIGN KEY (fk_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (fk_curso) REFERENCES curso(id_curso),
+    FOREIGN KEY (fk_tentativa) REFERENCES tentativa(id_tentativa),
+    FOREIGN KEY (fk_avaliacao) REFERENCES avaliacao(id_avaliacao),
+    FOREIGN KEY (fk_questao) REFERENCES questao(id_questao),
+    FOREIGN KEY (fk_alternativa) REFERENCES alternativa(id_alternativa)
 );
 
 -- Ajuste os valores de FK_tentativa para corresponder aos id_tentativa existentes na tabela tentativa
@@ -177,13 +179,13 @@ select * from resposta_do_usuario;
 
 -- Tabela feedback
 CREATE TABLE feedback (
-    FK_curso INT NOT NULL,
+    fk_curso INT NOT NULL,
     estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 5),
     motivo VARCHAR(250),
-    FK_usuario INT NOT NULL,
-    PRIMARY KEY (FK_usuario, FK_curso),
-    FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (FK_curso) REFERENCES curso(id_curso)
+    fk_usuario INT NOT NULL,
+    PRIMARY KEY (fk_usuario, fk_curso),
+    FOREIGN KEY (fk_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (fk_curso) REFERENCES curso(id_curso)
 );
 
 use capacita;

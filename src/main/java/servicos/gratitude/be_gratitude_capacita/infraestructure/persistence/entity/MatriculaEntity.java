@@ -15,7 +15,7 @@ public class MatriculaEntity {
     @EmbeddedId
     private MatriculaEntityCompoundKey id;
 
-    @jakarta.persistence.Column(name = "FK_inicio")
+    @jakarta.persistence.Column(name = "fk_inicio")
     private LocalDateTime dtInscricao;
 
     @jakarta.persistence.Column(name = "ultimo_senso")

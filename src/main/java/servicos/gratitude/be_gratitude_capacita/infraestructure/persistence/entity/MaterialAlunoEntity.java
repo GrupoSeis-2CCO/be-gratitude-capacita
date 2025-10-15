@@ -2,6 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ent
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
@@ -24,19 +25,19 @@ public class MaterialAlunoEntity {
     @Column(name = "ultimo_acesso")
     private LocalDateTime ultimoAcesso;
 
-    @ManyToOne
-    @JoinColumn(name = "FK_video")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_video")
     private VideoEntity fkVideo;
 
-    @ManyToOne
-    @JoinColumn(name = "FK_apostila")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_apostila")
     private ApostilaEntity fkApostila;
 
     @ManyToOne(optional = false)
     @MapsId("idMatriculaComposto")
     @JoinColumns({
-        @JoinColumn(name = "FK_usuario", referencedColumnName = "FK_usuario"),
-        @JoinColumn(name = "FK_curso", referencedColumnName = "fk_curso")
+        @JoinColumn(name = "fk_usuario", referencedColumnName = "fk_usuario"),
+        @JoinColumn(name = "fk_curso", referencedColumnName = "fk_curso")
     })
     private MatriculaEntity matricula;
 
