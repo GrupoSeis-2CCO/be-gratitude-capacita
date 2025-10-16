@@ -20,7 +20,9 @@ public class CriarAvaliacaoUseCase {
     }
 
     public Avaliacao execute(CriarAvaliacaoCommand command){
-        Curso curso = cursoGateway.findById(command.idCurso());
+        System.out.println("[CriarAvaliacaoUseCase] fkCurso recebido: " + command.fkCurso());
+        System.out.println("[CriarAvaliacaoUseCase] notaMinima recebida: " + command.notaMinima());
+        Curso curso = cursoGateway.findById(command.fkCurso());
 
         if (Objects.isNull(curso)){
             throw new NaoEncontradoException("Não encontrado curso com o id informado");
@@ -29,8 +31,12 @@ public class CriarAvaliacaoUseCase {
         }
 
         Avaliacao avaliacao = new Avaliacao();
-
         avaliacao.setFkCurso(curso);
+        // Salvar notaMinima como acertosMinimos (ajuste conforme regra de negócio)
+        if (command.notaMinima() == null) {
+            throw new IllegalArgumentException("notaMinima não pode ser nula");
+        }
+        avaliacao.setAcertosMinimos(command.notaMinima().intValue());
 
         return avaliacaoGateway.save(avaliacao);
     }

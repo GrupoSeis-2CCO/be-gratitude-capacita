@@ -12,16 +12,28 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Valor
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.AtualizarAcertosMinimosAvaliacaoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.CriarAvaliacaoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.AvaliacaoGateway;
 
 @RestController
 @RequestMapping("/avaliacoes")
 public class AvaliacaoController {
     private final CriarAvaliacaoUseCase criarAvaliacaoUseCase;
     private final AtualizarAcertosMinimosAvaliacaoUseCase atualizarAcertosMinimosAvaliacaoUseCase;
+    private final AvaliacaoGateway avaliacaoGateway;
 
-    public AvaliacaoController(CriarAvaliacaoUseCase criarAvaliacaoUseCase, AtualizarAcertosMinimosAvaliacaoUseCase atualizarAcertosMinimosAvaliacaoUseCase) {
+    public AvaliacaoController(CriarAvaliacaoUseCase criarAvaliacaoUseCase, AtualizarAcertosMinimosAvaliacaoUseCase atualizarAcertosMinimosAvaliacaoUseCase, AvaliacaoGateway avaliacaoGateway) {
         this.criarAvaliacaoUseCase = criarAvaliacaoUseCase;
         this.atualizarAcertosMinimosAvaliacaoUseCase = atualizarAcertosMinimosAvaliacaoUseCase;
+        this.avaliacaoGateway = avaliacaoGateway;
+    }
+    @GetMapping
+    public ResponseEntity<?> listarAvaliacoes() {
+        try {
+            return ResponseEntity.ok(avaliacaoGateway.findAll());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao buscar avaliações", e);
+        }
     }
 
     @PostMapping
@@ -29,6 +41,7 @@ public class AvaliacaoController {
             @RequestBody CriarAvaliacaoCommand request
     ){
         try {
+            System.out.println("[AvaliacaoController] fkCurso recebido: " + request.fkCurso());
             return ResponseEntity.status(HttpStatus.OK).body(criarAvaliacaoUseCase.execute(request));
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
