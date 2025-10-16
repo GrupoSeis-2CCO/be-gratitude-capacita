@@ -25,10 +25,10 @@ public class MatriculaMapper {
     public static Matricula toDomain(MatriculaEntity entity){
         Matricula matricula = new Matricula();
 
-    matricula.setIdMatriculaComposto(MatriculaCompoundKeyMapper.toDoamin(entity.getId()));
-        matricula.setCurso(CursoMapper.toDomain(entity.getCurso()));
+    matricula.setIdMatriculaComposto(entity.getId() != null ? MatriculaCompoundKeyMapper.toDoamin(entity.getId()) : null);
+        matricula.setCurso(entity.getCurso() != null ? CursoMapper.toDomain(entity.getCurso()) : null);
         matricula.setCompleto(entity.getCompleto());
-        matricula.setUsuario(UsuarioMapper.toDomain(entity.getUsuario()));
+        matricula.setUsuario(entity.getUsuario() != null ? UsuarioMapper.toDomain(entity.getUsuario()) : null);
         matricula.setDtInscricao(entity.getDtInscricao());
         matricula.setDataFinalizacao(entity.getDataFinalizacao());
         matricula.setUltimoAcesso(entity.getUltimoAcesso());
@@ -62,10 +62,10 @@ public class MatriculaMapper {
         for (MatriculaEntity entityDaVez : entities) {
         Matricula matricula = new Matricula();
 
-    matricula.setIdMatriculaComposto(MatriculaCompoundKeyMapper.toDoamin(entityDaVez.getId()));
-        matricula.setCurso(CursoMapper.toDomain(entityDaVez.getCurso()));
+    matricula.setIdMatriculaComposto(entityDaVez.getId() != null ? MatriculaCompoundKeyMapper.toDoamin(entityDaVez.getId()) : null);
+        matricula.setCurso(entityDaVez.getCurso() != null ? CursoMapper.toDomain(entityDaVez.getCurso()) : null);
         matricula.setCompleto(entityDaVez.getCompleto());
-        matricula.setUsuario(UsuarioMapper.toDomain(entityDaVez.getUsuario()));
+        matricula.setUsuario(entityDaVez.getUsuario() != null ? UsuarioMapper.toDomain(entityDaVez.getUsuario()) : null);
         matricula.setDtInscricao(entityDaVez.getDtInscricao());
         matricula.setDataFinalizacao(entityDaVez.getDataFinalizacao());
         matricula.setUltimoAcesso(entityDaVez.getUltimoAcesso());

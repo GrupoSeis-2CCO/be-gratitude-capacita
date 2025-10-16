@@ -138,6 +138,12 @@ CREATE TABLE tentativa (
     FOREIGN KEY (fk_avaliacao) REFERENCES avaliacao(id_avaliacao)
 );
 
+-- Add composite unique index so that other tables can reference tentativa using
+-- the triplet (fk_curso, fk_usuario, id_tentativa). MySQL requires the referenced
+-- columns to be indexed in the same order when creating composite foreign keys.
+ALTER TABLE tentativa
+    ADD UNIQUE INDEX ux_tentativa_comp (fk_curso, fk_usuario, id_tentativa);
+
 -- Inserts para tentativa
 select * from tentativa;
 

@@ -33,6 +33,27 @@ public class RespostaDoUsuarioAdapter implements RespostaDoUsuarioGateway {
     }
 
     @Override
+    public List<RespostaDoUsuario> findAllByTentativa(servicos.gratitude.be_gratitude_capacita.core.domain.Tentativa tentativa) {
+        // Use composite key fields instead of entity reference to avoid lazy initialization issues
+        Integer fkCurso = tentativa.getIdTentativaComposto() != null && tentativa.getIdTentativaComposto().getIdMatriculaComposto() != null 
+            ? tentativa.getIdTentativaComposto().getIdMatriculaComposto().getFkCurso() 
+            : null;
+        Integer fkUsuario = tentativa.getIdTentativaComposto() != null && tentativa.getIdTentativaComposto().getIdMatriculaComposto() != null 
+            ? tentativa.getIdTentativaComposto().getIdMatriculaComposto().getFkUsuario() 
+            : null;
+        Integer fkTentativa = tentativa.getIdTentativaComposto() != null 
+            ? tentativa.getIdTentativaComposto().getIdTentativa() 
+            : null;
+        
+        if (fkCurso == null || fkUsuario == null || fkTentativa == null) {
+            return java.util.Collections.emptyList();
+        }
+        
+        List<RespostaDoUsuarioEntity> entities = respostaDoUsuarioRepository.findAllByTentativaKeys(fkCurso, fkUsuario, fkTentativa);
+        return RespostaDoUsuarioMapper.toDomains(entities);
+    }
+
+    @Override
     public Boolean existsById(RespostaDoUsuarioCompoundKey idComposto) {
         return respostaDoUsuarioRepository.existsById(RespostaDoUsuarioCompoundKeyMapper.toEntity(idComposto));
     }

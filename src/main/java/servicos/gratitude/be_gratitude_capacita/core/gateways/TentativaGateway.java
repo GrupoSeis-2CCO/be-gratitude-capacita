@@ -9,6 +9,7 @@ import java.util.List;
 public interface TentativaGateway {
     Tentativa save(Tentativa tentativa);
     List<Tentativa> findAllByMatricula(Matricula matricula);
+    List<Tentativa> findAllByUsuario(Integer fkUsuario);
     Tentativa findById(TentativaCompoundKey idComposto);
     Boolean existsById(TentativaCompoundKey idComposto);
 }

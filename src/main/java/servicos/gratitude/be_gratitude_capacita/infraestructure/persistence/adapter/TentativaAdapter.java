@@ -37,6 +37,19 @@ public class TentativaAdapter implements TentativaGateway {
     }
 
     @Override
+    public List<Tentativa> findAllByUsuario(Integer fkUsuario) {
+        try {
+            java.util.List<servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.TentativaEntity> results = tentativaRepository.findAllByUsuario(fkUsuario);
+            if (results == null) return new java.util.ArrayList<>();
+            return TentativaMapper.toDomains(results);
+        } catch (Exception e) {
+            // log and return empty list so controller can respond with 204 instead of 500
+            org.slf4j.LoggerFactory.getLogger(TentativaAdapter.class).error("Erro ao buscar tentativas por usuario {}", fkUsuario, e);
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    @Override
     public Tentativa findById(TentativaCompoundKey idComposto) {
         Optional<TentativaEntity> entity = tentativaRepository.findById(TentativaCompoundKeyMapper.toEntity(idComposto));
 

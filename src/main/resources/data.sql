@@ -33,7 +33,8 @@ ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original),
 INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (1, 7.5, 1),
   (2, 6.0, 2),
-  (3, 8.0, 3)
+  (3, 8.0, 3),
+  (4, 7.0, 4)
 ON DUPLICATE KEY UPDATE nota_minima = VALUES(nota_minima), fk_curso = VALUES(fk_curso);
 
 INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo) VALUES
@@ -109,7 +110,29 @@ ON DUPLICATE KEY UPDATE
 
 -- Dados iniciais para tabela matricula
 
-select * from video;
+select * from tentativa
+where fk_usuario = 1;
+SELECT * FROM resposta_do_usuario WHERE fk_usuario = 20;
+
+-- Garantir matrículas de John Doe (id 20) em todos os cursos necessários
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
+  (20, 2, '2025-03-01 08:00:00', '2025-03-15 10:00:00', 1, '2025-03-20 10:00:00'),
+  (20, 3, '2025-04-01 08:00:00', '2025-04-15 10:00:00', 1, '2025-04-20 10:00:00')
+ON DUPLICATE KEY UPDATE
+  fk_inicio = VALUES(fk_inicio),
+  ultimo_senso = VALUES(ultimo_senso),
+  completo = VALUES(completo),
+  data_finalizado = VALUES(data_finalizado);
+
+-- Inserir mais 5 tentativas para John Doe (usuario 20) com cursos variados
+-- (As respostas serão inseridas depois da criação das questões)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (40, 20, 1, '2025-07-01 10:00:00', 1),
+  (41, 20, 2, '2025-07-02 11:00:00', 2),
+  (42, 20, 3, '2025-07-03 12:00:00', 3),
+  (43, 20, 4, '2025-07-04 13:00:00', 4),
+  (44, 20, 1, '2025-07-05 14:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
 INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
   (1, 1, '2025-01-11 08:00:00', '2025-01-22 06:00:00', 0, NULL),
@@ -233,20 +256,78 @@ INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finaliz
 (2, 2, 3, 3, 0, NULL)
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
--- Dados iniciais para tabela alternativa
-INSERT INTO alternativa (id_alternativa, fk_avaliacao, texto, ordem_alternativa) VALUES
-  (1, 1, 'Alternativa A', 1),
-  (2, 1, 'Alternativa B', 2),
-  (3, 2, 'Alternativa C', 1),
-  (4, 2, 'Alternativa D', 2)
-ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
-
--- Dados iniciais para tabela questao
+-- Dados iniciais para tabela questao (ANTES das alternativas para que a FK funcione)
 INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
-  (1, 1, 'O que é JVM?', 1, 2),
-  (2, 1, 'Qual comando compila um arquivo Java?', 2, 1),
-  (3, 2, 'Para que serve o @RestController no Spring?', 1, 3)
-ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao), fk_alternativa_correta = VALUES(fk_alternativa_correta);
+  (1, 1, 'O que é JVM?', 1, NULL),
+  (2, 1, 'Qual comando compila um arquivo Java?', 2, NULL),
+  (3, 2, 'Para que serve o @RestController no Spring?', 1, NULL),
+  (4, 3, 'Qual comando SQL consulta dados?', 1, NULL),
+  (5, 4, 'Como instalar dependências no Node.js?', 1, NULL)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao);
+
+-- Dados iniciais para tabela alternativa (com fk_questao e IDs únicos)
+-- Questão 1 (avaliação 1): O que é JVM?
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (1, 1, 1, 'Um compilador Java', 1),
+  (2, 1, 1, 'Java Virtual Machine', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 2 (avaliação 1): Qual comando compila um arquivo Java?
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (3, 1, 2, 'javac', 1),
+  (4, 1, 2, 'java', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 3 (avaliação 2): Para que serve o @RestController no Spring?
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (5, 2, 3, 'Para definir controllers REST', 1),
+  (6, 2, 3, 'Para conectar ao banco de dados', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 4 (avaliação 3): Qual comando SQL consulta dados?
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (7, 3, 4, 'SELECT * FROM tabela', 1),
+  (8, 3, 4, 'INSERT INTO tabela', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 5 (avaliação 4): Como instalar dependências no Node.js?
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (9, 4, 5, 'npm install', 1),
+  (10, 4, 5, 'npm start', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Atualizar questões com as alternativas corretas
+UPDATE questao SET fk_alternativa_correta = 2 WHERE id_questao = 1;  -- "Java Virtual Machine"
+UPDATE questao SET fk_alternativa_correta = 3 WHERE id_questao = 2;  -- "javac"
+UPDATE questao SET fk_alternativa_correta = 5 WHERE id_questao = 3;  -- "Para definir controllers REST"
+UPDATE questao SET fk_alternativa_correta = 7 WHERE id_questao = 4;  -- "SELECT * FROM tabela"
+UPDATE questao SET fk_alternativa_correta = 9 WHERE id_questao = 5;  -- "npm install"
+
+-- Inserir respostas de exemplo para as tentativas de John Doe (para calcular notas)
+-- IMPORTANTE: Estas inserções devem vir DEPOIS da criação das questões e alternativas
+
+-- Tentativa 40 (curso 1, avaliação 1): responde questões 1 e 2 corretamente (2/2)
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (20, 1, 40, 1, 1, 2),  -- questão 1, alternativa correta "Java Virtual Machine" (id 2)
+  (20, 1, 40, 1, 2, 3)   -- questão 2, alternativa correta "javac" (id 3)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Tentativa 41 (curso 2, avaliação 2): responde questão 3 corretamente (1/1)
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (20, 2, 41, 2, 3, 5)   -- questão 3, alternativa correta "Para definir controllers REST" (id 5)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Tentativa 42 (curso 3, avaliação 3): sem respostas (para teste de "Sem respostas" - 0/0)
+
+-- Tentativa 43 (curso 4, avaliação 4): responde questão 5 incorretamente (0/1)
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (20, 4, 43, 4, 5, 10)  -- questão 5, alternativa incorreta "npm start" (id 10, correta seria id 9)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Tentativa 44 (curso 1, avaliação 1): responde apenas questão 1 corretamente (1/2)
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (20, 1, 44, 1, 1, 2)   -- questão 1, alternativa correta "Java Virtual Machine" (id 2)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
 -- Tentativas de avaliação dos novos participantes
 -- Ajuste: deixar alguns usuários sem tentativas (sem nota) para teste
@@ -362,6 +443,17 @@ INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_aval
   (37, 19, 1, '2025-02-11 10:00:00', 1)
 ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
+-- Duas tentativas adicionais para John Doe (usuário com email john@doe.com / id esperado 20)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (38, 20, 1, '2025-06-03 06:15:00', 1),
+  (39, 20, 1, '2025-06-04 07:20:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Ensure composite index exists for (fk_curso, fk_usuario, id_tentativa) to allow
+-- composite foreign keys referencing these columns (some DBs require an index on
+-- referenced columns in the same order).
+ALTER TABLE tentativa ADD UNIQUE INDEX IF NOT EXISTS ux_tentativa_comp (fk_curso, fk_usuario, id_tentativa);
+
 -- Inserir atividades para John Doe (referenciado pelo email john@doe.com)
 -- MaterialAluno: apenas insere se o usuário existir
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
@@ -371,3 +463,4 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 
 select * from video;
 SELECT id_material_aluno, fk_video, fk_apostila, finalizada, ultimo_acesso, fk_curso, fk_usuario FROM material_aluno WHERE fk_usuario=1 AND fk_curso=1 ORDER BY id_material_aluno;
+

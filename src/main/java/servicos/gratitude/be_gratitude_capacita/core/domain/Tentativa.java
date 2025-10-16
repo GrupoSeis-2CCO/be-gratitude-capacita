@@ -8,6 +8,9 @@ public class Tentativa {
     private LocalDateTime dtTentativa;
     private Matricula matricula;
     private Avaliacao avaliacao;
+    private Double nota;
+    private Integer notaAcertos;
+    private Integer notaTotal;
 
     public TentativaCompoundKey getIdTentativaComposto() {
         return idTentativaComposto;
@@ -39,5 +42,29 @@ public class Tentativa {
 
     public void setAvaliacao(Avaliacao avaliacao) {
         this.avaliacao = avaliacao;
+    }
+
+    public Double getNota() {
+        return nota;
+    }
+
+    public void setNota(Double nota) {
+        this.nota = nota;
+    }
+
+    public Integer getNotaAcertos() {
+        return notaAcertos;
+    }
+
+    public void setNotaAcertos(Integer notaAcertos) {
+        this.notaAcertos = notaAcertos;
+    }
+
+    public Integer getNotaTotal() {
+        return notaTotal;
+    }
+
+    public void setNotaTotal(Integer notaTotal) {
+        this.notaTotal = notaTotal;
     }
 }

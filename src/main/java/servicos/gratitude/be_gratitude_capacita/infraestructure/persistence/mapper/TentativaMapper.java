@@ -24,9 +24,9 @@ public class TentativaMapper {
 
         tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entity.getIdTentativaComposto()));
         tentativa.setDtTentativa(entity.getDtTentativa());
-        tentativa.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
-        tentativa.setAvaliacao(AvaliacaoMapper.toDomain(entity.getAvaliacao()));
-
+        // Map full Matricula (with usuario and curso) to avoid nulls
+        tentativa.setMatricula(entity.getMatricula() != null ? MatriculaMapper.toDomain(entity.getMatricula()) : null);
+        tentativa.setAvaliacao(entity.getAvaliacao() != null ? AvaliacaoMapper.toDomain(entity.getAvaliacao()) : null);
         return tentativa;
     }
 
@@ -51,16 +51,14 @@ public class TentativaMapper {
         List<Tentativa> tentativas = new ArrayList<>();
 
         for (TentativaEntity entityDaVez : entities) {
-        Tentativa tentativa = new Tentativa();
-
-        tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityDaVez.getIdTentativaComposto()));
-        tentativa.setDtTentativa(entityDaVez.getDtTentativa());
-        tentativa.setMatricula(MatriculaMapper.toDomain(entityDaVez.getMatricula()));
-        tentativa.setAvaliacao(AvaliacaoMapper.toDomain(entityDaVez.getAvaliacao()));
-
-        tentativas.add(tentativa);
+            Tentativa tentativa = new Tentativa();
+            tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityDaVez.getIdTentativaComposto()));
+            tentativa.setDtTentativa(entityDaVez.getDtTentativa());
+            // Map full Matricula (with usuario and curso) to avoid nulls
+            tentativa.setMatricula(entityDaVez.getMatricula() != null ? MatriculaMapper.toDomain(entityDaVez.getMatricula()) : null);
+            tentativa.setAvaliacao(entityDaVez.getAvaliacao() != null ? AvaliacaoMapper.toDomain(entityDaVez.getAvaliacao()) : null);
+            tentativas.add(tentativa);
         }
-
         return tentativas;
     }
 }

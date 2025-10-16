@@ -24,8 +24,28 @@ public class QuestaoMapper {
 
         questao.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toDomain(entity.getIdQuestaoComposto()));
         questao.setEnunciado(entity.getEnunciado());
-        questao.setFkAlternativaCorreta(AlternativaMapper.toDomain(entity.getFkAlternativaCorreta()));
+        questao.setFkAlternativaCorreta(AlternativaMapper.toDomain(entity.getFkAlternativaCorreta(), false)); // Don't include questao to avoid circular ref
         questao.setAvaliacao(AvaliacaoMapper.toDomain(entity.getAvaliacaoEntity()));
+
+        return questao;
+    }
+
+    /**
+     * Maps a QuestaoEntity to domain without creating circular references.
+     * Maps fkAlternativaCorreta without its questao to break the cycle.
+     */
+    public static Questao toDomainWithoutCircular(QuestaoEntity entity){
+        if (entity == null) return null;
+        
+        Questao questao = new Questao();
+        questao.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toDomain(entity.getIdQuestaoComposto()));
+        questao.setEnunciado(entity.getEnunciado());
+        questao.setAvaliacao(AvaliacaoMapper.toDomain(entity.getAvaliacaoEntity()));
+        
+        // Map fkAlternativaCorreta but tell the AlternativaMapper NOT to include the questao back
+        if (entity.getFkAlternativaCorreta() != null) {
+            questao.setFkAlternativaCorreta(AlternativaMapper.toDomain(entity.getFkAlternativaCorreta(), false));
+        }
 
         return questao;
     }

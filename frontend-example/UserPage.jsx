@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import UserActions from "../components/UserActions";
 import { getEngajamentoPorCurso } from "../services/UserPageService.js";
 import { api } from "../services/api.js";
@@ -15,8 +15,10 @@ export function UserPage({ courseId = 1, days = 14 }) {
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
   const [userCard, setUserCard] = useState({ email: "—", dataEntrada: null, ultimoAcesso: null, ultimoCurso: "—" });
+  const [selectedParticipantId, setSelectedParticipantId] = useState(participanteId ? Number(participanteId) : null);
   const [selectedMonth, setSelectedMonth] = useState(null); // format: '01'..'12' or null
   const [selectedYear, setSelectedYear] = useState(2025); // default to 2025
+  const navigate = useNavigate();
   // chart state
 
   useEffect(() => {
@@ -65,7 +67,9 @@ export function UserPage({ courseId = 1, days = 14 }) {
           }
         }
 
-        const pidNum = Number(pid);
+  const pidNum = Number(pid);
+  // persist resolved participant id so other UI pieces can link to it
+  if (pidNum && !Number.isNaN(pidNum)) setSelectedParticipantId(pidNum);
         if (pidNum && !Number.isNaN(pidNum)) {
           try {
             const uResp = await api.get(`/usuarios/${pid}`);
@@ -167,6 +171,14 @@ export function UserPage({ courseId = 1, days = 14 }) {
           <div className="text-gray-700"><strong className="text-gray-900">Primeiro acesso:</strong> {userCard.dataEntrada ? formatIsoDateTime(userCard.dataEntrada) : '—'}</div>
           <div className="text-gray-700"><strong className="text-gray-900">Último acesso:</strong> {userCard.ultimoAcesso ? formatIsoDateTime(userCard.ultimoAcesso) : '—'}</div>
           <div className="text-gray-700"><strong className="text-gray-900">Último curso acessado:</strong> {userCard.ultimoCurso}</div>
+          {selectedParticipantId ? (
+            <div className="pt-2">
+              <button
+                onClick={() => navigate(`/cursos/${effectiveCourseId}/participantes/${selectedParticipantId}/provas`)}
+                className="mt-2 inline-flex items-center px-3 py-1 bg-orange-500 text-white rounded text-sm"
+              >Ver Provas</button>
+            </div>
+          ) : null}
         </div>
       </div>
 
