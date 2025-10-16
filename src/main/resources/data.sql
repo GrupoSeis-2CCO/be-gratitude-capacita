@@ -5,22 +5,22 @@ INSERT INTO cargo (id_cargo, nome_cargo) VALUES
   (2, 'Funcionário')
 ON DUPLICATE KEY UPDATE nome_cargo = VALUES(nome_cargo);
 
--- Garantir que cursos base existem antes das avaliações
+-- Garantir que cursos base existem antes das avaliações (contexto: Regularização Fundiária)
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
-  (1, 'Java Básico', 'Curso introdutório de Java', 'java.jpg', 0, 20),
-  (2, 'Spring Boot', 'API REST com Spring Boot', 'spring.jpg', 0, 40),
-  (3, 'MySQL Essencial', 'Fundamentos do banco de dados MySQL', 'mysql.jpg', 0, 30)
+  (1, 'Regularização Fundiária: Fundamentos', 'Conceitos, etapas e objetivos da Reurb (S/E).', 'https://aguaslindasdegoias.go.gov.br/wp-content/uploads/2022/05/REGULARIZACAO-01-938x535-1.jpg', 0, 20),
+  (2, 'Legislação Urbana e Instrumentos da Reurb', 'Lei 13.465/2017, Decreto 9.310/2018, modalidades Reurb-S/Reurb-E e instrumentos jurídicos.', 'https://www.fundacao1demaio.org.br/media/2021/07/regularizacao_fundiaria.png', 0, 40),
+  (3, 'Diagnóstico Socioeconômico e Cadastro Social', 'Coleta, análise e gestão de dados para apoiar a regularização fundiária.', 'https://adenilsongiovanini.com.br/blog/wp-content/uploads/2019/11/regulariza%C3%A7%C3%A3o-fundi%C3%A1ria.jpg', 0, 30)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
 -- Adicionar um novo curso e conteúdo para John Doe
 
--- Curso 5 criado para testes, sem avaliação associada
+-- Curso 5 criado para testes, sem avaliação associada (contexto Reurb)
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
-  (5, 'Python para Iniciantes', 'Curso básico de Python para novos alunos', 'python.jpg', 0, 18)
+  (5, 'Comunicação e Participação Social na Reurb', 'Mobilização comunitária, comunicação e engajamento social em projetos de regularização fundiária.', 'https://publicacao.saocristovao.se.gov.br/storage/post/sao-cristovao-realiza-regularizacao-fundiaria-com-o-programa-moradia-legal-2024-10-22-6718078c8bb87.jpeg', 0, 18)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
-  (4, 'Node.js Básico', 'Curso introdutório de Node.js', 'nodejs.jpg', 0, 25)
+  (4, 'Procedimentos Técnicos e Documentais na Reurb', 'Levantamentos, plantas, memoriais descritivos e fluxo documental dos processos de regularização.', 'https://static.poder360.com.br/2020/05/governo-ceara-regularizacao-fundiaria.jpg', 0, 25)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
 -- Vídeo e apostila de exemplo para o curso 4

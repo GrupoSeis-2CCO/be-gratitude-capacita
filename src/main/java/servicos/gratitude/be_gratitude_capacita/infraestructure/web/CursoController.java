@@ -20,6 +20,7 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.questao
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.matricula.ListarMatriculaPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.MaterialResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.CursoResponse;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class CursoController {
     private final ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase;
     private final ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase;
     private final ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase;
+    private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -52,7 +54,8 @@ public class CursoController {
             ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase,
             ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase,
             ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
-            ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase) {
+            ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
+            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
@@ -65,6 +68,7 @@ public class CursoController {
         this.listarAvaliacaoPorCursoUseCase = listarAvaliacaoPorCursoUseCase;
         this.listarQuestoesPorAvaliacaoUseCase = listarQuestoesPorAvaliacaoUseCase;
         this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
+        this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
     }
 
     @GetMapping("/{idCurso}/materiais")
@@ -226,6 +230,57 @@ public class CursoController {
         }
 
         return ResponseEntity.ok(cursosPage);
+    }
+
+    @GetMapping("/{idCurso}/detalhes")
+    public ResponseEntity<CursoResponse> obterDetalhesCurso(@PathVariable Integer idCurso) {
+        try {
+            // busca o curso e monta a resposta com campos computados
+            Curso curso = encontrarCursoPorIdUseCase.execute(idCurso);
+
+            CursoResponse r = new CursoResponse();
+            r.setIdCurso(curso.getIdCurso());
+            r.setTituloCurso(curso.getTituloCurso());
+            r.setDescricao(curso.getDescricao());
+            r.setImagem(curso.getImagem());
+            r.setOcultado(curso.getOcultado());
+            r.setDuracaoEstimada(curso.getDuracaoEstimada());
+
+            int totalApostilas = 0;
+            int totalVideos = 0;
+            int totalQuestoes = 0;
+            try {
+                totalApostilas = listarApostilaPorCursoUseCase.execute(idCurso).size();
+            } catch (Exception ignored) {}
+            try {
+                totalVideos = listarVideoPorCursoUseCase.execute(idCurso).size();
+            } catch (Exception ignored) {}
+            try {
+                List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
+                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                    try {
+                        totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size();
+                    } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
+            r.setTotalMateriais(totalApostilas + totalVideos + totalQuestoes);
+
+            int totalAlunos = 0;
+            try {
+                if (curso != null && curso.getIdCurso() != null) {
+                    Curso cursoForMatriculas = new Curso();
+                    cursoForMatriculas.setIdCurso(curso.getIdCurso());
+                    totalAlunos = listarMatriculaPorCursoUseCase.execute(cursoForMatriculas).size();
+                }
+            } catch (Exception ignored) {}
+            r.setTotalAlunos(totalAlunos);
+
+            return ResponseEntity.ok(r);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao obter detalhes do curso", e);
+        }
     }
 
     @PutMapping("/{idCurso}")

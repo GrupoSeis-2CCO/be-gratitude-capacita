@@ -22,6 +22,7 @@ export default function AddCourseSection({ onCourseCreated, editCourse }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [urlModalOpen, setUrlModalOpen] = useState(false);
+  const [hours, setHours] = useState(""); // duracaoEstimada em horas (inteiro)
   const isUpdate = useMemo(() => Boolean(idCurso), [idCurso]);
 
   useEffect(() => {
@@ -33,6 +34,14 @@ export default function AddCourseSection({ onCourseCreated, editCourse }) {
       setContent(editCourse.description ?? editCourse.descricao ?? '');
       setImage(editCourse.imageUrl ?? editCourse.imagem ?? null);
       setIsHidden(Boolean(editCourse.ocultado));
+      // tenta preencher horas a partir do campo duracaoEstimada ou de strings como "20h"
+      const parseHours = (val) => {
+        if (val == null) return "";
+        if (typeof val === 'number' && Number.isFinite(val)) return String(val);
+        const m = String(val).match(/(\d+)/);
+        return m ? m[1] : "";
+      };
+      setHours(parseHours(editCourse.duracaoEstimada ?? editCourse.stats?.hours));
     }
   }, [editCourse]);
 
@@ -110,6 +119,16 @@ export default function AddCourseSection({ onCourseCreated, editCourse }) {
               const payload = { tituloCurso: title.trim() };
               if (content && content.trim()) payload.descricao = content.trim();
               if (finalImageUrl) payload.imagem = finalImageUrl;
+              // valida e aplica duracaoEstimada (horas inteiras)
+              if (hours !== "") {
+                const hNum = parseInt(String(hours).trim(), 10);
+                if (!Number.isFinite(hNum) || hNum < 0) {
+                  setError('Total de horas inválido: informe um número inteiro maior ou igual a 0.');
+                  setLoading(false);
+                  return;
+                }
+                payload.duracaoEstimada = hNum;
+              }
 
               if (isUpdate && idCurso) {
                 await updateCourse(idCurso, payload);
@@ -122,6 +141,7 @@ export default function AddCourseSection({ onCourseCreated, editCourse }) {
               setContent('');
               setImage(null);
               setFile(null);
+              setHours("");
               setError(null);
               if (onCourseCreated) await onCourseCreated();
             } catch (e) {
@@ -180,10 +200,17 @@ export default function AddCourseSection({ onCourseCreated, editCourse }) {
         </div>
 
         <div className="flex-1">
-          <div className="text-center space-y-4">
-            <div className="text-lg font-medium">Quantidade de Materiais</div>
-            <div className="text-lg font-medium">Quantidade de Alunos</div>
-            <div className="text-lg font-medium">Total de Horas</div>
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold">Total de Horas (inteiro)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Ex.: 20"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+            />
             {loading && <div className="text-sm text-gray-300">Salvando...</div>}
             {error && <div className="text-sm text-red-400">{error}</div>}
           </div>
