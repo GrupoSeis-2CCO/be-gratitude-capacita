@@ -7,4 +7,5 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 public interface AvaliacaoRepository extends JpaRepository<AvaliacaoEntity, Integer> {
     Boolean existsByFkCurso(CursoEntity cursoEntity);
     java.util.List<AvaliacaoEntity> findAllByFkCurso(CursoEntity cursoEntity);
+    // findAll já existe por herdar de JpaRepository
 }

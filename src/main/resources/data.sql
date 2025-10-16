@@ -13,6 +13,12 @@ INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
 -- Adicionar um novo curso e conteúdo para John Doe
+
+-- Curso 5 criado para testes, sem avaliação associada
+INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
+  (5, 'Python para Iniciantes', 'Curso básico de Python para novos alunos', 'python.jpg', 0, 18)
+ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
+
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
   (4, 'Node.js Básico', 'Curso introdutório de Node.js', 'nodejs.jpg', 0, 25)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
