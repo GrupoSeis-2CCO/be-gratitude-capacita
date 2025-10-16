@@ -22,19 +22,22 @@ public class AnswerSheetController {
     private final ListarRespostasDoUsuarioUseCase listarRespostasDoUsuarioUseCase;
     private final ListarAlternativasPorQuestaoUseCase listarAlternativasPorQuestaoUseCase;
     private final AlternativaController alternativaController;
+    private final servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.RespostaDoUsuarioRepository respostaDoUsuarioRepository;
 
     public AnswerSheetController(
             ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
             BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase,
             ListarRespostasDoUsuarioUseCase listarRespostasDoUsuarioUseCase,
             ListarAlternativasPorQuestaoUseCase listarAlternativasPorQuestaoUseCase,
-            AlternativaController alternativaController
+            AlternativaController alternativaController,
+            servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.RespostaDoUsuarioRepository respostaDoUsuarioRepository
     ) {
         this.listarQuestoesPorAvaliacaoUseCase = listarQuestoesPorAvaliacaoUseCase;
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
         this.listarRespostasDoUsuarioUseCase = listarRespostasDoUsuarioUseCase;
         this.listarAlternativasPorQuestaoUseCase = listarAlternativasPorQuestaoUseCase;
         this.alternativaController = alternativaController;
+        this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;
     }
 
     @GetMapping("/{examId}/{userId}")
@@ -42,9 +45,53 @@ public class AnswerSheetController {
             @PathVariable Integer examId,
             @PathVariable Integer userId
     ) {
+        System.out.println("[AnswerSheetController] Buscando gabarito: examId=" + examId + ", userId=" + userId);
         List<Questao> questoes = listarQuestoesPorAvaliacaoUseCase.execute(examId);
-        Usuario usuario = buscarUsuarioPorIdUseCase.execute(userId);
-        List<RespostaDoUsuario> respostas = listarRespostasDoUsuarioUseCase.execute(usuario);
+        System.out.println("[AnswerSheetController] Questões encontradas: " + (questoes != null ? questoes.size() : 0));
+        
+        // Buscar respostas diretamente do repositório
+        List<servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.RespostaDoUsuarioEntity> respostasEntity = 
+            respostaDoUsuarioRepository.findByUserIdAndExamId(userId, examId);
+        System.out.println("[AnswerSheetController] Respostas encontradas no repositório: " + (respostasEntity != null ? respostasEntity.size() : 0));
+        
+        // Converter entities para domain
+        List<RespostaDoUsuario> respostas = new ArrayList<>();
+        if (respostasEntity != null) {
+            for (var entity : respostasEntity) {
+                if (entity != null && entity.getAlternativa() != null) {
+                    RespostaDoUsuario resp = new RespostaDoUsuario();
+                    resp.setRespostaDoUsuarioCompoundKey(null); // não precisamos da chave completa
+                    
+                    // Converter alternativa
+                    Alternativa alt = new Alternativa();
+                    if (entity.getAlternativa().getAlternativaChaveComposta() != null) {
+                        servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey altKey = 
+                            new servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.AlternativaCompoundKey();
+                        altKey.setIdAlternativa(entity.getAlternativa().getAlternativaChaveComposta().getIdAlternativa());
+                        altKey.setIdQuestao(entity.getAlternativa().getAlternativaChaveComposta().getIdQuestao());
+                        altKey.setIdAvaliacao(entity.getAlternativa().getAlternativaChaveComposta().getIdAvaliacao());
+                        alt.setAlternativaChaveComposta(altKey);
+                    }
+                    resp.setAlternativa(alt);
+                    
+                    // Converter questão
+                    if (entity.getAlternativa().getQuestao() != null) {
+                        Questao q = new Questao();
+                        if (entity.getAlternativa().getQuestao().getIdQuestaoComposto() != null) {
+                            servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey qKey = 
+                                new servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.QuestaoCompoundKey();
+                            qKey.setIdQuestao(entity.getAlternativa().getQuestao().getIdQuestaoComposto().getIdQuestao());
+                            qKey.setFkAvaliacao(entity.getAlternativa().getQuestao().getIdQuestaoComposto().getFkAvaliacao());
+                            q.setIdQuestaoComposto(qKey);
+                        }
+                        alt.setQuestao(q);
+                    }
+                    
+                    respostas.add(resp);
+                }
+            }
+        }
+        System.out.println("[AnswerSheetController] Respostas do usuário convertidas: " + respostas.size());
 
         AnswerSheetResponse resp = new AnswerSheetResponse();
         resp.questions = new ArrayList<>();
@@ -76,51 +123,39 @@ public class AnswerSheetController {
                 }
             }
         }
+        // Mapear respostas do usuário diretamente (já foram filtradas por examId na query)
         if (respostas != null && !respostas.isEmpty()) {
-            // Identifica a tentativa mais recente desta avaliacao para o usuario
-            Integer chosenAttemptId = null;
-            java.time.LocalDateTime chosenAttemptDt = null;
+            System.out.println("[AnswerSheetController] Processando " + respostas.size() + " respostas");
             for (RespostaDoUsuario r : respostas) {
                 if (r == null) continue;
-                Tentativa t = r.getTentativa();
                 Alternativa alt = r.getAlternativa();
-                Questao q = (alt != null) ? alt.getQuestao() : null;
-                if (t == null || q == null || q.getIdQuestaoComposto() == null) continue;
-                Integer fkAvaliacao = q.getIdQuestaoComposto().getFkAvaliacao();
-                if (fkAvaliacao == null || !fkAvaliacao.equals(examId)) continue;
-                Integer attemptId = (t.getIdTentativaComposto() != null) ? t.getIdTentativaComposto().getIdTentativa() : null;
-                java.time.LocalDateTime dt = t.getDtTentativa();
-                if (attemptId == null) continue;
-                if (chosenAttemptDt == null || (dt != null && dt.isAfter(chosenAttemptDt))) {
-                    chosenAttemptDt = dt;
-                    chosenAttemptId = attemptId;
-                } else if (chosenAttemptDt == null && (chosenAttemptId == null || attemptId > chosenAttemptId)) {
-                    // fallback por id caso dt seja nulo
-                    chosenAttemptId = attemptId;
-                }
-            }
-
-            if (chosenAttemptId != null) {
-                for (RespostaDoUsuario r : respostas) {
-                    if (r == null) continue;
-                    Tentativa t = r.getTentativa();
-                    if (t == null || t.getIdTentativaComposto() == null) continue;
-                    Integer attemptId = t.getIdTentativaComposto().getIdTentativa();
-                    if (attemptId == null || !attemptId.equals(chosenAttemptId)) continue;
-                    Alternativa alt = r.getAlternativa();
-                    if (alt == null) continue;
-                    Questao q = alt.getQuestao();
-                    if (q == null || q.getIdQuestaoComposto() == null) continue;
-                    Integer fkAvaliacao = q.getIdQuestaoComposto().getFkAvaliacao();
-                    if (fkAvaliacao == null || !fkAvaliacao.equals(examId)) continue;
-                    Integer qid = q.getIdQuestaoComposto().getIdQuestao();
-                    Integer aid = (alt.getAlternativaChaveComposta() != null) ? alt.getAlternativaChaveComposta().getIdAlternativa() : null;
-                    if (qid != null && aid != null) {
-                        resp.userAnswers.put(qid, aid);
-                    }
+                if (alt == null) continue;
+                
+                Questao q = alt.getQuestao();
+                if (q == null || q.getIdQuestaoComposto() == null) continue;
+                
+                Integer qid = q.getIdQuestaoComposto().getIdQuestao();
+                Integer aid = (alt.getAlternativaChaveComposta() != null) ? alt.getAlternativaChaveComposta().getIdAlternativa() : null;
+                
+                if (qid != null && aid != null) {
+                    resp.userAnswers.put(qid, aid);
+                    System.out.println("[AnswerSheetController] Adicionado resposta: questão " + qid + " -> alternativa " + aid);
                 }
             }
         }
+        System.out.println("[AnswerSheetController] Resposta final: questions=" + resp.questions.size() + 
+                ", userAnswers=" + resp.userAnswers.size() + ", correctAnswers=" + resp.correctAnswers.size());
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/debug/all-answers")
+    public ResponseEntity<Map<String, Object>> debugAllAnswers() {
+        List<RespostaDoUsuario> todasRespostas = listarRespostasDoUsuarioUseCase.execute(
+            buscarUsuarioPorIdUseCase.execute(20) // usuario 20 como teste
+        );
+        Map<String, Object> debug = new HashMap<>();
+        debug.put("totalRespostas", todasRespostas != null ? todasRespostas.size() : 0);
+        debug.put("respostas", todasRespostas);
+        return ResponseEntity.ok(debug);
     }
 }

@@ -27,6 +27,16 @@ public class AvaliacaoMapper {
         return avaliacao;
     }
 
+    /**
+     * Key-only mapping to avoid initializing lazy relations when only id is needed.
+     */
+    public static Avaliacao toDomainKeyOnly(AvaliacaoEntity entity){
+        Avaliacao avaliacao = new Avaliacao();
+        avaliacao.setIdAvaliacao(entity.getIdAvaliacao());
+        avaliacao.setAcertosMinimos(entity.getAcertosMinimos());
+        return avaliacao;
+    }
+
     public static List<AvaliacaoEntity> toEntities(List<Avaliacao> avaliacoes){
         List<AvaliacaoEntity> entities = new ArrayList<>();
 

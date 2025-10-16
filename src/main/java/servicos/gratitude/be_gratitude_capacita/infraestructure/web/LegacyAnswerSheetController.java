@@ -81,15 +81,24 @@ public class LegacyAnswerSheetController {
             java.time.LocalDateTime chosenAttemptDt = null;
             for (RespostaDoUsuario r : respostas) {
                 if (r == null) continue;
-                Tentativa t = r.getTentativa();
                 Alternativa alt = r.getAlternativa();
                 Questao q = (alt != null) ? alt.getQuestao() : null;
-                if (t == null || q == null || q.getIdQuestaoComposto() == null) continue;
+                if (q == null || q.getIdQuestaoComposto() == null) continue;
                 Integer fkAvaliacao = q.getIdQuestaoComposto().getFkAvaliacao();
                 if (fkAvaliacao == null || !fkAvaliacao.equals(examId)) continue;
-                Integer attemptId = (t.getIdTentativaComposto() != null) ? t.getIdTentativaComposto().getIdTentativa() : null;
-                java.time.LocalDateTime dt = t.getDtTentativa();
+
+                Integer attemptId = null;
+                java.time.LocalDateTime dt = null;
+                Tentativa t = r.getTentativa();
+                if (t != null && t.getIdTentativaComposto() != null) {
+                    attemptId = t.getIdTentativaComposto().getIdTentativa();
+                    dt = t.getDtTentativa();
+                }
+                if (attemptId == null && r.getRespostaDoUsuarioCompoundKey() != null && r.getRespostaDoUsuarioCompoundKey().getIdTentativaComposto() != null) {
+                    attemptId = r.getRespostaDoUsuarioCompoundKey().getIdTentativaComposto().getIdTentativa();
+                }
                 if (attemptId == null) continue;
+
                 if (chosenAttemptDt == null || (dt != null && dt.isAfter(chosenAttemptDt))) {
                     chosenAttemptDt = dt;
                     chosenAttemptId = attemptId;
@@ -101,9 +110,13 @@ public class LegacyAnswerSheetController {
             if (chosenAttemptId != null) {
                 for (RespostaDoUsuario r : respostas) {
                     if (r == null) continue;
+                    Integer attemptId = null;
                     Tentativa t = r.getTentativa();
-                    if (t == null || t.getIdTentativaComposto() == null) continue;
-                    Integer attemptId = t.getIdTentativaComposto().getIdTentativa();
+                    if (t != null && t.getIdTentativaComposto() != null) {
+                        attemptId = t.getIdTentativaComposto().getIdTentativa();
+                    } else if (r.getRespostaDoUsuarioCompoundKey() != null && r.getRespostaDoUsuarioCompoundKey().getIdTentativaComposto() != null) {
+                        attemptId = r.getRespostaDoUsuarioCompoundKey().getIdTentativaComposto().getIdTentativa();
+                    }
                     if (attemptId == null || !attemptId.equals(chosenAttemptId)) continue;
                     Alternativa alt = r.getAlternativa();
                     if (alt == null) continue;
