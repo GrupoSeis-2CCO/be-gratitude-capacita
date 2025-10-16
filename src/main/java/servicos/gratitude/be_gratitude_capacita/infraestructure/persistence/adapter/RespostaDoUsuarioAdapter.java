@@ -1,4 +1,6 @@
+
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.AlternativaMapper;
 
 import org.springframework.stereotype.Service;
 import servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario;
@@ -15,6 +17,13 @@ import java.util.List;
 public class RespostaDoUsuarioAdapter implements RespostaDoUsuarioGateway {
     private final RespostaDoUsuarioRepository respostaDoUsuarioRepository;
 
+    @Override
+    public Boolean existsByAlternativa(servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa alternativa) {
+        Integer idAlternativa = alternativa.getAlternativaChaveComposta() != null ? alternativa.getAlternativaChaveComposta().getIdAlternativa() : null;
+        if (idAlternativa == null) return false;
+        return respostaDoUsuarioRepository.existsByAlternativa_IdAlternativa(idAlternativa);
+    }
+    
     public RespostaDoUsuarioAdapter(RespostaDoUsuarioRepository respostaDoUsuarioRepository) {
         this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;
     }

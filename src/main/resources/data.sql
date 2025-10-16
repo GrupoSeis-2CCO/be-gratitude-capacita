@@ -580,3 +580,5 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 select * from video;
 SELECT id_material_aluno, fk_video, fk_apostila, finalizada, ultimo_acesso, fk_curso, fk_usuario FROM material_aluno WHERE fk_usuario=1 AND fk_curso=1 ORDER BY id_material_aluno;
 
+SELECT id_questao, fk_alternativa_correta FROM questao WHERE fk_avaliacao = 1;
+SELECT * FROM avaliacao WHERE fk_curso = 1;

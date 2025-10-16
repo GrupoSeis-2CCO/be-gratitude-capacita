@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { createExam } from '../services/CreateExamPageService.js';
 
-function ExamBuilder({ cursoId = 1, onExamCreated = null }) {
+function ExamBuilder({ cursoId = 1, initialData = null, onExamCreated = null, onExamSaved = null, editMode = false }) {
   const [questions, setQuestions] = useState([]);
   const [minScore, setMinScore] = useState('');
+  // Preencher dados iniciais para edição
+  useEffect(() => {
+    if (editMode && initialData) {
+      setMinScore(initialData.notaMinima?.toString() || '');
+      setQuestions(
+        (initialData.questoes || []).map((q, idx) => ({
+          id: q.idQuestao || idx + 1,
+          text: q.enunciado || '',
+          alternatives: (q.alternativas || []).map((alt, aidx) => ({
+            id: alt.idAlternativa || aidx + 1,
+            text: alt.texto || '',
+            isCorrect: (q.fkAlternativaCorreta !== undefined && alt.idAlternativa === q.fkAlternativaCorreta) || alt.isCorrect || false
+          }))
+        }))
+      );
+    }
+  }, [editMode, initialData]);
   const [showMinScoreModal, setShowMinScoreModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -92,51 +109,52 @@ function ExamBuilder({ cursoId = 1, onExamCreated = null }) {
     try {
       // Validações
       if (questions.length === 0) {
-        throw new Error('Adicione pelo menos uma questão antes de concluir');
+        throw new Error(editMode ? 'Adicione pelo menos uma questão antes de atualizar' : 'Adicione pelo menos uma questão antes de concluir');
       }
       
       if (!minScore || minScore === '' || Number(minScore) < 0 || Number(minScore) > 10) {
-        throw new Error('Defina uma nota mínima válida (0-10) antes de concluir');
+        throw new Error(editMode ? 'Defina uma nota mínima válida (0-10) antes de atualizar' : 'Defina uma nota mínima válida (0-10) antes de concluir');
       }
       
       // Transformar dados do frontend para formato do backend
-        const examData = {
-          fkCurso: cursoId, // Backend espera fkCurso
-          notaMinima: Number(minScore),
-          questoes: questions.map((q, qIdx) => {
-            const correctAlt = q.alternatives.find(alt => alt.isCorrect);
-            if (!correctAlt) {
-              throw new Error(`Questão ${qIdx + 1}: marque a alternativa correta`);
-            }
-            // Encontrar o índice (ordemAlternativa) da alternativa correta
-            const correctAltIndex = q.alternatives.findIndex(alt => alt.isCorrect);
-            if (correctAltIndex === -1) {
-              throw new Error(`Questão ${qIdx + 1}: erro ao identificar alternativa correta`);
-            }
-            return {
-              enunciado: q.text.trim(),
-              numeroQuestao: qIdx + 1,
-              alternativas: q.alternatives.map((alt, altIdx) => ({
-                texto: alt.text.trim(),
-                ordemAlternativa: altIdx
-              })),
-              fkAlternativaCorreta: correctAltIndex // Enviar o índice da alternativa correta
-            };
-          })
-        };
-      
+      const examData = {
+        fkCurso: cursoId, // Backend espera fkCurso
+        notaMinima: Number(minScore),
+        questoes: questions.map((q, qIdx) => {
+          const correctAlt = q.alternatives.find(alt => alt.isCorrect);
+          if (!correctAlt) {
+            throw new Error(`Questão ${qIdx + 1}: marque a alternativa correta`);
+          }
+          // Encontrar o índice (ordemAlternativa) da alternativa correta
+          const correctAltIndex = q.alternatives.findIndex(alt => alt.isCorrect);
+          if (correctAltIndex === -1) {
+            throw new Error(`Questão ${qIdx + 1}: erro ao identificar alternativa correta`);
+          }
+          return {
+            enunciado: q.text.trim(),
+            numeroQuestao: qIdx + 1,
+            alternativas: q.alternatives.map((alt, altIdx) => ({
+              texto: alt.text.trim(),
+              ordemAlternativa: altIdx
+            })),
+            fkAlternativaCorreta: correctAltIndex // Enviar o índice da alternativa correta
+          };
+        })
+      };
       console.log('[ExamBuilder] Dados enviados ao backend:', JSON.stringify(examData, null, 2));
-      
-      const createdExam = await createExam(examData);
-      alert('Avaliação criada com sucesso!');
-      
-      // Reset form
-      setQuestions([]);
-      setMinScore('');
-      
-      // Callback para página pai
-      if (onExamCreated) {
-        onExamCreated(createdExam);
+      if (editMode && onExamSaved) {
+        await onExamSaved(examData);
+        alert('Avaliação atualizada com sucesso!');
+      } else {
+        const createdExam = await createExam(examData);
+        alert('Avaliação criada com sucesso!');
+        // Reset form
+        setQuestions([]);
+        setMinScore('');
+        // Callback para página pai
+        if (onExamCreated) {
+          onExamCreated(createdExam);
+        }
       }
     } catch (err) {
       // Tratamento especial para erro 409 (avaliação já existe)
@@ -187,8 +205,8 @@ function ExamBuilder({ cursoId = 1, onExamCreated = null }) {
         
         <div className="flex gap-4">
           <Button 
-            variant="Confirm" 
-            label={loading ? "Salvando..." : "Concluir"}
+            variant={editMode ? "Primary" : "Confirm"} 
+            label={loading ? "Salvando..." : (editMode ? "Atualizar" : "Concluir")}
             onClick={handleSaveExam}
             disabled={loading || questions.length === 0}
           />

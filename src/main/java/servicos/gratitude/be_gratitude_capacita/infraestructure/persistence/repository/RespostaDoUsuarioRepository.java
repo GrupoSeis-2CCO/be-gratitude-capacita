@@ -1,3 +1,4 @@
+
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 import java.util.List;
 
 public interface RespostaDoUsuarioRepository extends JpaRepository<RespostaDoUsuarioEntity, RespostaDoUsuarioEntityCompoundKey> {
+	boolean existsByAlternativa_IdAlternativa(Integer idAlternativa);
 	@Query("SELECT r FROM RespostaDoUsuarioEntity r " +
 		   "JOIN FETCH r.alternativa a " +
 		   "JOIN FETCH a.questao q " +
@@ -21,14 +23,14 @@ public interface RespostaDoUsuarioRepository extends JpaRepository<RespostaDoUsu
 		@Param("fkUsuario") Integer fkUsuario,
 		@Param("fkTentativa") Integer fkTentativa
 	);
-	
+    
 	@Query("SELECT r FROM RespostaDoUsuarioEntity r " +
 		   "JOIN FETCH r.alternativa a " +
 		   "JOIN FETCH a.questao q " +
 		   "LEFT JOIN FETCH q.fkAlternativaCorreta " +
 		   "WHERE r.tentativa = :tentativa")
 	List<RespostaDoUsuarioEntity> findAllByTentativa(@Param("tentativa") TentativaEntity tentativa);
-	
+    
 	@Query("SELECT r FROM RespostaDoUsuarioEntity r " +
 		   "WHERE r.respostaDoUsuarioEntityCompoundKey.idTentativaComposto.idMatriculaComposto.fkUsuario = :userId " +
 		   "AND r.respostaDoUsuarioEntityCompoundKey.idAvaliacao = :examId")
