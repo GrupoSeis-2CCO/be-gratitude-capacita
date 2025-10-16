@@ -7,10 +7,33 @@ export default function CourseCard({ course, onClick, onEdit, onDelete, onToggle
   const imageSrc = course.imageUrl || '/default-course-icon.svg';
   const isHidden = Boolean(course.ocultado);
 
+  // Normalize hours display to "Xh" format with fallbacks
+  const rawHours = (course && course.stats && course.stats.hours) ?? course?.duracaoEstimada ?? null;
+  const formattedHours = React.useMemo(() => {
+    if (rawHours == null) return null;
+    if (typeof rawHours === 'number') return `${rawHours}h`;
+    if (typeof rawHours === 'string') {
+      const match = rawHours.match(/^\s*(\d+)/);
+      if (match) return `${parseInt(match[1], 10)}h`;
+      return rawHours.endsWith('h') ? rawHours : `${rawHours}h`;
+    }
+    return null;
+  }, [rawHours]);
+
   return (
     <div className="mb-8 relative">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-2xl font-bold text-gray-800">{course.title}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-800">{course.title}</h2>
+          {formattedHours && (
+            <span
+              title="Carga horária"
+              className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 border border-indigo-100"
+            >
+              {formattedHours}
+            </span>
+          )}
+        </div>
         <div className="relative">
           <button
             className="text-gray-500 hover:text-gray-800 p-1 rounded-full focus:outline-none"
@@ -58,7 +81,7 @@ export default function CourseCard({ course, onClick, onEdit, onDelete, onToggle
           <ul className="text-sm text-gray-700 space-y-2">
             <li>Quantidade de Materiais - {String(course.stats.materials).padStart(2, '0')}</li>
             <li>Quantidade de Alunos - {String(course.stats.students).padStart(2, '0')}</li>
-            <li>Total de Horas - {course.stats.hours}</li>
+            <li>Total de Horas - {formattedHours ?? '—'}</li>
           </ul>
         </div>
       </div>
