@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.AtualizarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.CriarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
@@ -15,7 +16,10 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.video.ListarVideoPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.apostila.ListarApostilaPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.questao.ListarQuestoesPorAvaliacaoUseCase;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.matricula.ListarMatriculaPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.MaterialResponse;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.CursoResponse;
 
 import java.util.List;
 
@@ -29,9 +33,12 @@ public class CursoController {
     private final AtualizarCursoUseCase atualizarCursoUseCase;
     private final AtualizarOcultoUseCase atualizarOcultoUseCase;
     private final DeletarCursoUseCase deletarCursoUseCase;
+    private final servicos.gratitude.be_gratitude_capacita.infraestructure.service.CascadeDeletionService cascadeDeletionService;
     private final ListarVideoPorCursoUseCase listarVideoPorCursoUseCase;
     private final ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase;
     private final ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase;
+    private final ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase;
+    private final ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -40,18 +47,24 @@ public class CursoController {
             AtualizarCursoUseCase atualizarCursoUseCase,
             AtualizarOcultoUseCase atualizarOcultoUseCase,
             DeletarCursoUseCase deletarCursoUseCase,
+            servicos.gratitude.be_gratitude_capacita.infraestructure.service.CascadeDeletionService cascadeDeletionService,
             ListarVideoPorCursoUseCase listarVideoPorCursoUseCase,
             ListarApostilaPorCursoUseCase listarApostilaPorCursoUseCase,
-            ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase) {
+            ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase,
+            ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
+            ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
         this.atualizarCursoUseCase = atualizarCursoUseCase;
         this.atualizarOcultoUseCase = atualizarOcultoUseCase;
-        this.deletarCursoUseCase = deletarCursoUseCase;
+    this.deletarCursoUseCase = deletarCursoUseCase;
+    this.cascadeDeletionService = cascadeDeletionService;
         this.listarVideoPorCursoUseCase = listarVideoPorCursoUseCase;
         this.listarApostilaPorCursoUseCase = listarApostilaPorCursoUseCase;
         this.listarAvaliacaoPorCursoUseCase = listarAvaliacaoPorCursoUseCase;
+        this.listarQuestoesPorAvaliacaoUseCase = listarQuestoesPorAvaliacaoUseCase;
+        this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
     }
 
     @GetMapping("/{idCurso}/materiais")
@@ -121,18 +134,82 @@ public class CursoController {
         } catch (ConflitoException e) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (DataIntegrityViolationException e) {
+            String msg = "Dados inválidos: um ou mais campos excedem o tamanho máximo permitido.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, msg, e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Requisição inválida para cadastro do curso.", e);
+        } catch (ResponseStatusException e) {
+            throw e; // rethrow explicit status exceptions above
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao cadastrar curso", e);
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Curso>> listarCursos() {
+    public ResponseEntity<List<CursoResponse>> listarCursos() {
         List<Curso> cursos = listarCursoUseCase.execute();
 
         if (cursos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(cursos);
+        List<CursoResponse> resp = new java.util.ArrayList<>();
+        for (Curso c : cursos) {
+            CursoResponse r = new CursoResponse();
+            r.setIdCurso(c.getIdCurso());
+            r.setTituloCurso(c.getTituloCurso());
+            r.setDescricao(c.getDescricao());
+            r.setImagem(c.getImagem());
+            r.setOcultado(c.getOcultado());
+            r.setDuracaoEstimada(c.getDuracaoEstimada());
+
+            // compute totals: apostilas + videos + questoes
+            int totalApostilas = 0;
+            int totalVideos = 0;
+            int totalQuestoes = 0;
+            try {
+                totalApostilas = listarApostilaPorCursoUseCase.execute(c.getIdCurso()).size();
+            } catch (Exception e) {
+                totalApostilas = 0;
+            }
+            try {
+                totalVideos = listarVideoPorCursoUseCase.execute(c.getIdCurso()).size();
+            } catch (Exception e) {
+                totalVideos = 0;
+            }
+            try {
+                List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(c.getIdCurso());
+                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                    try {
+                        totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size();
+                    } catch (Exception ex) {
+                        // ignore per-avaliacao errors
+                    }
+                }
+            } catch (Exception e) {
+                totalQuestoes = 0;
+            }
+            r.setTotalMateriais(totalApostilas + totalVideos + totalQuestoes);
+
+            // compute total alunos
+            int totalAlunos = 0;
+            try {
+                if (c != null && c.getIdCurso() != null) {
+                    // build a minimal Curso domain object for the use case
+                    Curso cursoForMatriculas = new Curso();
+                    cursoForMatriculas.setIdCurso(c.getIdCurso());
+                    totalAlunos = listarMatriculaPorCursoUseCase.execute(cursoForMatriculas).size();
+                }
+            } catch (Exception e) {
+                totalAlunos = 0;
+            }
+            r.setTotalAlunos(totalAlunos);
+
+            resp.add(r);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
     @GetMapping("/paginated")
@@ -163,6 +240,15 @@ public class CursoController {
         } catch (ConflitoException e) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Não foi possível atualizar: dados inválidos ou conflito de integridade.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Requisição inválida para atualização do curso.", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar curso", e);
         }
     }
 
@@ -181,11 +267,14 @@ public class CursoController {
     public ResponseEntity deletarCurso(
             @PathVariable Integer idCurso) {
         try {
-            deletarCursoUseCase.execute(idCurso);
+            // Executa deleção total, removendo vínculos primeiro
+            cascadeDeletionService.deleteCursoComVinculos(idCurso);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir curso", e);
         }
     }
 }

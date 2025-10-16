@@ -14,6 +14,8 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         Path uploadDir = Path.of("uploads");
         String uploadPath = uploadDir.toAbsolutePath().toUri().toString();
         // Serve files under /uploads/** mapped to the uploads directory
-        registry.addResourceHandler("/uploads/**").addResourceLocations(uploadPath);
+    registry.addResourceHandler("/uploads/**")
+        .addResourceLocations(uploadPath)
+        .setCachePeriod(3600);
     }
 }

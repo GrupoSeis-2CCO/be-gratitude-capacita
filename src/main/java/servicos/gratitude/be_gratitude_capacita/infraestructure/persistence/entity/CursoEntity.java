@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "curso")
@@ -16,6 +17,7 @@ public class CursoEntity {
 
     private String tituloCurso;
     private String descricao;
+    @Column(length = 1024)
     private String imagem;
     private Boolean ocultado;
     private Integer duracaoEstimada;
