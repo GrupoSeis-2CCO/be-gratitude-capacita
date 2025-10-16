@@ -30,7 +30,7 @@ CREATE TABLE curso (
     id_curso INT AUTO_INCREMENT ,
     titulo_curso VARCHAR(50),
     descricao VARCHAR(100),
-    imagem VARCHAR(255),
+    imagem VARCHAR(1024),
     ocultado TINYINT,
     duracao_estimada INT,
     PRIMARY KEY(id_curso)

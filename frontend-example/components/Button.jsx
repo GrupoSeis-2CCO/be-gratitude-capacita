@@ -1,5 +1,6 @@
 function Button(props){
   const variant = props.variant || 'Default';
+  const isDisabled = Boolean(props.disabled);
     
   const getVariantClasses = () => {
     switch(variant) {
@@ -22,8 +23,10 @@ function Button(props){
 
   return (
     <button 
-      className={`px-6 py-3 font-semibold transition-all duration-200 border-none cursor-pointer ${getVariantClasses()} ${borderRadius}`}
+      className={`px-6 py-3 font-semibold transition-all duration-200 border-none ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${getVariantClasses()} ${borderRadius}`}
       onClick={props.onClick}
+      type={props.type || 'button'}
+      disabled={isDisabled}
     >
       {props.label}
     </button>
