@@ -2,6 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.tentativa.CriarTentativaCommand;
@@ -17,8 +18,13 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentati
 import servicos.gratitude.be_gratitude_capacita.core.domain.*;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.MatriculaCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.core.domain.compoundKeys.TentativaCompoundKey;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.TentativaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.TentativaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.TentativaComCursoResponse;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tentativas")
@@ -33,8 +39,9 @@ public class TentativaController {
     private final servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase;
     private final servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorUsuarioUseCase listarTentativaPorUsuarioUseCase;
     private final servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.CalcularNotaPorTentativaUseCase calcularNotaPorTentativaUseCase;
+    private final TentativaRepository tentativaRepository;
 
-    public TentativaController(CriarTentativaUseCase criarTentativaUseCase, ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase, MontarChaveCompostaMatriculaUseCase montarChaveCompostaMatriculaUseCase, EncontrarMatriculaPorIdUseCase encontrarMatriculaPorIdUseCase, CriarNovaChaveCompostaTentativaUseCase criarNovaChaveCompostaTentativaUseCase, EncontrarAvaliacaoPorIdUseCase encontrarAvaliacaoPorIdUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.CalcularNotaPorTentativaUseCase calcularNotaPorTentativaUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorUsuarioUseCase listarTentativaPorUsuarioUseCase) {
+    public TentativaController(CriarTentativaUseCase criarTentativaUseCase, ListarTentativaPorMatriculaUseCase listarTentativaPorMatriculaUseCase, MontarChaveCompostaMatriculaUseCase montarChaveCompostaMatriculaUseCase, EncontrarMatriculaPorIdUseCase encontrarMatriculaPorIdUseCase, CriarNovaChaveCompostaTentativaUseCase criarNovaChaveCompostaTentativaUseCase, EncontrarAvaliacaoPorIdUseCase encontrarAvaliacaoPorIdUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.CalcularNotaPorTentativaUseCase calcularNotaPorTentativaUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliacao.ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase, servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorUsuarioUseCase listarTentativaPorUsuarioUseCase, TentativaRepository tentativaRepository) {
         this.criarTentativaUseCase = criarTentativaUseCase;
         this.listarTentativaPorMatriculaUseCase = listarTentativaPorMatriculaUseCase;
         this.montarChaveCompostaMatriculaUseCase = montarChaveCompostaMatriculaUseCase;
@@ -44,6 +51,7 @@ public class TentativaController {
         this.calcularNotaPorTentativaUseCase = calcularNotaPorTentativaUseCase;
         this.listarAvaliacaoPorCursoUseCase = listarAvaliacaoPorCursoUseCase;
         this.listarTentativaPorUsuarioUseCase = listarTentativaPorUsuarioUseCase;
+        this.tentativaRepository = tentativaRepository;
     }
 
     @PostMapping
@@ -73,40 +81,67 @@ public class TentativaController {
     }
 
     @GetMapping("/usuario/{fkUsuario}")
-    public ResponseEntity<List<Tentativa>> listarTentativasPorUsuario(
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<TentativaComCursoResponse>> listarTentativasPorUsuario(
             @PathVariable Integer fkUsuario
     ){
         try {
-            List<Tentativa> tentativas = listarTentativaPorUsuarioUseCase.execute(fkUsuario);
+            // Buscar entidades com join fetch (dentro da transação)
+            List<TentativaEntity> entities = tentativaRepository.findAllByUsuario(fkUsuario);
 
-            if (tentativas.isEmpty()){
+            if (entities.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            for (Tentativa t : tentativas) {
+            // Converter para DTO dentro da transação (curso está carregado)
+            List<TentativaComCursoResponse> response = entities.stream().map(entity -> {
+                TentativaComCursoResponse dto = new TentativaComCursoResponse();
+                
+                // Dados da tentativa
+                dto.setIdTentativa(entity.getIdTentativaComposto().getIdTentativa());
+                dto.setFkUsuario(entity.getIdTentativaComposto().getIdMatriculaComposto().getFkUsuario());
+                dto.setFkCurso(entity.getIdTentativaComposto().getIdMatriculaComposto().getFkCurso());
+                dto.setFkAvaliacao(entity.getAvaliacao() != null ? entity.getAvaliacao().getIdAvaliacao() : null);
+                dto.setDtTentativa(entity.getDtTentativa());
+                
+                // Nome do curso (está carregado via join fetch)
+                String nomeCurso = null;
+                if (entity.getMatricula() != null && entity.getMatricula().getCurso() != null) {
+                    nomeCurso = entity.getMatricula().getCurso().getTituloCurso();
+                    if (nomeCurso == null && entity.getMatricula().getCurso().getIdCurso() != null) {
+                        nomeCurso = "Curso " + entity.getMatricula().getCurso().getIdCurso();
+                    }
+                }
+                dto.setNomeCurso(nomeCurso);
+                
+                // Calcular nota (usando domain object temporário)
                 try {
-                    servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.NotaResult notaResult = calcularNotaPorTentativaUseCase.execute(t);
+                    Tentativa tentativaDomain = new Tentativa();
+                    tentativaDomain.setIdTentativaComposto(servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.compoundKeysMapper.TentativaCompoundKeyMapper.toDomain(entity.getIdTentativaComposto()));
+                    
+                    // CRITICAL: Set Avaliacao so the UseCase can get total questions
+                    if (entity.getAvaliacao() != null) {
+                        tentativaDomain.setAvaliacao(servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.AvaliacaoMapper.toDomainKeyOnly(entity.getAvaliacao()));
+                    }
+                    
+                    servicos.gratitude.be_gratitude_capacita.core.application.usecase.respostaDoUsuario.NotaResult notaResult = calcularNotaPorTentativaUseCase.execute(tentativaDomain);
                     if (notaResult != null) {
-                        t.setNotaAcertos(notaResult.getCorretas());
-                        t.setNotaTotal(notaResult.getTotal());
-                        t.setNota(notaResult.getPercent());
-                        logger.debug("TentativaController: nota calculada para tentativa {} -> corretas={}, total={}, percent={}", t.getIdTentativaComposto(), notaResult.getCorretas(), notaResult.getTotal(), notaResult.getPercent());
+                        dto.setNotaAcertos(notaResult.getCorretas());
+                        dto.setNotaTotal(notaResult.getTotal());
+                        dto.setNota(notaResult.getPercent());
+                        logger.debug("TentativaController: nota calculada para tentativa {} -> corretas={}, total={}, percent={}", 
+                                dto.getIdTentativa(), notaResult.getCorretas(), notaResult.getTotal(), notaResult.getPercent());
                     }
                 } catch (Exception e){
-                    // log the exception so we know why nota fields may be missing
-                    logger.warn("TentativaController: falha ao calcular nota para tentativa {}: {}", t.getIdTentativaComposto(), e.toString());
+                    logger.warn("TentativaController: falha ao calcular nota para tentativa {}: {}", dto.getIdTentativa(), e.getMessage(), e);
                 }
-            }
+                
+                return dto;
+            }).collect(Collectors.toList());
 
-            return ResponseEntity.status(HttpStatus.OK).body(tentativas);
-        } catch (ValorInvalidoException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        } catch (NaoEncontradoException e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        } catch (ConflitoException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e){
-            logger.error("Erro inesperado ao listar tentativas por usuario {}", fkUsuario, e);
+            logger.error("Erro ao listar tentativas por usuario {}", fkUsuario, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro inesperado", e);
         }
     }

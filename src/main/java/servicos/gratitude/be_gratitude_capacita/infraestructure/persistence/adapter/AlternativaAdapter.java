@@ -31,7 +31,11 @@ public class AlternativaAdapter implements AlternativaGateway {
 
     @Override
     public List<Alternativa> findAllByQuestao(Questao questao) {
-        return AlternativaMapper.toDomains(alternativaRepository.findAllByQuestao(QuestaoMapper.toEntity(questao)));
+        // Use only the composite key to avoid NPE when questao has partial data
+        return AlternativaMapper.toDomains(
+                alternativaRepository.findAllByQuestao(QuestaoMapper.toEntityKeyOnly(questao)),
+                false // do not include questao to avoid circular mapping and unnecessary loads
+        );
     }
 
     @Override

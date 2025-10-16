@@ -131,7 +131,7 @@ INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_aval
   (41, 20, 2, '2025-07-02 11:00:00', 2),
   (42, 20, 3, '2025-07-03 12:00:00', 3),
   (43, 20, 4, '2025-07-04 13:00:00', 4),
-  (44, 20, 1, '2025-07-05 14:00:00', 1)
+  (44, 20, 1, '2025-06-30 09:00:00', 1)
 ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
 
 INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
@@ -258,24 +258,111 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 
 -- Dados iniciais para tabela questao (ANTES das alternativas para que a FK funcione)
 INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
-  (1, 1, 'O que é JVM?', 1, NULL),
-  (2, 1, 'Qual comando compila um arquivo Java?', 2, NULL),
+  (1, 1, 'O que é Regularização Fundiária Urbana (Reurb)?', 1, NULL),
+  (2, 1, 'Qual é o principal objetivo da Reurb?', 2, NULL),
   (3, 2, 'Para que serve o @RestController no Spring?', 1, NULL),
   (4, 3, 'Qual comando SQL consulta dados?', 1, NULL),
   (5, 4, 'Como instalar dependências no Node.js?', 1, NULL)
 ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao);
 
+-- Questões adicionais para a avaliação 1 para totalizar 10 questões (IDs 6..13)
+INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
+  (6, 1, 'O que é o Cadastro Social no processo de Reurb?', 3, NULL),
+  (7, 1, 'Qual documento delimita a área e os lotes a serem regularizados?', 4, NULL),
+  (8, 1, 'Qual instrumento titula o direito real ao morador na Reurb-S?', 5, NULL),
+  (9, 1, 'Quem é o ente competente para instaurar o procedimento de Reurb?', 6, NULL),
+  (10, 1, 'Qual etapa verifica a conformidade ambiental e urbanística?', 7, NULL),
+  (11, 1, 'Qual cartório pratica os atos de registro da Reurb?', 8, NULL),
+  (12, 1, 'Na Reurb-S, quais taxas podem ser isentadas para famílias de baixa renda?', 9, NULL),
+  (13, 1, 'Qual participação social é recomendada durante a Reurb?', 10, NULL)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao);
+
 -- Dados iniciais para tabela alternativa (com fk_questao e IDs únicos)
--- Questão 1 (avaliação 1): O que é JVM?
+-- Questão 1 (avaliação 1): Reurb - conceito
 INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
-  (1, 1, 1, 'Um compilador Java', 1),
-  (2, 1, 1, 'Java Virtual Machine', 2)
+  (1, 1, 1, 'Processo de despejo coletivo', 1),
+  (2, 1, 1, 'Medidas para integrar assent. ao sistema formal', 2)
 ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
 
--- Questão 2 (avaliação 1): Qual comando compila um arquivo Java?
 INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
-  (3, 1, 2, 'javac', 1),
-  (4, 1, 2, 'java', 2)
+  (11, 1, 1, 'Apenas registro cartorial', 3),
+  (12, 1, 1, 'Apenas construção de moradias', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 2 (avaliação 1): objetivo da Reurb
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (3, 1, 2, 'Integrar assentamentos ao ordenamento formal', 1),
+  (4, 1, 2, 'Punir ocupações irregulares', 2)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (13, 1, 2, 'Privatizar áreas públicas', 3),
+  (14, 1, 2, 'Aumentar valor venal', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questões 6..13 (avaliação 1): inserir 4 alternativas por questão (Reurb)
+-- Questão 6: Cadastro Social
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (15, 1, 6, 'Levantamento socioeconômico das famílias', 1),
+  (16, 1, 6, 'Perícia judicial', 2),
+  (17, 1, 6, 'Registro de hipotecas', 3),
+  (18, 1, 6, 'Projeto de drenagem', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 7: Documento que delimita área e lotes
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (19, 1, 7, 'Projeto de Regularização Fundiária (PRF)', 1),
+  (20, 1, 7, 'Contrato de compra e venda', 2),
+  (21, 1, 7, 'Habite-se', 3),
+  (22, 1, 7, 'Carnê de IPTU', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 8: Instrumento de titulação na Reurb-S
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (23, 1, 8, 'Título de legitimação fundiária', 1),
+  (24, 1, 8, 'Contrato de locação', 2),
+  (25, 1, 8, 'Termo de guarda', 3),
+  (26, 1, 8, 'Escritura de doação simples', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 9: Ente competente para instaurar Reurb
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (27, 1, 9, 'Município', 1),
+  (28, 1, 9, 'Cartório de Registro de Imóveis', 2),
+  (29, 1, 9, 'União', 3),
+  (30, 1, 9, 'Condomínio', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 10: Etapa de verificação de conformidade
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (31, 1, 10, 'Análise técnica do PRF pelos órgãos', 1),
+  (32, 1, 10, 'Emissão do carnê de IPTU', 2),
+  (33, 1, 10, 'Audiência pública exclusiva', 3),
+  (34, 1, 10, 'Registro de contrato particular', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 11: Cartório competente
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (35, 1, 11, 'Cartório de Registro de Imóveis', 1),
+  (36, 1, 11, 'Cartório de Notas', 2),
+  (37, 1, 11, 'Cartório de Protesto', 3),
+  (38, 1, 11, 'Cartório Eleitoral', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 12: Isenções na Reurb-S
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (39, 1, 12, 'Custas e emolumentos de registro', 1),
+  (40, 1, 12, 'Tarifa de água', 2),
+  (41, 1, 12, 'Multa de trânsito', 3),
+  (42, 1, 12, 'Taxa de lixo', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Questão 13: Participação social na Reurb
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (43, 1, 13, 'Reuniões e audiências com a comunidade', 1),
+  (44, 1, 13, 'Somente comunicação por edital', 2),
+  (45, 1, 13, 'Apenas informativo online', 3),
+  (46, 1, 13, 'Sem participação', 4)
 ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
 
 -- Questão 3 (avaliação 2): Para que serve o @RestController no Spring?
@@ -297,19 +384,42 @@ INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_
 ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
 
 -- Atualizar questões com as alternativas corretas
-UPDATE questao SET fk_alternativa_correta = 2 WHERE id_questao = 1;  -- "Java Virtual Machine"
-UPDATE questao SET fk_alternativa_correta = 3 WHERE id_questao = 2;  -- "javac"
+UPDATE questao SET fk_alternativa_correta = 2 WHERE id_questao = 1;  -- Reurb: conceito (integração ao ordenamento)
+UPDATE questao SET fk_alternativa_correta = 3 WHERE id_questao = 2;  -- Reurb: objetivo (integrar assentamentos)
 UPDATE questao SET fk_alternativa_correta = 5 WHERE id_questao = 3;  -- "Para definir controllers REST"
 UPDATE questao SET fk_alternativa_correta = 7 WHERE id_questao = 4;  -- "SELECT * FROM tabela"
 UPDATE questao SET fk_alternativa_correta = 9 WHERE id_questao = 5;  -- "npm install"
+
+-- Define alternativas corretas para as novas questões da avaliação 1 (Reurb)
+UPDATE questao SET fk_alternativa_correta = 15 WHERE id_questao = 6;   -- Cadastro Social
+UPDATE questao SET fk_alternativa_correta = 19 WHERE id_questao = 7;   -- PRF delimita área/lotes
+UPDATE questao SET fk_alternativa_correta = 23 WHERE id_questao = 8;   -- Título de legitimação fundiária
+UPDATE questao SET fk_alternativa_correta = 27 WHERE id_questao = 9;   -- Município
+UPDATE questao SET fk_alternativa_correta = 31 WHERE id_questao = 10;  -- Análise técnica do PRF
+UPDATE questao SET fk_alternativa_correta = 35 WHERE id_questao = 11;  -- CRI (Registro de Imóveis)
+UPDATE questao SET fk_alternativa_correta = 39 WHERE id_questao = 12;  -- Isenção de custas/emolumentos
+UPDATE questao SET fk_alternativa_correta = 43 WHERE id_questao = 13;  -- Reuniões/audiências com comunidade
 
 -- Inserir respostas de exemplo para as tentativas de John Doe (para calcular notas)
 -- IMPORTANTE: Estas inserções devem vir DEPOIS da criação das questões e alternativas
 
 -- Tentativa 40 (curso 1, avaliação 1): responde questões 1 e 2 corretamente (2/2)
 INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
-  (20, 1, 40, 1, 1, 2),  -- questão 1, alternativa correta "Java Virtual Machine" (id 2)
-  (20, 1, 40, 1, 2, 3)   -- questão 2, alternativa correta "javac" (id 3)
+  (20, 1, 40, 1, 1, 2),  -- questão 1, alternativa correta (conceito Reurb)
+  (20, 1, 40, 1, 2, 3)   -- questão 2, alternativa correta (objetivo Reurb)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Complemento da tentativa 40: adiciona respostas para as novas questões (6..13) com acerto total de 6/10 em avaliação 1
+-- Correções adicionais: acerta Q6, Q7, Q8, Q9 (4 acertos); erra Q10, Q11, Q12, Q13 (4 erros)
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (20, 1, 40, 1, 6, 15),  -- correto
+  (20, 1, 40, 1, 7, 19),  -- correto
+  (20, 1, 40, 1, 8, 23),  -- correto
+  (20, 1, 40, 1, 9, 27),  -- correto
+  (20, 1, 40, 1, 10, 32), -- errado (correta é 31)
+  (20, 1, 40, 1, 11, 36), -- errado (correta é 35)
+  (20, 1, 40, 1, 12, 40), -- errado (correta é 39)
+  (20, 1, 40, 1, 13, 44)  -- errado (correta é 43)
 ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
 -- Tentativa 41 (curso 2, avaliação 2): responde questão 3 corretamente (1/1)

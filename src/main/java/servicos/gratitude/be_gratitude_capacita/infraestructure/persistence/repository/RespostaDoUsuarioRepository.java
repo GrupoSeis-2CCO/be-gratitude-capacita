@@ -28,4 +28,12 @@ public interface RespostaDoUsuarioRepository extends JpaRepository<RespostaDoUsu
 		   "LEFT JOIN FETCH q.fkAlternativaCorreta " +
 		   "WHERE r.tentativa = :tentativa")
 	List<RespostaDoUsuarioEntity> findAllByTentativa(@Param("tentativa") TentativaEntity tentativa);
+	
+	@Query("SELECT r FROM RespostaDoUsuarioEntity r " +
+		   "WHERE r.respostaDoUsuarioEntityCompoundKey.idTentativaComposto.idMatriculaComposto.fkUsuario = :userId " +
+		   "AND r.respostaDoUsuarioEntityCompoundKey.idAvaliacao = :examId")
+	List<RespostaDoUsuarioEntity> findByUserIdAndExamId(
+		@Param("userId") Integer userId,
+		@Param("examId") Integer examId
+	);
 }

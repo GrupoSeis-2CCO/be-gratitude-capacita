@@ -36,6 +36,19 @@ public class MatriculaMapper {
         return matricula;
     }
 
+    /**
+     * Shallow mapping that avoids touching lazy relations (curso/usuario).
+     * Use this when the JPA session may be closed to prevent LazyInitializationException.
+     */
+    public static Matricula toDomainKeyOnly(MatriculaEntity entity){
+        Matricula matricula = new Matricula();
+        // Only copy the ID (compound key) and DO NOT touch any other property that could be lazy
+        matricula.setIdMatriculaComposto(entity.getId() != null ? MatriculaCompoundKeyMapper.toDoamin(entity.getId()) : null);
+        // Optionally, you can copy primitive fields that are always loaded (not relations)
+        // But avoid entity.getCompleto(), getUsuario(), getCurso(), etc.
+        return matricula;
+    }
+
     public static List<MatriculaEntity> toEntities(List<Matricula> matriculas){
         List<MatriculaEntity> entities = new ArrayList<>();
 

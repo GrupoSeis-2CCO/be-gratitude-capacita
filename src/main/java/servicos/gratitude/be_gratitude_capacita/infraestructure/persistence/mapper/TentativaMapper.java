@@ -24,9 +24,9 @@ public class TentativaMapper {
 
         tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entity.getIdTentativaComposto()));
         tentativa.setDtTentativa(entity.getDtTentativa());
-        // Map full Matricula (with usuario and curso) to avoid nulls
-        tentativa.setMatricula(entity.getMatricula() != null ? MatriculaMapper.toDomain(entity.getMatricula()) : null);
-        tentativa.setAvaliacao(entity.getAvaliacao() != null ? AvaliacaoMapper.toDomain(entity.getAvaliacao()) : null);
+    // Use key-only to avoid LazyInitialization when session is closed
+    tentativa.setMatricula(entity.getMatricula() != null ? MatriculaMapper.toDomainKeyOnly(entity.getMatricula()) : null);
+    tentativa.setAvaliacao(entity.getAvaliacao() != null ? AvaliacaoMapper.toDomainKeyOnly(entity.getAvaliacao()) : null);
         return tentativa;
     }
 
@@ -54,9 +54,9 @@ public class TentativaMapper {
             Tentativa tentativa = new Tentativa();
             tentativa.setIdTentativaComposto(TentativaCompoundKeyMapper.toDomain(entityDaVez.getIdTentativaComposto()));
             tentativa.setDtTentativa(entityDaVez.getDtTentativa());
-            // Map full Matricula (with usuario and curso) to avoid nulls
-            tentativa.setMatricula(entityDaVez.getMatricula() != null ? MatriculaMapper.toDomain(entityDaVez.getMatricula()) : null);
-            tentativa.setAvaliacao(entityDaVez.getAvaliacao() != null ? AvaliacaoMapper.toDomain(entityDaVez.getAvaliacao()) : null);
+            // Use key-only to avoid LazyInitialization when session is closed
+            tentativa.setMatricula(entityDaVez.getMatricula() != null ? MatriculaMapper.toDomainKeyOnly(entityDaVez.getMatricula()) : null);
+            tentativa.setAvaliacao(entityDaVez.getAvaliacao() != null ? AvaliacaoMapper.toDomainKeyOnly(entityDaVez.getAvaliacao()) : null);
             tentativas.add(tentativa);
         }
         return tentativas;
