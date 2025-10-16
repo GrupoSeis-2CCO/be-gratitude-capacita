@@ -38,10 +38,9 @@ public class DataSourceChecker implements CommandLineRunner {
         }
 
         try {
-            Integer countFeedbackEntity = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM feedback_entity", Integer.class);
-            log.info("DB count feedback_entity={}", countFeedbackEntity);
+            // Removido: feedback_entity table check (causava erro caso a tabela não exista)
         } catch (Exception e) {
-            log.warn("Erro ao consultar contagem de feedback_entity: {}", e.getMessage());
+            // Removido: feedback_entity table check (causava erro caso a tabela não exista)
         }
     }
 }

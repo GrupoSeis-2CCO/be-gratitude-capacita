@@ -11,6 +11,9 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 import java.util.List;
 
 public interface MatriculaRepository extends JpaRepository<MatriculaEntity, MatriculaEntityCompoundKey> {
+    @Query("SELECT m FROM MatriculaEntity m WHERE m.usuario.idUsuario = :userId AND m.curso.idCurso = :cursoId")
+    java.util.Optional<MatriculaEntity> findByFkUsuarioAndFkCurso(@Param("userId") Integer userId, @Param("cursoId") Integer cursoId);
+
     @Query("SELECT m FROM MatriculaEntity m JOIN FETCH m.curso WHERE m.usuario = :usuario")
     List<MatriculaEntity> findAllByUsuario(@Param("usuario") UsuarioEntity usuario);
     

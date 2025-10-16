@@ -2,6 +2,9 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.ent
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -13,9 +16,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tentativa")
+
 public class TentativaEntity {
     @EmbeddedId
     private TentativaEntityCompoundKey idTentativaComposto;
+
 
     private LocalDateTime dtTentativa;
 
@@ -30,6 +35,7 @@ public class TentativaEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_avaliacao")
     private AvaliacaoEntity avaliacao;
+
 
     public TentativaEntityCompoundKey getIdTentativaComposto() {
         return idTentativaComposto;

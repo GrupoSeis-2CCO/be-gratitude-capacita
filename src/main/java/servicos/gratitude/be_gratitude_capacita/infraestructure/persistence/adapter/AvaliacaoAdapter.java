@@ -12,6 +12,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repo
 import java.util.Optional;
 
 @Service
+
 public class AvaliacaoAdapter implements AvaliacaoGateway {
 
     private final AvaliacaoRepository avaliacaoRepository;
@@ -52,5 +53,11 @@ public class AvaliacaoAdapter implements AvaliacaoGateway {
     @Override
     public java.util.List<Avaliacao> findAll() {
         return AvaliacaoMapper.toDomain(avaliacaoRepository.findAll());
+    }
+
+    @Override
+    public Optional<Avaliacao> findByFkCursoId(Long idCurso) {
+        return avaliacaoRepository.findFirstByFkCurso_IdCurso(idCurso)
+                .map(AvaliacaoMapper::toDomain);
     }
 }
