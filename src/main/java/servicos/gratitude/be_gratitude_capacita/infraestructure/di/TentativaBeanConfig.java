@@ -27,6 +27,10 @@ public class TentativaBeanConfig {
         return new ListarTentativaPorMatriculaUseCase(tentativaAdapter);
     }
     @Bean
+    public servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorUsuarioUseCase listarTentativaPorUsuarioUseCase(TentativaAdapter tentativaAdapter){
+        return new servicos.gratitude.be_gratitude_capacita.core.application.usecase.tentativa.ListarTentativaPorUsuarioUseCase(tentativaAdapter);
+    }
+    @Bean
     public CriarNovaChaveCompostaTentativaUseCase criarNovaChaveCompostaTentativaUseCase(MatriculaAdapter matriculaAdapter, TentativaAdapter tentativaAdapter){
         return new CriarNovaChaveCompostaTentativaUseCase(matriculaAdapter, tentativaAdapter);
     }

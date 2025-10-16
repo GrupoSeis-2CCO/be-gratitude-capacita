@@ -19,7 +19,7 @@ public class TentativaEntity {
 
     private LocalDateTime dtTentativa;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = jakarta.persistence.FetchType.LAZY)
     @MapsId("idMatriculaComposto")
     @JoinColumns({
         @JoinColumn(name = "fk_usuario", referencedColumnName = "fk_usuario"),

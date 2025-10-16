@@ -23,7 +23,8 @@ public class RespostaDoUsuarioMapper {
 
         respostaDoUsuario.setRespostaDoUsuarioCompoundKey(RespostaDoUsuarioCompoundKeyMapper.toDomain(entity.getRespostaDoUsuarioCompoundKey()));
         respostaDoUsuario.setAlternativa(AlternativaMapper.toDomain(entity.getAlternativa()));
-        respostaDoUsuario.setTentativa(TentativaMapper.toDomain(entity.getTentativa()));
+        // Don't map tentativa to avoid LazyInitializationException - it's not needed for nota calculation
+        // respostaDoUsuario.setTentativa(TentativaMapper.toDomain(entity.getTentativa()));
 
         return respostaDoUsuario;
     }
@@ -52,7 +53,8 @@ public class RespostaDoUsuarioMapper {
 
         respostaDoUsuario.setRespostaDoUsuarioCompoundKey(RespostaDoUsuarioCompoundKeyMapper.toDomain(entityDaVez.getRespostaDoUsuarioCompoundKey()));
         respostaDoUsuario.setAlternativa(AlternativaMapper.toDomain(entityDaVez.getAlternativa()));
-        respostaDoUsuario.setTentativa(TentativaMapper.toDomain(entityDaVez.getTentativa()));
+        // Don't map tentativa to avoid LazyInitializationException - it's not needed for nota calculation
+        // respostaDoUsuario.setTentativa(TentativaMapper.toDomain(entityDaVez.getTentativa()));
 
         respostasDoUsuario.add(respostaDoUsuario);
         }

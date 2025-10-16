@@ -22,13 +22,21 @@ public class AlternativaMapper {
     }
 
     public static Alternativa toDomain(AlternativaEntity entity){
+        return toDomain(entity, true);
+    }
+
+    public static Alternativa toDomain(AlternativaEntity entity, boolean includeQuestao){
         Alternativa alternativa = new Alternativa();
         if (entity.getAlternativaChaveComposta() != null) {
             alternativa.setAlternativaChaveComposta(AlternativaCompoundKeyMapper.toDomain(entity.getAlternativaChaveComposta()));
         }
         alternativa.setTexto(entity.getTexto());
         alternativa.setOrdem(entity.getOrdem());
-        alternativa.setQuestao(QuestaoMapper.toDomain(entity.getQuestao()));
+        
+        // Only map questao if requested AND if entity has it loaded to avoid LazyInitializationException
+        if (includeQuestao && entity.getQuestao() != null) {
+            alternativa.setQuestao(QuestaoMapper.toDomainWithoutCircular(entity.getQuestao()));
+        }
 
         return alternativa;
     }
@@ -51,17 +59,14 @@ public class AlternativaMapper {
     }
 
     public static List<Alternativa> toDomains(List<AlternativaEntity> entities){
+        return toDomains(entities, true);
+    }
+
+    public static List<Alternativa> toDomains(List<AlternativaEntity> entities, boolean includeQuestao){
         List<Alternativa> alternativas = new ArrayList<>();
 
         for (AlternativaEntity entityDaVez : entities) {
-        Alternativa alternativa = new Alternativa();
-
-        alternativa.setAlternativaChaveComposta(AlternativaCompoundKeyMapper.toDomain(entityDaVez.getAlternativaChaveComposta()));
-        alternativa.setTexto(entityDaVez.getTexto());
-        alternativa.setOrdem(entityDaVez.getOrdem());
-        alternativa.setQuestao(QuestaoMapper.toDomain(entityDaVez.getQuestao()));
-
-        alternativas.add(alternativa);
+            alternativas.add(toDomain(entityDaVez, includeQuestao));
         }
 
         return alternativas;

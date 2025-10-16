@@ -23,6 +23,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import servicos.gratitude.be_gratitude_capacita.JWTImplement.AutenticacaoService;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +64,10 @@ public class SecurityConfiguracao {
         "/relatorios/curso/*/engajamento",
         "/matriculas/curso/*/participantes",
         "/cursos/*/materiais/*",
-        "/materiais-alunos/finalizar-por-material/video/**"
+        "/materiais-alunos/finalizar-por-material/video/**",
+        "/tentativas/*/*",
+        "/participantes/*/avaliacoes"
+
     };
 
     @Bean
@@ -138,5 +144,22 @@ public class SecurityConfiguracao {
         origem.registerCorsConfiguration("/**", configuracao);
         return origem;
     }
+
+        // Customize the HttpFirewall to allow some percent-encoded characters (e.g. %0A) that
+        // StrictHttpFirewall blocks by default. Use with caution: permitting encoded control
+        // characters can widen the attack surface if unvalidated URLs are forwarded to
+        // downstream systems. Prefer sanitizing inputs when possible.
+        @Bean
+        public HttpFirewall allowUrlEncodedCharsHttpFirewall() {
+            // Use DefaultHttpFirewall which is more permissive than StrictHttpFirewall.
+            // This avoids rejecting requests that contain encoded control characters like %0A.
+            return new DefaultHttpFirewall();
+        }
+
+        // Apply the custom firewall to WebSecurity so Spring Security uses it when building filter chains
+        @Bean
+        public WebSecurityCustomizer applyCustomHttpFirewall(HttpFirewall httpFirewall) {
+            return web -> web.httpFirewall(httpFirewall);
+        }
 
 }
