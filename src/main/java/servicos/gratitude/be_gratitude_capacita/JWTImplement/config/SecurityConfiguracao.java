@@ -60,14 +60,15 @@ public class SecurityConfiguracao {
             "/cargos/**",
             "/h2-console/**",
             "/error",
-        "/matriculas/curso/*/participantes",
-        "/relatorios/curso/*/engajamento",
-        "/matriculas/curso/*/participantes",
-        "/cursos/*/materiais/*",
-        "/materiais-alunos/finalizar-por-material/video/**",
-        "/tentativas/*/*",
-        "/participantes/*/avaliacoes"
-
+            "/matriculas/curso/*/participantes",
+            "/relatorios/curso/*/engajamento",
+            "/matriculas/curso/*/participantes",
+            "/cursos/*/materiais/*",
+            "/materiais-alunos/finalizar-por-material/video/**",
+            "/tentativas/*/*",
+            "/participantes/*/avaliacoes",
+            "/answersheet/**"
+        ,"/exams/**"
     };
 
     @Bean

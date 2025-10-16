@@ -25,8 +25,20 @@ public class ListarRespostasDoUsuarioUseCase {
         List<RespostaDoUsuario> respostas = respostaDoUsuarioGateway.findAll();
         List<RespostaDoUsuario> respostasPorUsuario = new ArrayList<>();
 
+        if (respostas == null || respostas.isEmpty()) return respostasPorUsuario;
+
+        Integer idUsuarioRef = usuario.getIdUsuario();
+
         for (RespostaDoUsuario respostaDaVez : respostas) {
-            if (respostaDaVez.getTentativa().getMatricula().getUsuario().equals(usuario)){
+            if (respostaDaVez == null) continue;
+            var tentativa = respostaDaVez.getTentativa();
+            if (tentativa == null) continue;
+            var matricula = tentativa.getMatricula();
+            if (matricula == null) continue;
+            var usuarioResp = matricula.getUsuario();
+            if (usuarioResp == null) continue;
+            Integer idUsuarioResp = usuarioResp.getIdUsuario();
+            if (idUsuarioResp != null && idUsuarioRef != null && idUsuarioResp.equals(idUsuarioRef)){
                 respostasPorUsuario.add(respostaDaVez);
             }
         }

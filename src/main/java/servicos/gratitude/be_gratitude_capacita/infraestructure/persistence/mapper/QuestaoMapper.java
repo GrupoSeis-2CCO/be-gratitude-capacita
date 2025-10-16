@@ -9,6 +9,7 @@ import java.util.List;
 
 public class QuestaoMapper {
     public static QuestaoEntity toEntity(Questao questao){
+        if (questao == null) return null;
         QuestaoEntity entity = new QuestaoEntity();
 
         entity.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(questao.getIdQuestaoComposto()));
@@ -16,6 +17,17 @@ public class QuestaoMapper {
         entity.setFkAlternativaCorreta(AlternativaMapper.toEntity(questao.getFkAlternativaCorreta()));
         entity.setAvaliacaoEntity(AvaliacaoMapper.toEntity(questao.getAvaliacao()));
 
+        return entity;
+    }
+
+    /**
+     * Maps only the composite key to avoid deep recursion or null pointer issues
+     * when only an identifier is required (e.g., repository lookups).
+     */
+    public static QuestaoEntity toEntityKeyOnly(Questao questao){
+        if (questao == null) return null;
+        QuestaoEntity entity = new QuestaoEntity();
+        entity.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(questao.getIdQuestaoComposto()));
         return entity;
     }
 
@@ -54,6 +66,7 @@ public class QuestaoMapper {
         List<QuestaoEntity> entities = new ArrayList<>();
 
         for (Questao questaoDaVez : questoes) {
+        if (questaoDaVez == null) continue;
         QuestaoEntity entity = new QuestaoEntity();
 
         entity.setIdQuestaoComposto(QuestaoCompoundKeyMapper.toEntity(questaoDaVez.getIdQuestaoComposto()));
