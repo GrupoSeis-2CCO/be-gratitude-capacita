@@ -17,6 +17,9 @@ CREATE TABLE usuario (
     cpf CHAR(11) NOT NULL UNIQUE,
     email VARCHAR(256) NOT NULL UNIQUE,
     senha VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NULL,
+    departamento VARCHAR(100) NULL,
+    foto_url VARCHAR(255) NULL,
     data_entrada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ultimo_acesso DATETIME,
     fk_cargo INT NOT NULL,
@@ -184,8 +187,9 @@ select * from resposta_do_usuario;
 -- Tabela feedback
 CREATE TABLE feedback (
     FK_curso INT NOT NULL,
-    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 5),
+    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 10),
     motivo VARCHAR(250),
+    anonimo TINYINT(1) NOT NULL DEFAULT 0,
     FK_usuario INT NOT NULL,
     PRIMARY KEY (FK_usuario, FK_curso),
     FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),

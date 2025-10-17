@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api } from "../api.js";
 
 function normalizeError(err, fallbackMessage) {
   const responseMessage = err?.response?.data?.message || err?.response?.data;

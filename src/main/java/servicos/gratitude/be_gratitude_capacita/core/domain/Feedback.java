@@ -6,6 +6,7 @@ public class Feedback {
     private String motivo;
     private Usuario fkUsuario;
     private Curso curso;
+    private Boolean anonimo;
 
     public Integer getFkCurso() {
         return fkCurso;
@@ -45,5 +46,13 @@ public class Feedback {
 
     public void setCurso(Curso curso) {
         this.curso = curso;
+    }
+
+    public Boolean getAnonimo() {
+        return anonimo;
+    }
+
+    public void setAnonimo(Boolean anonimo) {
+        this.anonimo = anonimo;
     }
 }

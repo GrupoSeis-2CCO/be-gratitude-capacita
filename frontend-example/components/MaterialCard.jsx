@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { FileText, Youtube } from 'lucide-react';
+import SmartImage from './SmartImage.jsx';
+import { api } from '../api.js';
 import MaterialService from '../services/MaterialService.js';
 import ConfirmModal from './ConfirmModal.jsx';
 
@@ -55,7 +57,12 @@ export default function MaterialCard({ material, index, onEdit = null, onActionC
       fetch(oembed)
         .then(res => res.json())
         .then(data => {
-          if (data && data.thumbnail_url) setThumbnailUrl(data.thumbnail_url);
+          if (data && data.thumbnail_url) {
+            // usa proxy para evitar CORS em domínios terceiros
+            const apiBase = api?.defaults?.baseURL || '';
+            const proxied = apiBase ? `${apiBase}/proxy/image?url=${encodeURIComponent(data.thumbnail_url)}` : data.thumbnail_url;
+            setThumbnailUrl(proxied);
+          }
         })
         .catch(() => {
           // ignore errors and keep thumbnail null
@@ -114,7 +121,7 @@ export default function MaterialCard({ material, index, onEdit = null, onActionC
           <FileText size={48} className="text-gray-500" />
         ) : (
           thumbnailUrl ? (
-            <img src={thumbnailUrl} alt={material.title} className="w-full h-full object-cover" />
+            <SmartImage src={thumbnailUrl} alt={material.title} className="w-full h-full object-cover" />
           ) : (
             <Youtube size={48} className="text-red-600" />
           )
@@ -123,7 +130,7 @@ export default function MaterialCard({ material, index, onEdit = null, onActionC
       <div className="flex-1">
         <div className="flex justify-between items-start">
           <h3 className="text-xl font-bold text-gray-800 mb-2">
-            Material {index + 1} - {material.title}
+            {`Material ${material?.order ?? (index + 1)} - ${material.title}`}
           </h3>
           <div className="relative" ref={ref}>
             <button className="text-gray-500 hover:text-gray-800" onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>

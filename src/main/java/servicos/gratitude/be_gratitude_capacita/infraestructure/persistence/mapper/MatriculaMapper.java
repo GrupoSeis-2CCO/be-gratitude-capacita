@@ -49,6 +49,19 @@ public class MatriculaMapper {
         return matricula;
     }
 
+    /**
+     * Build a MatriculaEntity with only the embedded id filled.
+     * Use this when you only have the composite key and don't want to touch relations (usuario/curso).
+     * Typically, the caller should later replace the association with an EntityManager.getReference.
+     */
+    public static MatriculaEntity toEntityKeyOnly(Matricula matricula){
+        if (matricula == null) return null;
+        MatriculaEntity entity = new MatriculaEntity();
+        entity.setId(MatriculaCompoundKeyMapper.toEntity(matricula.getIdMatriculaComposto()));
+        // Do NOT set usuario/curso here to avoid NPEs when domain only carries keys
+        return entity;
+    }
+
     public static List<MatriculaEntity> toEntities(List<Matricula> matriculas){
         List<MatriculaEntity> entities = new ArrayList<>();
 

@@ -8,6 +8,7 @@ import java.util.List;
 public class UsuarioMapper {
 
     public static UsuarioEntity toEntity(Usuario usuario){
+        if (usuario == null) return null;
         UsuarioEntity entity = new UsuarioEntity();
 
         entity.setCpf(usuario.getCpf());
@@ -15,6 +16,9 @@ public class UsuarioMapper {
         entity.setEmail(usuario.getEmail());
         entity.setNome(usuario.getNome());
         entity.setSenha(usuario.getSenha());
+    entity.setTelefone(usuario.getTelefone());
+    entity.setDepartamento(usuario.getDepartamento());
+    entity.setFotoUrl(usuario.getFotoUrl());
         entity.setDataEntrada(usuario.getDataEntrada());
         entity.setUltimoAcesso(usuario.getUltimoAcesso());
         entity.setFkCargo(CargoMapper.toEntity(usuario.getFkCargo()));
@@ -23,6 +27,7 @@ public class UsuarioMapper {
     }
 
     public static Usuario toDomain(UsuarioEntity entity){
+        if (entity == null) return null;
         Usuario usuario = new Usuario();
 
         usuario.setCpf(entity.getCpf());
@@ -30,6 +35,9 @@ public class UsuarioMapper {
         usuario.setEmail(entity.getEmail());
         usuario.setNome(entity.getNome());
         usuario.setSenha(entity.getSenha());
+    usuario.setTelefone(entity.getTelefone());
+    usuario.setDepartamento(entity.getDepartamento());
+    usuario.setFotoUrl(entity.getFotoUrl());
         usuario.setDataEntrada(entity.getDataEntrada());
         usuario.setUltimoAcesso(entity.getUltimoAcesso());
         usuario.setFkCargo(CargoMapper.toDomain(entity.getFkCargo()));
@@ -40,6 +48,7 @@ public class UsuarioMapper {
     public static List<Usuario> toDomains(List<UsuarioEntity> entity){
         List<Usuario> usuarios = new ArrayList<>();
 
+        if (entity == null) return usuarios;
         for (UsuarioEntity entityDaVez : entity) {
         Usuario usuario = new Usuario();
 
@@ -48,6 +57,9 @@ public class UsuarioMapper {
         usuario.setEmail(entityDaVez.getEmail());
         usuario.setNome(entityDaVez.getNome());
         usuario.setSenha(entityDaVez.getSenha());
+    usuario.setTelefone(entityDaVez.getTelefone());
+    usuario.setDepartamento(entityDaVez.getDepartamento());
+    usuario.setFotoUrl(entityDaVez.getFotoUrl());
         usuario.setDataEntrada(entityDaVez.getDataEntrada());
         usuario.setUltimoAcesso(entityDaVez.getUltimoAcesso());
         usuario.setFkCargo(CargoMapper.toDomain(entityDaVez.getFkCargo()));

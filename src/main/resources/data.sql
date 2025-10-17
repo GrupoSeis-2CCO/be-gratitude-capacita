@@ -1,8 +1,8 @@
 -- Garantir que usuários base (id 1, 2, 3) existem
 
 INSERT INTO cargo (id_cargo, nome_cargo) VALUES
-  (1, 'Colaborador'),
-  (2, 'Funcionário')
+  (1, 'Funcionário'),
+  (2, 'Colaborador')
 ON DUPLICATE KEY UPDATE nome_cargo = VALUES(nome_cargo);
 
 -- Garantir que cursos base existem antes das avaliações (contexto: Regularização Fundiária)
@@ -32,6 +32,9 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (5, 'Guia de Regularização Fundiária - Introdução.pdf', 'regulacao_apostila_intro.pdf', 'Guia introdutório com conceitos e procedimentos iniciais para processos de regularização fundiária.', 512000, 0, 1, 4)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
+-- Vincula URL local para a apostila do curso 4 (id_apostila=5)
+UPDATE apostila SET url_arquivo = '/uploads/regulacao_apostila_intro.pdf' WHERE id_apostila = 5;
+
 -- Matricular John Doe (se existir) no curso 4 e adicionar materiais iniciais
 -- (matriculas do John Doe para curso 4 serão adicionadas mais abaixo, depois de garantirmos que o usuário existe)
 
@@ -43,24 +46,24 @@ INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (4, 7.0, 4)
 ON DUPLICATE KEY UPDATE nota_minima = VALUES(nota_minima), fk_curso = VALUES(fk_curso);
 
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo) VALUES
-  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
-  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
-  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
+  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', 'Projetos', NULL),
+  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', 'RH', NULL),
+  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', 'TI', NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
 -- Dados adicionais de usuario (id 10 a 19) para testes variados
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo) VALUES
-  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1),
-  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1),
-  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2),
-  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1),
-  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2),
-  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1),
-  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2),
-  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1),
-  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2),
-  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
+  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL, NULL),
+  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL, NULL),
+  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL, NULL),
+  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL, NULL),
+  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL, NULL),
+  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL, NULL),
+  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL, NULL),
+  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL, NULL),
+  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL, NULL),
+  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL, NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
 
 
 
@@ -91,8 +94,13 @@ INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, 
   SELECT id_usuario, 4, '2025-04-01 08:00:00', '2025-04-01 08:00:00', 0, NULL FROM usuario WHERE email = 'john@doe.com'
 ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
 
+-- Em material_aluno, cada linha deve referenciar somente um tipo de material (vídeo OU apostila)
+-- Vincula John Doe (curso 4) separando vídeo (id 5) e apostila (id 5)
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
-  SELECT id_usuario, 4, 5, 5, 0, NULL FROM usuario WHERE email = 'john@doe.com'
+  SELECT id_usuario, 4, 5, NULL, 0, NULL FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
+  SELECT id_usuario, 4, NULL, 5, 0, NULL FROM usuario WHERE email = 'john@doe.com'
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 INSERT INTO usuario (
@@ -198,6 +206,12 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (4, 'Participação Social e Comunicação.pdf', 'regulacao_participacao.pdf', 'Recursos e orientações para mobilização social e comunicação em processos de regularização.', 102400, 0, 4, 1)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
+-- Vincula URLs locais para apostilas do curso 1 (ids 1..4)
+UPDATE apostila SET url_arquivo = '/uploads/reurb_intro.pdf' WHERE id_apostila = 1;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_instrumentos.pdf' WHERE id_apostila = 2;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_modelos.pdf' WHERE id_apostila = 3;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_participacao.pdf' WHERE id_apostila = 4;
+
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
   -- For course 1 we want exactly 1 video + 1 apostila as materials
   -- Insert two material_aluno rows per student (one for the video, one for the apostila)
@@ -256,10 +270,18 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 -- ...existing code...
 -- Dados iniciais para tabela apostila (removido duplicidade)
 -- Já inserido anteriormente
+-- Corrige duplicidades: não vincular vídeo e apostila na mesma linha
+-- Para (1,1): cria duas linhas, uma para vídeo=1 e outra para apostila=1
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
-(1, 1, 1, 1, 0, '2025-01-22 06:00:00'),
-(2, 2, 2, 2, 1, '2025-01-18 09:30:00'),
-(2, 2, 3, 3, 0, NULL)
+(1, 1, 1, NULL, 0, '2025-01-22 06:00:00'),
+(1, 1, NULL, 1, 0, '2025-01-22 06:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+-- Para (2,2): cria quatro linhas separadas (vídeo 2, apostila 2) e (vídeo 3, apostila 3)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+(2, 2, 2, NULL, 1, '2025-01-18 09:30:00'),
+(2, 2, NULL, 2, 1, '2025-01-18 09:30:00'),
+(2, 2, 3, NULL, 0, NULL),
+(2, 2, NULL, 3, 0, NULL)
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela questao (ANTES das alternativas para que a FK funcione)

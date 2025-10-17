@@ -29,6 +29,9 @@ public class FeedbackEntity {
     @Column(name = "motivo")
     private String motivo;
 
+    @Column(name = "anonimo")
+    private Boolean anonimo;
+
     public Integer getFkCurso() {
         return fkCurso;
     }
@@ -59,5 +62,13 @@ public class FeedbackEntity {
 
     public void setMotivo(String motivo) {
         this.motivo = motivo;
+    }
+
+    public Boolean getAnonimo() {
+        return anonimo;
+    }
+
+    public void setAnonimo(Boolean anonimo) {
+        this.anonimo = anonimo;
     }
 }

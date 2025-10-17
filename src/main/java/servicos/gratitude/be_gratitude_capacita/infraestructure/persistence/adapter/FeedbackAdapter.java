@@ -11,6 +11,7 @@ import servicos.gratitude.be_gratitude_capacita.core.gateways.FeedbackGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.FeedbackEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.FeedbackMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.FeedbackRepository;
+import servicos.gratitude.be_gratitude_capacita.core.application.exception.ValorInvalidoException;
 
 import java.util.List;
 
@@ -28,108 +29,146 @@ public class FeedbackAdapter implements FeedbackGateway {
 
     @Override
     public Feedback save(Feedback feedback) {
-        FeedbackEntity entity = FeedbackMapper.toEntity(feedback);
+        // Alguns bancos ainda não possuem a coluna 'anonimo'.
+        // Para evitar 500 no INSERT via JPA, fazemos um caminho resiliente via JDBC
+        // checando a existência da coluna e montando o INSERT dinamicamente.
+        boolean anonimoExists = false;
+        try {
+            Integer cnt = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'feedback' AND COLUMN_NAME = 'anonimo'",
+                Integer.class
+            );
+            anonimoExists = (cnt != null && cnt > 0);
+        } catch (Exception e) {
+            log.debug("Could not check for 'anonimo' column on save: {}", e.getMessage());
+        }
 
-        return FeedbackMapper.toDomain(feedbackRepository.save(entity));
+        Integer fkCurso = feedback.getFkCurso();
+        Integer fkUsuario = (feedback.getFkUsuario() != null ? feedback.getFkUsuario().getIdUsuario() : null);
+        Integer estrelas = feedback.getEstrelas();
+        String motivo = feedback.getMotivo();
+        Boolean anonimo = feedback.getAnonimo();
+
+        // Tenta JDBC primeiro para tolerar esquemas antigos
+        try {
+            if (anonimoExists) {
+                jdbcTemplate.update(
+                    "INSERT INTO feedback (fk_curso, fk_usuario, estrelas, motivo, anonimo) VALUES (?, ?, ?, ?, ?)",
+                    fkCurso, fkUsuario, estrelas, motivo, anonimo
+                );
+            } else {
+                jdbcTemplate.update(
+                    "INSERT INTO feedback (fk_curso, fk_usuario, estrelas, motivo) VALUES (?, ?, ?, ?)",
+                    fkCurso, fkUsuario, estrelas, motivo
+                );
+            }
+            // Retorna o próprio domínio (já preenchido) após inserção bem-sucedida
+            return feedback;
+        } catch (DataAccessException ex) {
+            String msg = ex.getMessage() == null ? "" : ex.getMessage();
+            // Se for chave duplicada (um feedback por usuario/curso), faz UPSERT (UPDATE)
+            if (msg.toLowerCase().contains("duplicate") || msg.toLowerCase().contains("primary")) {
+                try {
+                    if (anonimoExists) {
+                        jdbcTemplate.update(
+                            "UPDATE feedback SET estrelas = ?, motivo = ?, anonimo = ? WHERE fk_curso = ? AND fk_usuario = ?",
+                            estrelas, motivo, anonimo, fkCurso, fkUsuario
+                        );
+                    } else {
+                        jdbcTemplate.update(
+                            "UPDATE feedback SET estrelas = ?, motivo = ? WHERE fk_curso = ? AND fk_usuario = ?",
+                            estrelas, motivo, fkCurso, fkUsuario
+                        );
+                    }
+                    return feedback;
+                } catch (DataAccessException upEx) {
+                    log.warn("FeedbackAdapter.save UPSERT (UPDATE) failed: {}", upEx.getMessage());
+                    // Usa a mensagem do UPDATE para o mapeamento de erro abaixo
+                    msg = upEx.getMessage() == null ? "" : upEx.getMessage();
+                }
+            }
+            // Regra: se falhar por constraint em 'estrelas', sinalizar 400 (valor inválido)
+            if (msg.contains("feedback.estrelas") || msg.toLowerCase().contains("check constraint") || msg.toLowerCase().contains("constraint")) {
+                throw new ValorInvalidoException("Estrelas fora do intervalo permitido pelo esquema atual. Atualize o banco para aceitar 1..10 ou envie um valor permitido.");
+            }
+            // Em esquemas antigos sem 'anonimo', evitar fallback via JPA (pois fará SELECT na coluna ausente)
+            if (!anonimoExists) {
+                log.warn("FeedbackAdapter.save JDBC insert failed and schema is legacy (sem coluna 'anonimo'): {}", msg);
+                throw new ValorInvalidoException("Esquema do banco desatualizado (coluna 'anonimo' ausente). Aplique a migration antes de enviar feedback.");
+            }
+            // Caso geral: tentar fallback via JPA apenas quando o esquema está alinhado
+            log.warn("FeedbackAdapter.save JDBC insert failed, falling back to JPA: {}", msg);
+            try {
+                FeedbackEntity entity = FeedbackMapper.toEntity(feedback);
+                return FeedbackMapper.toDomain(feedbackRepository.save(entity));
+            } catch (Exception jpaEx) {
+                log.warn("FeedbackAdapter.save JPA save also failed: {}", jpaEx.getMessage());
+                throw jpaEx;
+            }
+        }
     }
 
     @Override
     public List<Feedback> findAllByCurso(Curso curso) {
         Integer idCurso = curso.getIdCurso();
-        List<FeedbackEntity> entities = feedbackRepository.findAllByFkCurso(idCurso);
-        if (entities == null) {
-            log.info("FeedbackAdapter: repository returned null for curso {}", idCurso);
-        } else {
-            log.info("FeedbackAdapter: repository returned {} entities for curso {}", entities.size(), idCurso);
-            for (FeedbackEntity e : entities) {
-                try {
-                    log.debug("RAW feedback row -> fkCurso={}, fkUsuario={}, estrelas={}, motivo={}", e.getFkCurso(), e.getFkUsuario() == null ? null : e.getFkUsuario().getIdUsuario(), e.getEstrelas(), e.getMotivo());
-                } catch (Exception ex) {
-                    log.debug("RAW feedback row logging failed: {}", ex.getMessage());
-                }
-            }
+        // Robust path: avoid JPA entity query to tolerate schema missing 'anonimo'
+        boolean anonimoExists = false;
+        try {
+            Integer cnt = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'feedback' AND COLUMN_NAME = 'anonimo'",
+                Integer.class
+            );
+            anonimoExists = (cnt != null && cnt > 0);
+        } catch (Exception e) {
+            log.debug("Could not check for 'anonimo' column: {}", e.getMessage());
         }
 
-        List<Feedback> domains = FeedbackMapper.toDomains(entities == null ? List.of() : entities);
-        // if JPA returned empty but DB has rows, try native fallback
-        if ((entities == null || entities.isEmpty())) {
-            try {
-                List<Object[]> rows = feedbackRepository.findAllByFkCursoNative(idCurso);
-                if (rows != null && !rows.isEmpty()) {
-                    log.info("FeedbackAdapter: native query returned {} rows for curso {}", rows.size(), idCurso);
-                    // map rows -> Feedback
-                    List<Feedback> nativeMapped = new java.util.ArrayList<>();
-                    for (Object[] r : rows) {
-                        Feedback f = new Feedback();
-                        // r: FK_curso, FK_usuario, estrelas, motivo
-                        Integer fkCurso = r[0] == null ? null : ((Number) r[0]).intValue();
-                        Integer fkUsuario = r[1] == null ? null : ((Number) r[1]).intValue();
-                        Integer estrelas = r[2] == null ? null : ((Number) r[2]).intValue();
-                        String motivo = r[3] == null ? null : r[3].toString();
+        final String baseCols = "fk_curso, fk_usuario, estrelas, motivo";
+        final String cols = anonimoExists ? baseCols + ", anonimo" : baseCols;
+        String sql = "SELECT " + cols + " FROM feedback WHERE fk_curso = ?";
 
-                        f.setFkCurso(fkCurso);
-                        f.setEstrelas(estrelas);
-                        f.setMotivo(motivo);
-                        // minimal usuario domain
-                        if (fkUsuario != null) {
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
-                            u.setIdUsuario(fkUsuario);
-                            f.setFkUsuario(u);
-                        }
-                        // set curso domain
-                        servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
-                        c.setIdCurso(fkCurso);
-                        f.setCurso(c);
-
-                        nativeMapped.add(f);
-                    }
-                    return nativeMapped;
+        List<Feedback> rows;
+        try {
+            boolean readAnon = anonimoExists;
+            rows = jdbcTemplate.query(sql, new Object[]{idCurso}, (rs, rowNum) -> {
+                Feedback f = new Feedback();
+                Integer fkCursoRow = rs.getObject("fk_curso") == null ? null : rs.getInt("fk_curso");
+                Integer fkUsuarioRow = rs.getObject("fk_usuario") == null ? null : rs.getInt("fk_usuario");
+                Integer estrelasRow = rs.getObject("estrelas") == null ? null : rs.getInt("estrelas");
+                String motivoRow = rs.getString("motivo");
+                Boolean anonimoRow = null;
+                if (readAnon) {
+                    try { anonimoRow = rs.getObject("anonimo") != null ? rs.getBoolean("anonimo") : null; } catch (Exception ignore) { /* tolerate */ }
                 }
-            } catch (Exception ex) {
-                log.warn("FeedbackAdapter: native fallback failed: {}", ex.getMessage());
-            }
 
-            // If native fallback via JPA didn't return rows, try JdbcTemplate directly
-            try {
-                List<Feedback> jdbcRows = jdbcTemplate.query("SELECT fk_curso, fk_usuario, estrelas, motivo FROM feedback WHERE fk_curso = ?",
-                        new Object[]{idCurso}, (rs, rowNum) -> {
-                            Feedback f = new Feedback();
-                            Integer fkCursoRow = rs.getObject("fk_curso") == null ? null : rs.getInt("fk_curso");
-                            Integer fkUsuarioRow = rs.getObject("fk_usuario") == null ? null : rs.getInt("fk_usuario");
-                            Integer estrelasRow = rs.getObject("estrelas") == null ? null : rs.getInt("estrelas");
-                            String motivoRow = rs.getString("motivo");
-
-                            f.setFkCurso(fkCursoRow);
-                            f.setEstrelas(estrelasRow);
-                            f.setMotivo(motivoRow);
-                            if (fkUsuarioRow != null) {
-                                servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
-                                u.setIdUsuario(fkUsuarioRow);
-                                f.setFkUsuario(u);
-                            }
-                            servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
-                            c.setIdCurso(fkCursoRow);
-                            f.setCurso(c);
-                            return f;
-                        });
-                log.info("FeedbackAdapter: JdbcTemplate fallback returned {} rows for curso {}", jdbcRows.size(), idCurso);
-                jdbcRows.forEach(f -> log.debug("Jdbc fallback mapped curso={}, usuarioId={}, estrelas={}, motivo={}", f.getFkCurso(), f.getFkUsuario() == null ? null : f.getFkUsuario().getIdUsuario(), f.getEstrelas(), f.getMotivo()));
-                if (jdbcRows != null && !jdbcRows.isEmpty()) return jdbcRows;
-            } catch (DataAccessException dae) {
-                log.warn("FeedbackAdapter: JdbcTemplate fallback failed: {}", dae.getMessage());
-            }
-        }
-        // inject curso object into domain feedbacks
-        if (domains != null) {
-            domains.forEach(d -> {
-                if (d.getCurso() == null) {
-                    Curso c = new Curso();
-                    c.setIdCurso(idCurso);
-                    d.setCurso(c);
+                f.setFkCurso(fkCursoRow);
+                f.setEstrelas(estrelasRow);
+                f.setMotivo(motivoRow);
+                f.setAnonimo(anonimoRow);
+                if (fkUsuarioRow != null) {
+                    servicos.gratitude.be_gratitude_capacita.core.domain.Usuario u = new servicos.gratitude.be_gratitude_capacita.core.domain.Usuario();
+                    u.setIdUsuario(fkUsuarioRow);
+                    f.setFkUsuario(u);
                 }
+                servicos.gratitude.be_gratitude_capacita.core.domain.Curso c = new servicos.gratitude.be_gratitude_capacita.core.domain.Curso();
+                c.setIdCurso(fkCursoRow);
+                f.setCurso(c);
+                return f;
             });
+            log.info("FeedbackAdapter: query returned {} rows for curso {} (anonimo column present? {})", rows.size(), idCurso, anonimoExists);
+        } catch (DataAccessException e) {
+            log.warn("FeedbackAdapter: failed to query feedbacks: {}", e.getMessage());
+            rows = List.of();
         }
 
-        return domains;
+        // inject curso object if missing (defensive)
+        rows.forEach(d -> {
+            if (d.getCurso() == null) {
+                Curso c = new Curso();
+                c.setIdCurso(idCurso);
+                d.setCurso(c);
+            }
+        });
+        return rows;
     }
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
 import UserActions from "../components/UserActions";
 import { getEngajamentoPorCurso } from "../services/UserPageService.js";
-import { api } from "../services/api.js";
+import { api } from "../api.js";
 import MonthFilter from "../components/MonthFilter.jsx";
 import YearFilter from "../components/YearFilter.jsx";
 import ApexLineChart from "../components/ApexLineChart.jsx";

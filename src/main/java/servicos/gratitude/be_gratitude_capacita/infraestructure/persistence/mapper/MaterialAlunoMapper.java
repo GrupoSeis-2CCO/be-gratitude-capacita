@@ -14,7 +14,8 @@ public class MaterialAlunoMapper {
         entity.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toEntity(materialAluno.getIdMaterialAlunoComposto()));
         entity.setUltimoAcesso(materialAluno.getUltimoAcesso());
         entity.setFinalizado(materialAluno.getFinalizado());
-        entity.setMatricula(MatriculaMapper.toEntity(materialAluno.getMatricula()));
+        // Use key-only mapping to avoid touching lazy relations (usuario/curso) that may be null in domain
+        entity.setMatricula(MatriculaMapper.toEntityKeyOnly(materialAluno.getMatricula()));
         entity.setFkVideo(VideoMapper.toEntity(materialAluno.getFkVideo()));
         entity.setFkApostila(ApostilaMapper.toEntity(materialAluno.getFkApostila()));
 
@@ -27,13 +28,42 @@ public class MaterialAlunoMapper {
         materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entity.getIdMaterialAlunoComposto()));
         materialAluno.setUltimoAcesso(entity.getUltimoAcesso());
         materialAluno.setFinalizado(entity.getFinalizado());
-        materialAluno.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
-    // Avoid initializing lazy proxies for Video/Apostila here —
-    // the participants endpoint only needs finalizado/ultimoAcesso.
-    // Mapping the full Video/Apostila would trigger a DB load and
-    // may cause SQL errors if the schema differs. Set to null for now.
-    materialAluno.setFkVideo(null);
-    materialAluno.setFkApostila(null);
+    // Map only matricula key to avoid initializing lazy relations (curso/usuario)
+    materialAluno.setMatricula(MatriculaMapper.toDomainKeyOnly(entity.getMatricula()));
+
+        // Map only the identifiers of associations to avoid heavy lazy initialization.
+        // This keeps listar-por-matricula usable by the frontend to match materials.
+        try {
+            if (entity.getFkVideo() != null) {
+                Integer id = entity.getFkVideo().getIdVideo();
+                materialAluno.setIdVideo(id);
+                servicos.gratitude.be_gratitude_capacita.core.domain.Video v = new servicos.gratitude.be_gratitude_capacita.core.domain.Video();
+                v.setIdVideo(id);
+                materialAluno.setFkVideo(v);
+            } else {
+                materialAluno.setFkVideo(null);
+                materialAluno.setIdVideo(null);
+            }
+        } catch (Exception ignored) {
+            materialAluno.setFkVideo(null);
+            materialAluno.setIdVideo(null);
+        }
+
+        try {
+            if (entity.getFkApostila() != null) {
+                Integer id = entity.getFkApostila().getIdApostila();
+                materialAluno.setIdApostila(id);
+                servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a = new servicos.gratitude.be_gratitude_capacita.core.domain.Apostila();
+                a.setIdApostila(id);
+                materialAluno.setFkApostila(a);
+            } else {
+                materialAluno.setFkApostila(null);
+                materialAluno.setIdApostila(null);
+            }
+        } catch (Exception ignored) {
+            materialAluno.setFkApostila(null);
+            materialAluno.setIdApostila(null);
+        }
 
         return materialAluno;
     }
@@ -48,19 +78,24 @@ public class MaterialAlunoMapper {
         materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entity.getIdMaterialAlunoComposto()));
         materialAluno.setUltimoAcesso(entity.getUltimoAcesso());
         materialAluno.setFinalizado(entity.getFinalizado());
-        materialAluno.setMatricula(MatriculaMapper.toDomain(entity.getMatricula()));
+    // Avoid touching lazy relations inside Matricula; only map the key
+    materialAluno.setMatricula(MatriculaMapper.toDomainKeyOnly(entity.getMatricula()));
 
         // Map associations fully
         try {
             materialAluno.setFkVideo(VideoMapper.toDomain(entity.getFkVideo()));
+            materialAluno.setIdVideo(entity.getFkVideo() != null ? entity.getFkVideo().getIdVideo() : null);
         } catch (Exception ignored) {
             materialAluno.setFkVideo(null);
+            materialAluno.setIdVideo(null);
         }
 
         try {
             materialAluno.setFkApostila(ApostilaMapper.toDomain(entity.getFkApostila()));
+            materialAluno.setIdApostila(entity.getFkApostila() != null ? entity.getFkApostila().getIdApostila() : null);
         } catch (Exception ignored) {
             materialAluno.setFkApostila(null);
+            materialAluno.setIdApostila(null);
         }
 
         return materialAluno;
@@ -89,17 +124,40 @@ public class MaterialAlunoMapper {
         List<MaterialAluno> materiaisAluno = new ArrayList<>();
 
         for (MaterialAlunoEntity entityDaVez : entities) {
-        MaterialAluno materialAluno = new MaterialAluno();
+            MaterialAluno materialAluno = new MaterialAluno();
 
-        materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entityDaVez.getIdMaterialAlunoComposto()));
-        materialAluno.setUltimoAcesso(entityDaVez.getUltimoAcesso());
-        materialAluno.setFinalizado(entityDaVez.getFinalizado());
-        materialAluno.setMatricula(MatriculaMapper.toDomain(entityDaVez.getMatricula()));
-    // Avoid initializing lazy proxies when converting lists — keep lightweight.
-    materialAluno.setFkVideo(null);
-    materialAluno.setFkApostila(null);
+            materialAluno.setIdMaterialAlunoComposto(MaterialAlunoCompoundKeyMapper.toDomain(entityDaVez.getIdMaterialAlunoComposto()));
+            materialAluno.setUltimoAcesso(entityDaVez.getUltimoAcesso());
+            materialAluno.setFinalizado(entityDaVez.getFinalizado());
+            // Only map the matricula key to prevent lazy init outside transactions
+            materialAluno.setMatricula(MatriculaMapper.toDomainKeyOnly(entityDaVez.getMatricula()));
 
-        materiaisAluno.add(materialAluno);
+            // Map only IDs for associations to keep payload light yet informative
+            try {
+                if (entityDaVez.getFkVideo() != null) {
+                    Integer id = entityDaVez.getFkVideo().getIdVideo();
+                    materialAluno.setIdVideo(id);
+                    servicos.gratitude.be_gratitude_capacita.core.domain.Video v = new servicos.gratitude.be_gratitude_capacita.core.domain.Video();
+                    v.setIdVideo(id);
+                    materialAluno.setFkVideo(v);
+                } else {
+                    materialAluno.setIdVideo(null);
+                }
+            } catch (Exception ignored) { materialAluno.setIdVideo(null); }
+
+            try {
+                if (entityDaVez.getFkApostila() != null) {
+                    Integer id = entityDaVez.getFkApostila().getIdApostila();
+                    materialAluno.setIdApostila(id);
+                    servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a = new servicos.gratitude.be_gratitude_capacita.core.domain.Apostila();
+                    a.setIdApostila(id);
+                    materialAluno.setFkApostila(a);
+                } else {
+                    materialAluno.setIdApostila(null);
+                }
+            } catch (Exception ignored) { materialAluno.setIdApostila(null); }
+
+            materiaisAluno.add(materialAluno);
         }
 
         return materiaisAluno;

@@ -15,6 +15,7 @@ public class FeedbackMapper {
         entity.setEstrelas(feedback.getEstrelas());
         entity.setMotivo(feedback.getMotivo());
         entity.setFkUsuario(UsuarioMapper.toEntity(feedback.getFkUsuario()));
+    entity.setAnonimo(feedback.getAnonimo());
 
         return entity;
     }
@@ -31,6 +32,7 @@ public class FeedbackMapper {
         feedback.setEstrelas(entity.getEstrelas());
         feedback.setMotivo(entity.getMotivo());
         feedback.setFkUsuario(UsuarioMapper.toDomain(entity.getFkUsuario()));
+    feedback.setAnonimo(entity.getAnonimo());
 
         return feedback;
     }
@@ -45,6 +47,7 @@ public class FeedbackMapper {
             entity.setEstrelas(feedbackDaVez.getEstrelas());
             entity.setMotivo(feedbackDaVez.getMotivo());
             entity.setFkUsuario(UsuarioMapper.toEntity(feedbackDaVez.getFkUsuario()));
+            entity.setAnonimo(feedbackDaVez.getAnonimo());
 
             entities.add(entity);
         }
@@ -65,6 +68,7 @@ public class FeedbackMapper {
             feedback.setEstrelas(entityDaVez.getEstrelas());
             feedback.setMotivo(entityDaVez.getMotivo());
             feedback.setFkUsuario(UsuarioMapper.toDomain(entityDaVez.getFkUsuario()));
+            feedback.setAnonimo(entityDaVez.getAnonimo());
 
             feedbacks.add(feedback);
         }
