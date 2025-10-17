@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
 import GradientSideRail from "../components/GradientSideRail.jsx";
 import TituloPrincipal from "../components/TituloPrincipal";
@@ -12,6 +12,8 @@ import { updateVideo, updateApostila } from "./services/UploadService.js";
 export default function MaterialsListPage() {
 	const { getCurrentUserType, isLoggedIn } = useAuth();
 	const userType = getCurrentUserType();
+  const navigate = useNavigate();
+  const { idCurso } = useParams();
 
 	// Proteção: apenas funcionários (tipo 1) podem acessar esta página
 	if (!isLoggedIn() || userType !== 1) {
@@ -31,7 +33,7 @@ export default function MaterialsListPage() {
 	async function loadMaterials() {
 		setLoading(true);
 		try {
-			const cursoId = 1; // ajuste conforme necessário ou pegue da rota/contexto
+			const cursoId = Number(idCurso || 1); // prefer route param
 			const mats = await getMateriaisPorCurso(cursoId);
 			// mapear para o formato do MaterialCard (id, title, type, description, url, hidden)
 			const mapped = (mats || []).map((m, idx) => {
@@ -62,7 +64,7 @@ export default function MaterialsListPage() {
 		}
 	}
 
-	useEffect(() => { loadMaterials(); }, []);
+	useEffect(() => { loadMaterials(); }, [idCurso]);
 
 	// When in reordering mode we render and operate directly on `materials` (which are ordered by their saved order)
 	const listToRender = materials;
@@ -163,9 +165,14 @@ export default function MaterialsListPage() {
 								const key = `${material.type}-${material.id}`;
 								if (!isReordering) {
 									return (
-										<MaterialCard key={key} material={material} index={index}
+										<MaterialCard
+											key={key}
+											material={material}
+											index={index}
 											onEdit={(m) => setEditingMaterial(m)}
-											onActionComplete={() => loadMaterials()} />
+											onActionComplete={() => loadMaterials()}
+											onClick={() => navigate(`/cursos/${idCurso || cursoId}/material/${material.id}`)}
+										/>
 									);
 								}
 

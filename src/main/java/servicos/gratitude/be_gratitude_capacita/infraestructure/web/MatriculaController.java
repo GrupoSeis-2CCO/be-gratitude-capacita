@@ -176,13 +176,39 @@ public class MatriculaController {
                     }
                 }
 
+                // Última tentativa do usuário neste curso (para nota exibida no front)
+                Integer ultimaNotaAcertos = null;
+                Integer ultimaNotaTotal = null;
+                try {
+                    List<Tentativa> tentativas = listarTentativaPorMatriculaUseCase.execute(matricula);
+                    if (tentativas != null && !tentativas.isEmpty()) {
+                        tentativas.sort((a, b) -> {
+                            java.time.LocalDateTime da = a.getDtTentativa();
+                            java.time.LocalDateTime db = b.getDtTentativa();
+                            if (da == null && db == null) return 0;
+                            if (da == null) return 1;
+                            if (db == null) return -1;
+                            return db.compareTo(da);
+                        });
+                        Tentativa last = tentativas.get(0);
+                        if (last != null) {
+                            ultimaNotaAcertos = last.getNotaAcertos();
+                            ultimaNotaTotal = last.getNotaTotal();
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+
                 return new ParticipanteCursoResponse(
                     usuario.getIdUsuario(),
                     usuario.getNome(),
                     materiaisConcluidos,
                     materiaisTotaisDoCurso,
                     avaliacao,
-                    ultimoAcesso
+                    ultimoAcesso,
+                    ultimaNotaAcertos,
+                    ultimaNotaTotal
                 );
             }).collect(Collectors.toList());
             if (participantes.isEmpty()) {

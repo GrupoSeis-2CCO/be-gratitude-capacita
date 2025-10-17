@@ -28,9 +28,30 @@ public class AcessoController {
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
     }
 
+    // Endpoint auxiliar para logar acesso simples por usuário (sem amarrar a curso);
+    // mantém compatibilidade e simplifica o front quando quiser apenas registrar "entrou".
+    @PostMapping("/usuario/{fkUsuario}")
+    public ResponseEntity<Acesso> criarAcessoPorUsuario(
+            @PathVariable Integer fkUsuario
+    ){
+        try {
+            Usuario usuario = buscarUsuarioPorIdUseCase.execute(fkUsuario);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(criarAcessoUseCase.execute(usuario, new CriarAcessoCommand(fkUsuario)));
+        } catch (ValorInvalidoException e){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage(), e
+            );
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
+            );
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Acesso> criarAcesso(
-            @PathVariable CriarAcessoCommand request
+            @RequestBody CriarAcessoCommand request
     ){
         try {
             Usuario usuario = buscarUsuarioPorIdUseCase.execute(request.fkUsuario());
