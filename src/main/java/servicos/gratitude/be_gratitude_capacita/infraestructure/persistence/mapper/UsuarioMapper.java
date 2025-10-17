@@ -8,6 +8,7 @@ import java.util.List;
 public class UsuarioMapper {
 
     public static UsuarioEntity toEntity(Usuario usuario){
+        if (usuario == null) return null;
         UsuarioEntity entity = new UsuarioEntity();
 
         entity.setCpf(usuario.getCpf());
@@ -23,6 +24,7 @@ public class UsuarioMapper {
     }
 
     public static Usuario toDomain(UsuarioEntity entity){
+        if (entity == null) return null;
         Usuario usuario = new Usuario();
 
         usuario.setCpf(entity.getCpf());
@@ -40,6 +42,7 @@ public class UsuarioMapper {
     public static List<Usuario> toDomains(List<UsuarioEntity> entity){
         List<Usuario> usuarios = new ArrayList<>();
 
+        if (entity == null) return usuarios;
         for (UsuarioEntity entityDaVez : entity) {
         Usuario usuario = new Usuario();
 

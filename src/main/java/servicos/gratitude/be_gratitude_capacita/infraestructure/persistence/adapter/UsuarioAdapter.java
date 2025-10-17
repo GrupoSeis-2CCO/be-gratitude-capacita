@@ -46,13 +46,42 @@ public class UsuarioAdapter implements UsuarioGateway {
                 .filter(u -> u.getEmail() != null && u.getEmail().trim().equalsIgnoreCase(email.trim()))
                 .findFirst();
         if (entityOpt.isPresent()) {
-            String hash = entityOpt.get().getSenha();
+            UsuarioEntity userEntity = entityOpt.get();
+            String hash = userEntity.getSenha();
             log.debug("Hash salvo no banco: {}", hash);
-            if (BCrypt.checkpw(senha, hash)) {
-                log.info("Usuário autenticado com sucesso: {}", email);
-                return UsuarioMapper.toDomain(entityOpt.get());
+
+            // Se o valor no banco parece ser um hash BCrypt válido, use checkpw
+            if (hash != null && hash.startsWith("$2")) {
+                try {
+                    if (BCrypt.checkpw(senha, hash)) {
+                        log.info("Usuário autenticado com sucesso: {}", email);
+                        return UsuarioMapper.toDomain(userEntity);
+                    } else {
+                        log.warn("Senha inválida para {}", email);
+                    }
+                } catch (IllegalArgumentException iae) {
+                    // Protege contra 'Invalid salt' e outros formatos inesperados
+                    log.warn("Formato de hash inválido no banco para {}: {}", email, iae.getMessage());
+                }
             } else {
-                log.warn("Senha inválida para {}", email);
+                // Possível senha em texto simples (legacy) — comparar diretamente
+                if (hash != null && hash.equals(senha)) {
+                    log.info("Usuário autenticado (senha em texto simples). Atualizando para bcrypt: {}", email);
+                    try {
+                        String newHash = org.springframework.security.crypto.bcrypt.BCrypt.hashpw(senha,
+                                org.springframework.security.crypto.bcrypt.BCrypt.gensalt());
+                        userEntity.setSenha(newHash);
+                        usuarioRepository.save(userEntity);
+                        // retornar domínio com a entidade já atualizada
+                        return UsuarioMapper.toDomain(userEntity);
+                    } catch (Exception e) {
+                        log.error("Falha ao re-hashar senha do usuário {}: {}", email, e.getMessage());
+                        // mesmo se falhar ao re-hash, já autenticou com texto simples: retornar usuário
+                        return UsuarioMapper.toDomain(userEntity);
+                    }
+                } else {
+                    log.warn("Senha inválida (legacy) para {}", email);
+                }
             }
         } else {
             log.warn("Usuário com email {} não encontrado no banco.", email);

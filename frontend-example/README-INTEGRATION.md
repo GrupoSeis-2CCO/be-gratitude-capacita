@@ -13,6 +13,7 @@ How to wire the page into your app
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserExamsPage from './pages/UserExamsPage.jsx';
 import ClassDetailsPage from './pages/ClassDetailsPage.jsx';
+import StudentMaterialsListPage from './pages/StudentMaterialsListPage.jsx';
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="/cursos/:cursoId/participantes/:participanteId/provas" element={<UserExamsPage />} />
         {/* detalhes do curso */}
         <Route path="/cursos/:idCurso" element={<ClassDetailsPage />} />
+  {/* materiais (visão do colaborador) */}
+  <Route path="/cursos/:idCurso/material" element={<StudentMaterialsListPage />} />
       </Routes>
     </BrowserRouter>
   );
