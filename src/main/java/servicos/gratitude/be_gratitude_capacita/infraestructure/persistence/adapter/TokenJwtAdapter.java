@@ -21,9 +21,15 @@ public class TokenJwtAdapter implements TokenJwtGateway {
     @Override
     public String gerarToken(Usuario usuario) {
         SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), ALG.getJcaName());
+        Integer cargoId = usuario != null && usuario.getFkCargo() != null ? usuario.getFkCargo().getIdCargo() : null;
+        // Convenção alinhada: tipo de usuário segue o id do cargo
+        // 1 = Funcionário, 2 = Colaborador
+        Integer tipo = cargoId;
         return Jwts.builder()
                 .setSubject(usuario.getEmail())
                 .claim("id", usuario.getIdUsuario())
+                .claim("idCargo", cargoId)
+                .claim("tipo", tipo)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key, ALG)

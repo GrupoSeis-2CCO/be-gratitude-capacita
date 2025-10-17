@@ -25,6 +25,15 @@ public class UsuarioEntity {
     @Column(name = "senha")
     private String senha;
 
+    @Column(name = "telefone")
+    private String telefone;
+
+    @Column(name = "departamento")
+    private String departamento;
+
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
     @Column(name = "data_entrada")
     private LocalDateTime dataEntrada;
 
@@ -73,6 +82,30 @@ public class UsuarioEntity {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
     }
 
     public LocalDateTime getDataEntrada() {

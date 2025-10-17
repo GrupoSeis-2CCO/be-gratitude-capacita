@@ -16,6 +16,9 @@ public class UsuarioMapper {
         entity.setEmail(usuario.getEmail());
         entity.setNome(usuario.getNome());
         entity.setSenha(usuario.getSenha());
+    entity.setTelefone(usuario.getTelefone());
+    entity.setDepartamento(usuario.getDepartamento());
+    entity.setFotoUrl(usuario.getFotoUrl());
         entity.setDataEntrada(usuario.getDataEntrada());
         entity.setUltimoAcesso(usuario.getUltimoAcesso());
         entity.setFkCargo(CargoMapper.toEntity(usuario.getFkCargo()));
@@ -32,6 +35,9 @@ public class UsuarioMapper {
         usuario.setEmail(entity.getEmail());
         usuario.setNome(entity.getNome());
         usuario.setSenha(entity.getSenha());
+    usuario.setTelefone(entity.getTelefone());
+    usuario.setDepartamento(entity.getDepartamento());
+    usuario.setFotoUrl(entity.getFotoUrl());
         usuario.setDataEntrada(entity.getDataEntrada());
         usuario.setUltimoAcesso(entity.getUltimoAcesso());
         usuario.setFkCargo(CargoMapper.toDomain(entity.getFkCargo()));
@@ -51,6 +57,9 @@ public class UsuarioMapper {
         usuario.setEmail(entityDaVez.getEmail());
         usuario.setNome(entityDaVez.getNome());
         usuario.setSenha(entityDaVez.getSenha());
+    usuario.setTelefone(entityDaVez.getTelefone());
+    usuario.setDepartamento(entityDaVez.getDepartamento());
+    usuario.setFotoUrl(entityDaVez.getFotoUrl());
         usuario.setDataEntrada(entityDaVez.getDataEntrada());
         usuario.setUltimoAcesso(entityDaVez.getUltimoAcesso());
         usuario.setFkCargo(CargoMapper.toDomain(entityDaVez.getFkCargo()));

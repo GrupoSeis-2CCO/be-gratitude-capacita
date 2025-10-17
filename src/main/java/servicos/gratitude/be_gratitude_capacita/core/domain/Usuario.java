@@ -9,6 +9,9 @@ public class Usuario {
     private String cpf;
     private String email;
     private String senha;
+    private String telefone;
+    private String departamento;
+    private String fotoUrl;
     private LocalDateTime dataEntrada;
     private LocalDateTime ultimoAcesso;
     private Cargo fkCargo;
@@ -51,6 +54,30 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
     }
 
     public LocalDateTime getDataEntrada() {

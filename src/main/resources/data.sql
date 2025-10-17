@@ -1,8 +1,8 @@
 -- Garantir que usuários base (id 1, 2, 3) existem
 
 INSERT INTO cargo (id_cargo, nome_cargo) VALUES
-  (1, 'Colaborador'),
-  (2, 'Funcionário')
+  (1, 'Funcionário'),
+  (2, 'Colaborador')
 ON DUPLICATE KEY UPDATE nome_cargo = VALUES(nome_cargo);
 
 -- Garantir que cursos base existem antes das avaliações (contexto: Regularização Fundiária)
@@ -46,24 +46,24 @@ INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (4, 7.0, 4)
 ON DUPLICATE KEY UPDATE nota_minima = VALUES(nota_minima), fk_curso = VALUES(fk_curso);
 
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo) VALUES
-  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1),
-  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2),
-  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
+  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', 'Projetos', NULL),
+  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', 'RH', NULL),
+  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', 'TI', NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
 -- Dados adicionais de usuario (id 10 a 19) para testes variados
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo) VALUES
-  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1),
-  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1),
-  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2),
-  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1),
-  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2),
-  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1),
-  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2),
-  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1),
-  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2),
-  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
+  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL, NULL),
+  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL, NULL),
+  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL, NULL),
+  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL, NULL),
+  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL, NULL),
+  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL, NULL),
+  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL, NULL),
+  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL, NULL),
+  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL, NULL),
+  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL, NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
 
 
 
