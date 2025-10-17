@@ -2,6 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.web;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.*;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/exam")
 public class ExamSubmissionController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExamSubmissionController.class);
 
     @Autowired
     private TentativaRepository tentativaRepository;
@@ -47,24 +49,39 @@ public class ExamSubmissionController {
         MatriculaEntity matricula = matriculaOpt.get();
 
 
-        // 2. Gerar manualmente o próximo id_tentativa para a matrícula
-        int nextIdTentativa = 1;
-        var tentativasExistentes = tentativaRepository.findAllByMatricula(matricula);
-        if (!tentativasExistentes.isEmpty()) {
-            nextIdTentativa = tentativasExistentes.stream()
-                .mapToInt(t -> t.getIdTentativaComposto().getIdTentativa())
-                .max().orElse(0) + 1;
-        }
+        // 2. Gerar o próximo id_tentativa globalmente (a tabela tentativa tem PK somente em id_tentativa)
+    int nextIdTentativa = Optional.ofNullable(tentativaRepository.findMaxTentativaId()).orElse(0) + 1;
+    log.info("[ExamSubmission] nextIdTentativa={} (examId={}, userId={}, cursoId={})", nextIdTentativa, examId, submission.userId, cursoId);
 
-        TentativaEntity tentativa = new TentativaEntity();
-        TentativaEntityCompoundKey tentativaKey = new TentativaEntityCompoundKey();
-        tentativaKey.setIdMatriculaComposto(matricula.getId());
-        tentativaKey.setIdTentativa(nextIdTentativa);
-        tentativa.setIdTentativaComposto(tentativaKey);
-        tentativa.setMatricula(matricula);
-        tentativa.setAvaliacao(avaliacao);
-        tentativa.setDtTentativa(LocalDateTime.now());
-        tentativa = tentativaRepository.save(tentativa);
+        TentativaEntity tentativa = null;
+        int attempts = 3;
+        while (attempts-- > 0) {
+            try {
+                TentativaEntity t = new TentativaEntity();
+                TentativaEntityCompoundKey tentativaKey = new TentativaEntityCompoundKey();
+                tentativaKey.setIdMatriculaComposto(matricula.getId());
+                tentativaKey.setIdTentativa(nextIdTentativa);
+                t.setIdTentativaComposto(tentativaKey);
+                t.setMatricula(matricula);
+                t.setAvaliacao(avaliacao);
+                t.setDtTentativa(LocalDateTime.now());
+                tentativa = tentativaRepository.save(t);
+                log.info("[ExamSubmission] tentativa salva id={} (user={}, curso={})", nextIdTentativa, submission.userId, cursoId);
+                break;
+            } catch (DataIntegrityViolationException dive) {
+                // Se houve colisão de PK (Duplicate entry), recalcula o próximo id e tenta novamente
+                if (dive.getMessage() != null && dive.getMessage().toLowerCase().contains("duplicate entry")) {
+                    int prev = nextIdTentativa;
+                    nextIdTentativa = Optional.ofNullable(tentativaRepository.findMaxTentativaId()).orElse(0) + 1;
+                    log.warn("[ExamSubmission] Duplicate tentativa id {} -> retry with {}", prev, nextIdTentativa);
+                    continue;
+                }
+                throw dive;
+            }
+        }
+        if (tentativa == null) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "Falha ao gerar id de tentativa"));
+        }
 
         TentativaEntityCompoundKey tentativaKeyCompleto = tentativa.getIdTentativaComposto();
 

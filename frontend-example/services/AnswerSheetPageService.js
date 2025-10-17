@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api } from "../api.js";
 
 /**
  * Busca dados do gabarito (answer sheet) do backend.

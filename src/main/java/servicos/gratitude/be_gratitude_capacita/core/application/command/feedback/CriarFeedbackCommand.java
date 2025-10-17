@@ -4,6 +4,7 @@ public record CriarFeedbackCommand(
          Integer idCurso,
          Integer estrelas,
          String motivo,
-         Integer fkUsuario
+         Integer fkUsuario,
+         Boolean anonimo
 ) {
 }

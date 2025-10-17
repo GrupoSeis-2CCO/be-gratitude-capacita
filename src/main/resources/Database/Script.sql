@@ -184,8 +184,9 @@ select * from resposta_do_usuario;
 -- Tabela feedback
 CREATE TABLE feedback (
     FK_curso INT NOT NULL,
-    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 5),
+    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 10),
     motivo VARCHAR(250),
+    anonimo TINYINT(1) NOT NULL DEFAULT 0,
     FK_usuario INT NOT NULL,
     PRIMARY KEY (FK_usuario, FK_curso),
     FOREIGN KEY (FK_usuario) REFERENCES usuario(id_usuario),

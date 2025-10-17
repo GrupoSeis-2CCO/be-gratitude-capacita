@@ -70,6 +70,7 @@ public class CriarFeedbackUseCase {
         feedback.setEstrelas(command.estrelas());
         feedback.setFkUsuario(usuario);
         feedback.setMotivo(command.motivo());
+        feedback.setAnonimo(Boolean.TRUE.equals(command.anonimo()));
 
         return feedbackGateway.save(feedback);
     }

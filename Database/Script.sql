@@ -180,13 +180,23 @@ select * from resposta_do_usuario;
 -- Tabela feedback
 CREATE TABLE feedback (
     fk_curso INT NOT NULL,
-    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 5),
+    estrelas INT NOT NULL CHECK (estrelas BETWEEN 1 AND 10),
     motivo VARCHAR(250),
+    anonimo BOOLEAN NOT NULL DEFAULT FALSE,
     fk_usuario INT NOT NULL,
     PRIMARY KEY (fk_usuario, fk_curso),
     FOREIGN KEY (fk_usuario) REFERENCES usuario(id_usuario),
     FOREIGN KEY (fk_curso) REFERENCES curso(id_curso)
 );
+
+-- Para bancos já existentes (LEGADO), caso precise ajustar sem recriar o schema, use como referência:
+-- 1) Adicionar coluna 'anonimo' quando ausente
+--    ALTER TABLE feedback ADD COLUMN anonimo TINYINT(1) NOT NULL DEFAULT 0;
+-- 2) Atualizar a restrição para aceitar 1..10 (nome da constraint pode variar)
+--    -- Exemplo para MySQL 8+:
+--    -- ALTER TABLE feedback DROP CHECK chk_feedback_estrelas;
+--    -- ALTER TABLE feedback ADD CONSTRAINT chk_feedback_estrelas CHECK (estrelas BETWEEN 1 AND 10);
+--    -- Se sua instância não suportar DROP/ADD CHECK, considere remover a constraint e validar via aplicação.
 
 use capacita;
 select * from feedback

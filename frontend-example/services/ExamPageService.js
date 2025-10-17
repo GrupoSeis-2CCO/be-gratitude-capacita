@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api } from "../api.js";
 
 /**
  * Busca dados da prova (exam) do backend para o ExamTaker.

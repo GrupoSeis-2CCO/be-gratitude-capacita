@@ -13,21 +13,27 @@ public record FeedbackResponse(
         String cursoTitulo,
         Integer usuarioId,
         String aluno,
-        Integer estrelas,
-        String motivo
+    Integer estrelas,
+    String motivo,
+    Boolean anonimo
 ) {
 
     public static FeedbackResponse fromDomain(Feedback feedback) {
         Usuario usuario = feedback.getFkUsuario();
         Curso curso = feedback.getCurso();
 
-        return new FeedbackResponse(
+    boolean isAnon = Boolean.TRUE.equals(feedback.getAnonimo());
+    String alunoNome = (Objects.nonNull(usuario) ? usuario.getNome() : null);
+    if (isAnon) alunoNome = null; // ocultar nome no modo anônimo
+
+    return new FeedbackResponse(
                 feedback.getFkCurso(),
                 Objects.nonNull(curso) ? curso.getTituloCurso() : null,
                 Objects.nonNull(usuario) ? usuario.getIdUsuario() : null,
-                Objects.nonNull(usuario) ? usuario.getNome() : null,
+        alunoNome,
                 feedback.getEstrelas(),
-                feedback.getMotivo()
+        feedback.getMotivo(),
+        isAnon
         );
     }
 

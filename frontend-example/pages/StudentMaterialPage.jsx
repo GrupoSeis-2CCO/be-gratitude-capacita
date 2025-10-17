@@ -10,7 +10,7 @@ import { getMateriaisPorCursoEnsuringMatricula as getMateriaisPorCurso } from ".
 import MaterialAlunoService from "../services/MaterialAlunoService.js";
 import { ensureMatricula, updateUltimoAcesso } from "../services/MatriculaService.js";
 import { useAuth } from "../hooks/useAuth.js";
-import { api } from "../services/api.js";
+import { api } from "../api.js";
 
 // Student view of a single material with backend integration, transcript and PDF rendering
 export default function StudentMaterialPage() {

@@ -20,4 +20,8 @@ public interface TentativaRepository extends JpaRepository<TentativaEntity, Tent
     // Use the embedded key path to filter by usuario without joining the Matricula entity.
     @Query("select t from TentativaEntity t join fetch t.matricula m join fetch m.usuario join fetch m.curso where t.idTentativaComposto.idMatriculaComposto.fkUsuario = :fkUsuario")
     java.util.List<TentativaEntity> findAllByUsuario(@Param("fkUsuario") Integer fkUsuario);
+
+    // Recupera o maior id_tentativa globalmente para evitar colisões de PK (tabela usa PK apenas em id_tentativa)
+    @Query("select coalesce(max(t.idTentativaComposto.idTentativa), 0) from TentativaEntity t")
+    Integer findMaxTentativaId();
 }
