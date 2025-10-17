@@ -90,6 +90,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- PDF generation for seeding readable placeholder PDFs -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>2.0.32</version>
+		</dependency>
 		<dependency>
     <groupId>software.amazon.awssdk</groupId>
     <artifactId>s3</artifactId>

@@ -16,6 +16,7 @@ export default function MaterialPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [materialsList, setMaterialsList] = useState([]);
 
   async function loadMaterial() {
     setLoading(true);
@@ -40,6 +41,29 @@ export default function MaterialPage() {
   useEffect(() => {
     loadMaterial();
   }, [idCurso, idMaterial]);
+
+  // Carregar lista para obter ordem global e manter numeração estável mesmo com filtros
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { getMateriaisPorCurso } = await import('../services/MaterialListPageService.js');
+        const resp = await getMateriaisPorCurso(idCurso);
+        let arr = [];
+        if (Array.isArray(resp)) arr = resp; else if (resp?.materiais) arr = resp.materiais; else if (resp?.data && Array.isArray(resp.data)) arr = resp.data; else if (resp) arr = [resp];
+        const onlyMaterials = (arr || []).filter(m => (m?.tipo || m?.type) !== 'avaliacao');
+        const withIndex = onlyMaterials.map((m, idx) => ({ ...m, __idx: idx }));
+        withIndex.sort((a, b) => {
+          const ao = a?.ordem ?? a?.order ?? Number.MAX_SAFE_INTEGER;
+          const bo = b?.ordem ?? b?.order ?? Number.MAX_SAFE_INTEGER;
+          if (ao === bo) return a.__idx - b.__idx;
+          return (ao || Number.MAX_SAFE_INTEGER) - (bo || Number.MAX_SAFE_INTEGER);
+        });
+        if (mounted) setMaterialsList(withIndex.map(({ __idx, ...m }) => m));
+      } catch (_) {}
+    })();
+    return () => { mounted = false };
+  }, [idCurso]);
 
   // reset videoLoaded when the material changes (so thumbnails show for new materials)
   useEffect(() => {
@@ -267,11 +291,15 @@ export default function MaterialPage() {
     }
 
     if (material.tipo === 'apostila') {
+      const displayTitle = (() => {
+        const raw = material?.titulo || '';
+        return typeof raw === 'string' && /\.pdf$/i.test(raw) ? raw.replace(/\.pdf$/i, '') : raw;
+      })();
       return (
         <div className="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 aspect-video flex items-center justify-center">
           <div className="flex flex-col items-center text-gray-600">
             <FileText size={64} className="mb-4" />
-            <p className="text-lg font-medium">Visualizador de PDF</p>
+            <p className="text-lg font-medium">{displayTitle || 'Visualizador de PDF'}</p>
             <Button
               variant="Default"
               label="Abrir PDF"
@@ -314,7 +342,14 @@ export default function MaterialPage() {
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600">
             <h2 className="text-2xl font-bold text-white">
-              Material {idMaterial} - {material ? material.titulo : '...'}
+              {(() => {
+                const list = materialsList || [];
+                const cur = list.find(m => Number(m?.id) === Number(idMaterial));
+                const order = cur?.ordem ?? cur?.order;
+                const cleanTitle = material && typeof material.titulo === 'string' && /\.pdf$/i.test(material.titulo) ? material.titulo.replace(/\.pdf$/i, '') : (material?.titulo || '...');
+                const num = order != null ? order : Number(idMaterial);
+                return `Material ${num} - ${cleanTitle}`;
+              })()}
             </h2>
             <div className="flex items-center mt-2 text-orange-100">
               {material ? (material.tipo === 'video' ? <Youtube size={20} className="mr-2" /> : <FileText size={20} className="mr-2" />) : null}

@@ -34,15 +34,22 @@ export default function MaterialsListPage() {
 			const cursoId = 1; // ajuste conforme necessário ou pegue da rota/contexto
 			const mats = await getMateriaisPorCurso(cursoId);
 			// mapear para o formato do MaterialCard (id, title, type, description, url, hidden)
-			const mapped = (mats || []).map((m, idx) => ({
-				id: m.id ?? m.idApostila ?? m.idVideo ?? idx,
-				title: m.titulo ?? m.nomeApostila ?? m.nomeVideo ?? `Material ${m.id ?? idx}`,
-				type: m.tipo === 'video' ? 'video' : (m.tipo === 'apostila' ? 'pdf' : 'avaliacao'),
-				description: m.descricao ?? m.descricaoApostila ?? m.descricaoVideo ?? '',
-				url: m.url ?? m.urlArquivo ?? m.urlVideo ?? null,
-				hidden: (typeof m.isApostilaOculto !== 'undefined') ? (m.isApostilaOculto === 1) : (typeof m.isVideoOculto !== 'undefined' ? (m.isVideoOculto === 1) : false),
-				order: m.ordem ?? m.ordemVideo ?? m.ordemApostila ?? idx
-			}));
+			const mapped = (mats || []).map((m, idx) => {
+				const type = m.tipo === 'video' ? 'video' : (m.tipo === 'apostila' ? 'pdf' : 'avaliacao');
+				// Strip trailing .pdf in titles for apostilas (cleaner list labels)
+				const rawTitle = m.titulo ?? m.nomeApostila ?? m.nomeVideo ?? `Material ${m.id ?? idx}`;
+				const cleanTitle = typeof rawTitle === 'string' && /\.pdf$/i.test(rawTitle) ? rawTitle.replace(/\.pdf$/i, '') : rawTitle;
+				return ({
+					id: m.id ?? m.idApostila ?? m.idVideo ?? idx,
+					title: type === 'pdf' ? cleanTitle : rawTitle,
+					type,
+					description: m.descricao ?? m.descricaoApostila ?? m.descricaoVideo ?? '',
+					url: m.url ?? m.urlArquivo ?? m.urlVideo ?? null,
+					hidden: (typeof m.isApostilaOculto !== 'undefined') ? (m.isApostilaOculto === 1) : (typeof m.isVideoOculto !== 'undefined' ? (m.isVideoOculto === 1) : false),
+					// Persisted order when available; this drives stable numbering even when filtering
+					order: m.ordem ?? m.ordemVideo ?? m.ordemApostila ?? (idx + 1)
+				});
+			});
 
 			// ensure base materials are sorted by stored order initially
 			mapped.sort((a, b) => (a.order || 0) - (b.order || 0));

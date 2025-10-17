@@ -130,7 +130,7 @@ export default function MaterialCard({ material, index, onEdit = null, onActionC
       <div className="flex-1">
         <div className="flex justify-between items-start">
           <h3 className="text-xl font-bold text-gray-800 mb-2">
-            Material {index + 1} - {material.title}
+            {`Material ${material?.order ?? (index + 1)} - ${material.title}`}
           </h3>
           <div className="relative" ref={ref}>
             <button className="text-gray-500 hover:text-gray-800" onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>

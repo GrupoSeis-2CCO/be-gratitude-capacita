@@ -32,6 +32,9 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (5, 'Guia de Regularização Fundiária - Introdução.pdf', 'regulacao_apostila_intro.pdf', 'Guia introdutório com conceitos e procedimentos iniciais para processos de regularização fundiária.', 512000, 0, 1, 4)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
+-- Vincula URL local para a apostila do curso 4 (id_apostila=5)
+UPDATE apostila SET url_arquivo = '/uploads/regulacao_apostila_intro.pdf' WHERE id_apostila = 5;
+
 -- Matricular John Doe (se existir) no curso 4 e adicionar materiais iniciais
 -- (matriculas do John Doe para curso 4 serão adicionadas mais abaixo, depois de garantirmos que o usuário existe)
 
@@ -91,8 +94,13 @@ INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, 
   SELECT id_usuario, 4, '2025-04-01 08:00:00', '2025-04-01 08:00:00', 0, NULL FROM usuario WHERE email = 'john@doe.com'
 ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
 
+-- Em material_aluno, cada linha deve referenciar somente um tipo de material (vídeo OU apostila)
+-- Vincula John Doe (curso 4) separando vídeo (id 5) e apostila (id 5)
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
-  SELECT id_usuario, 4, 5, 5, 0, NULL FROM usuario WHERE email = 'john@doe.com'
+  SELECT id_usuario, 4, 5, NULL, 0, NULL FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso)
+  SELECT id_usuario, 4, NULL, 5, 0, NULL FROM usuario WHERE email = 'john@doe.com'
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 INSERT INTO usuario (
@@ -198,6 +206,12 @@ INSERT INTO apostila (id_apostila, nome_apostila_original, nome_apostila_armazen
   (4, 'Participação Social e Comunicação.pdf', 'regulacao_participacao.pdf', 'Recursos e orientações para mobilização social e comunicação em processos de regularização.', 102400, 0, 4, 1)
 ON DUPLICATE KEY UPDATE nome_apostila_original = VALUES(nome_apostila_original), nome_apostila_armazenamento = VALUES(nome_apostila_armazenamento), descricao_apostila = VALUES(descricao_apostila), tamanho_bytes = VALUES(tamanho_bytes), is_apostila_oculto = VALUES(is_apostila_oculto), ordem_apostila = VALUES(ordem_apostila), fk_curso = VALUES(fk_curso);
 
+-- Vincula URLs locais para apostilas do curso 1 (ids 1..4)
+UPDATE apostila SET url_arquivo = '/uploads/reurb_intro.pdf' WHERE id_apostila = 1;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_instrumentos.pdf' WHERE id_apostila = 2;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_modelos.pdf' WHERE id_apostila = 3;
+UPDATE apostila SET url_arquivo = '/uploads/reurb_participacao.pdf' WHERE id_apostila = 4;
+
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
   -- For course 1 we want exactly 1 video + 1 apostila as materials
   -- Insert two material_aluno rows per student (one for the video, one for the apostila)
@@ -256,10 +270,18 @@ ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apo
 -- ...existing code...
 -- Dados iniciais para tabela apostila (removido duplicidade)
 -- Já inserido anteriormente
+-- Corrige duplicidades: não vincular vídeo e apostila na mesma linha
+-- Para (1,1): cria duas linhas, uma para vídeo=1 e outra para apostila=1
 INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
-(1, 1, 1, 1, 0, '2025-01-22 06:00:00'),
-(2, 2, 2, 2, 1, '2025-01-18 09:30:00'),
-(2, 2, 3, 3, 0, NULL)
+(1, 1, 1, NULL, 0, '2025-01-22 06:00:00'),
+(1, 1, NULL, 1, 0, '2025-01-22 06:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+-- Para (2,2): cria quatro linhas separadas (vídeo 2, apostila 2) e (vídeo 3, apostila 3)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+(2, 2, 2, NULL, 1, '2025-01-18 09:30:00'),
+(2, 2, NULL, 2, 1, '2025-01-18 09:30:00'),
+(2, 2, 3, NULL, 0, NULL),
+(2, 2, NULL, 3, 0, NULL)
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela questao (ANTES das alternativas para que a FK funcione)

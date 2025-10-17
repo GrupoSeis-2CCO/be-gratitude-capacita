@@ -84,7 +84,16 @@ public class CursoController {
                 out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo(), v.getOrdemVideo()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
-                out.add(new MaterialResponse(a.getIdApostila(), "apostila", a.getNomeApostilaOriginal(), a.getDescricaoApostila(), null, a.getOrdemApostila()));
+                // Return the URL to the stored PDF so the frontend can render/download without
+                // requiring the single-material endpoint (which may 404 on mixed id spaces)
+                out.add(new MaterialResponse(
+                        a.getIdApostila(),
+                        "apostila",
+                        a.getNomeApostilaOriginal(),
+                        a.getDescricaoApostila(),
+                        a.getUrlArquivo(),
+                        a.getOrdemApostila()
+                ));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
                 out.add(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));
