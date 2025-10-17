@@ -25,16 +25,16 @@ public class DataSourceChecker implements CommandLineRunner {
     public void run(String... args) throws Exception {
         try (Connection c = dataSource.getConnection()) {
             DatabaseMetaData md = c.getMetaData();
-            log.info("Datasource productName={} url={} user={}", md.getDatabaseProductName(), md.getURL(), md.getUserName());
+            log.debug("Datasource productName={} url={} user={}", md.getDatabaseProductName(), md.getURL(), md.getUserName());
         } catch (Exception e) {
-            log.warn("Não foi possível obter info do DataSource: {}", e.getMessage());
+            log.debug("Não foi possível obter info do DataSource: {}", e.getMessage());
         }
 
         try {
             Integer countFeedback = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM feedback", Integer.class);
-            log.info("DB count feedback={}", countFeedback);
+            log.debug("DB count feedback={}", countFeedback);
         } catch (Exception e) {
-            log.warn("Erro ao consultar contagem de feedback: {}", e.getMessage());
+            log.debug("Erro ao consultar contagem de feedback: {}", e.getMessage());
         }
 
         try {

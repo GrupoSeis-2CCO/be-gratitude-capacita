@@ -28,8 +28,6 @@ public class AcessoController {
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
     }
 
-    // Endpoint auxiliar para logar acesso simples por usuário (sem amarrar a curso);
-    // mantém compatibilidade e simplifica o front quando quiser apenas registrar "entrou".
     @PostMapping("/usuario/{fkUsuario}")
     public ResponseEntity<Acesso> criarAcessoPorUsuario(
             @PathVariable Integer fkUsuario

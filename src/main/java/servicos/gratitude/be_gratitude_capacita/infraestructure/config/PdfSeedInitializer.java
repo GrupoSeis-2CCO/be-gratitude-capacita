@@ -52,7 +52,7 @@ public class PdfSeedInitializer {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to initialize sample PDFs: {}", e.getMessage());
+            log.debug("Failed to initialize sample PDFs: {}", e.getMessage());
         }
     }
 
@@ -91,9 +91,9 @@ public class PdfSeedInitializer {
 
             File f = path.toFile();
             doc.save(f);
-            log.info("Seeded PDF with content at: {}", f.getAbsolutePath());
+            log.debug("Seeded PDF with content at: {}", f.getAbsolutePath());
         } catch (IOException e) {
-            log.warn("Failed to write PDF {}: {}", path, e.getMessage());
+            log.debug("Failed to write PDF {}: {}", path, e.getMessage());
         }
     }
 
