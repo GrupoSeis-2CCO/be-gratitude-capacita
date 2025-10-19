@@ -475,7 +475,7 @@ spring.mail.username=seu-email@gmail.com
 spring.mail.password=xxxx xxxx xxxx xxxx
 ```
 
-### Opção 2: MailHog (Melhor para Desenvolvimento)
+### Opção 3: MailHog (Melhor para Desenvolvimento)
 
 MailHog é um servidor SMTP fake que intercepta emails sem realmente enviá-los. Perfeito para testes!
 
@@ -499,9 +499,65 @@ spring.mail.port=1025
 
 ---
 
-### Opção 3: SendGrid / Mailgun (Produção)
+### Opção 4: AWS SES (Recomendado para Produção) ⭐
 
-Para ambientes de produção, use serviços SMTP gerenciados:
+**Vantagens:**
+- ✅ 62.000 emails/mês GRÁTIS
+- ✅ Depois: $0.10 por 1000 emails
+- ✅ Integrado com AWS (se já usa S3)
+- ✅ Alta entregabilidade
+
+**Setup (uma única vez):**
+
+1. **AWS Console → SES (Simple Email Service)**
+   - Região: **us-east-1**
+   - Verified Identities → Create identity
+   - Adicione seu email/domínio
+   - Confirme no email
+
+2. **Solicitar Production Access**
+   - SES Dashboard → Send quota
+   - "Request production access"
+   - Demora ~1 dia para aprovar
+
+3. **Gerar SMTP Credentials**
+   - SES → SMTP Settings → Create SMTP Credentials
+   - Copia o Username e Password gerados
+
+4. **Adicionar nos GitHub Secrets** (Settings > Secrets and variables > Actions)
+   ```
+   AWS_SES_SMTP_USER=seu-usuario-smtp
+   AWS_SES_SMTP_PASSWORD=sua-senha-smtp-gerada
+   ```
+
+5. **CI/CD já está configurado!**
+   - `.github/workflows/cicd.yml` já envia essas variáveis
+   - Só execute o setup acima
+
+**Configuração no `.env` (já está no CI/CD):**
+```bash
+MAIL_HOST=email-smtp.us-east-1.amazonaws.com
+MAIL_PORT=587
+MAIL_USERNAME=${AWS_SES_SMTP_USER}
+MAIL_PASSWORD=${AWS_SES_SMTP_PASSWORD}
+```
+
+**Testes locais com SES:**
+```bash
+# Copie as credenciais do AWS e execute localmente
+export MAIL_HOST=email-smtp.us-east-1.amazonaws.com
+export MAIL_PORT=587
+export MAIL_USERNAME=seu-usuario-smtp
+export MAIL_PASSWORD=sua-senha-smtp
+
+mvn spring-boot:run
+```
+
+---
+
+### Opção 5: SendGrid / Mailgun (Alternativa)
+
+Para ambientes de produção:
 
 ```properties
 # SendGrid
@@ -510,6 +566,17 @@ spring.mail.port=587
 spring.mail.username=apikey
 spring.mail.password=${SENDGRID_API_KEY}
 ```
+
+---
+
+### Resumo: Qual usar?
+
+| Ambiente | Recomendação | Config |
+|----------|--------------|--------|
+| **Dev Local** | MailHog | `mailhog:1025` |
+| **Testes** | Gmail App Password | `smtp.gmail.com` |
+| **Produção** | AWS SES | `email-smtp.us-east-1.amazonaws.com` |
+| **Grande Volume** | SendGrid | `smtp.sendgrid.net` |
 
 ---
 
@@ -846,12 +913,71 @@ RABBITMQ_PASSWORD=guest
 
 ---
 
+## ✅ Checklist de Setup - AWS SES para Produção
+
+Se você quer usar AWS SES (recomendado), siga este checklist:
+
+### Passo 1: AWS Console
+
+- [ ] Acesse: https://console.aws.amazon.com/ses/
+- [ ] Selecione região: **us-east-1**
+- [ ] Vá em: Verified identities
+- [ ] Clique: "Create identity"
+- [ ] Selecione: Email address
+- [ ] Email: seu-email@company.com
+- [ ] Confirme no email que receber
+
+### Passo 2: Request Production Access
+
+- [ ] SES Dashboard → Send quota
+- [ ] Clique: "Request production access"
+- [ ] Preencha o formulário
+- [ ] Aguarde ~1 dia para aprovação
+
+### Passo 3: Gerar SMTP Credentials
+
+- [ ] SES → SMTP Settings
+- [ ] Clique: "Create SMTP Credentials"
+- [ ] Download das credenciais
+- [ ] Salve em local seguro:
+  - Username: `AKIA...`
+  - Password: `...senha-gerada...`
+
+### Passo 4: GitHub Secrets
+
+- [ ] Vá em: Repository Settings > Secrets and variables > Actions
+- [ ] Clique: "New repository secret"
+- [ ] Adicione 2 secrets:
+  ```
+  AWS_SES_SMTP_USER = seu-username-smtp
+  AWS_SES_SMTP_PASSWORD = sua-senha-smtp
+  ```
+
+### Passo 5: CI/CD já está pronto!
+
+- [ ] `.github/workflows/cicd.yml` já usa essas variáveis
+- [ ] Só fazer push para `main` branch
+- [ ] GitHub Actions automaticamente:
+  1. Compila Maven
+  2. Gera JAR
+  3. Copia para servidor
+  4. Aplica `.env` com AWS SES configurado
+  5. Reinicia containers
+
+### Passo 6: Testar
+
+- [ ] Admin publica um curso
+- [ ] Verifique AWS SES → Sent emails
+- [ ] Email deve chegar na caixa de entrada
+
+---
+
 ## 🔒 Segurança
 
 - ✅ RabbitMQ: Alterar credenciais padrão em produção
-- ✅ Email: Usar "Senha de App" do Gmail, não senha real
-- ✅ Variáveis: Não commitar credenciais no Git
-- ✅ SSL/TLS: Ativar conexão criptografada com RabbitMQ
+- ✅ Email: Usar AWS SES (não colocar senha real no Git)
+- ✅ Variáveis: Usar GitHub Secrets (nunca commitar credenciais)
+- ✅ SSL/TLS: SES usa conexão segura por padrão
 - ✅ Validação: Sempre validar dados antes de processar
 
 ---
@@ -859,10 +985,12 @@ RABBITMQ_PASSWORD=guest
 ## 📚 Referências
 
 - [Spring AMQP Documentation](https://spring.io/projects/spring-amqp)
+- [AWS SES Documentation](https://docs.aws.amazon.com/ses/)
 - [RabbitMQ Tutorials](https://www.rabbitmq.com/getstarted.html)
 - [RabbitMQ Management Plugin](https://www.rabbitmq.com/management.html)
 
 ---
 
 **Última atualização:** 18/10/2025  
+
 
