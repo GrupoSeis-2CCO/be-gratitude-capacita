@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.*;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.CursoAdapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.MatriculaAdapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.UsuarioAdapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.messaging.producer.NotificacaoProducer;
 
 @Configuration
 public class CursoBeanConfig {
@@ -41,5 +44,19 @@ public class CursoBeanConfig {
     @Bean
     public EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase(CursoAdapter cursoAdapter) {
         return new EncontrarCursoPorIdUseCase(cursoAdapter);
+    }
+
+    @Bean
+    public PublicarCursoUseCase publicarCursoUseCase(
+            CursoAdapter cursoAdapter,
+            MatriculaAdapter matriculaAdapter,
+            UsuarioAdapter usuarioAdapter,
+            NotificacaoProducer notificacaoProducer) {
+        return new PublicarCursoUseCase(
+            cursoAdapter, 
+            matriculaAdapter, 
+            usuarioAdapter, 
+            notificacaoProducer
+        );
     }
 }

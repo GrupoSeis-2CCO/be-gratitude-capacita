@@ -1,0 +1,77 @@
+version: '3.9'
+
+# ⚠️ ATENÇÃO: Este arquivo é APENAS para DESENVOLVIMENTO LOCAL
+# ⚠️ Para PRODUÇÃO, veja o CI/CD: .github/workflows/cicd.yml
+# ⚠️ Arquitetura de produção: GitHub Actions compila → rsync JAR → docker-compose no servidor
+# 
+# USO: docker-compose up -d
+# PARAR: docker-compose down
+
+services:
+  # 🗄️ MySQL Database
+  mysql-capacita:
+    image: mysql:8.0
+    container_name: mysql-capacita
+    hostname: mysql-capacita
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: capacita
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./src/main/resources/Database/Script.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+    networks:
+      - capacita-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 5s
+    restart: unless-stopped
+
+  # 🐰 RabbitMQ Message Broker (Notificações)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"      # AMQP port (protocolo)
+      - "15672:15672"    # Management Console → http://localhost:15672 (guest/guest)
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - capacita-net
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      timeout: 10s
+      retries: 10
+      interval: 3s
+    restart: unless-stopped
+
+  # 📧 MailHog - Mock SMTP para testar emails
+  # Dashboard: http://localhost:8025
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    hostname: mailhog
+    ports:
+      - "1025:1025"   # SMTP (aplicação envia para cá)
+      - "8025:8025"   # Web UI (ver emails)
+    networks:
+      - capacita-net
+    restart: unless-stopped
+
+networks:
+  capacita-net:
+    driver: bridge
+
+volumes:
+  rabbitmq-data:
+  mysql-data:
