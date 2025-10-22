@@ -20,6 +20,7 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.avaliac
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.questao.ListarQuestoesPorAvaliacaoUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.matricula.ListarMatriculaPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.MaterialResponse;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.PagedResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.CursoResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.PublicarCursoRequest;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
@@ -106,6 +107,56 @@ public class CursoController {
 
             if (out.isEmpty()) return ResponseEntity.noContent().build();
             return ResponseEntity.ok(out);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao listar materiais do curso", e);
+        }
+    }
+
+    @GetMapping("/{idCurso}/materiais/paginated")
+    public ResponseEntity<PagedResponse<MaterialResponse>> listarMateriaisDoCursoPaginado(
+        @PathVariable Integer idCurso,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Integer offset,
+        @RequestParam(required = false) Integer limit
+    ) {
+        try {
+            if (page < 0) page = 0;
+            if (size <= 0) size = 10;
+
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Video> videos = listarVideoPorCursoUseCase.execute(idCurso);
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Apostila> apostilas = listarApostilaPorCursoUseCase.execute(idCurso);
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
+
+            List<MaterialResponse> out = new java.util.ArrayList<>();
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
+                out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo(), v.getOrdemVideo()));
+            }
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
+                out.add(new MaterialResponse(
+                        a.getIdApostila(),
+                        "apostila",
+                        a.getNomeApostilaOriginal(),
+                        a.getDescricaoApostila(),
+                        a.getUrlArquivo(),
+                        a.getOrdemApostila()
+                ));
+            }
+            for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                out.add(new MaterialResponse(av.getIdAvaliacao(), "avaliacao", "Avaliação #" + av.getIdAvaliacao(), null, null));
+            }
+
+            if (out.isEmpty()) return ResponseEntity.noContent().build();
+
+            int effSize = (limit != null && limit > 0) ? limit : size;
+            int startIndex = (offset != null && offset >= 0) ? offset : (page * effSize);
+
+            int start = Math.min(startIndex, out.size());
+            int end = Math.min(start + effSize, out.size());
+            List<MaterialResponse> slice = out.subList(start, end);
+            int respPage = (offset != null && limit != null && limit > 0) ? (offset / limit) : page;
+            PagedResponse<MaterialResponse> resp = new PagedResponse<>(slice, respPage, effSize, out.size());
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao listar materiais do curso", e);
         }

@@ -16,6 +16,7 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedbac
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Feedback;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.FeedbackResponse;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.PagedResponse;
 
 import java.util.List;
 
@@ -77,6 +78,54 @@ public class FeedbackController {
             }
 
             return ResponseEntity.status(HttpStatus.OK).body(FeedbackResponse.fromDomains(feedbacks));
+        } catch (ValorInvalidoException e){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage(), e
+            );
+        } catch (NaoEncontradoException e){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage(), e
+            );
+        } catch (ConflitoException e){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, e.getMessage(), e
+            );
+        }
+    }
+
+    @GetMapping("/curso/{idCurso}/paginated")
+    public ResponseEntity<PagedResponse<FeedbackResponse>> listarFeedbackPorCursoPaginado(
+        @PathVariable Integer idCurso,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Integer offset,
+        @RequestParam(required = false) Integer limit
+    ){
+        try {
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+
+            Curso curso = encontrarCursoPorIdUseCase.execute(idCurso);
+            List<Feedback> feedbacks = listarFeedbacksPorCurso.execute(curso);
+            if (feedbacks == null || feedbacks.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            feedbacks.forEach(f -> f.setCurso(curso));
+            List<FeedbackResponse> mapped = FeedbackResponse.fromDomains(feedbacks);
+
+            // Offset/limit alias support
+            int effSize = (limit != null && limit > 0) ? limit : size;
+            int startIndex = (offset != null && offset >= 0) ? offset : (page * effSize);
+
+            int start = Math.min(startIndex, mapped.size());
+            int end = Math.min(start + effSize, mapped.size());
+            List<FeedbackResponse> slice = mapped.subList(start, end);
+
+            // Derive page when offset/limit provided
+            int respPage = (offset != null && limit != null && limit > 0) ? (offset / limit) : page;
+            PagedResponse<FeedbackResponse> resp = new PagedResponse<>(slice, respPage, effSize, mapped.size());
+            return ResponseEntity.ok(resp);
         } catch (ValorInvalidoException e){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e

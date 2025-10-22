@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import java.util.List;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.PagedResponse;
 
 @RestController
 @RequestMapping("/matriculas")
@@ -243,6 +244,134 @@ public class MatriculaController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (ConflitoException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/curso/{fkCurso}/participantes/paginated")
+    public ResponseEntity<PagedResponse<ParticipanteCursoResponse>> listarParticipantesPorCursoPaginado(
+        @PathVariable Integer fkCurso,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Integer offset,
+        @RequestParam(required = false) Integer limit) {
+        try {
+            if (page < 0) page = 0;
+            if (size <= 0) size = 10;
+
+            Curso curso = encontrarCursoPorIdUseCase.execute(fkCurso);
+            List<Matricula> matriculas = listarMatriculaPorCursoUseCase.execute(curso);
+
+            List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> _feedbacksTemp;
+            try {
+                _feedbacksTemp = listarFeedbacksPorCurso.execute(curso);
+            } catch (Exception e) {
+                _feedbacksTemp = java.util.Collections.emptyList();
+            }
+            final List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksDoCurso = _feedbacksTemp;
+
+            int totalApostilas = 0;
+            int totalVideos = 0;
+            int totalQuestoes = 0;
+            try { totalApostilas = listarApostilaPorCursoUseCase.execute(fkCurso).size(); } catch (Exception ignored) {}
+            try { totalVideos = listarVideoPorCursoUseCase.execute(fkCurso).size(); } catch (Exception ignored) {}
+            try {
+                java.util.List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(fkCurso);
+                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
+                    try { totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size(); } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
+            final int materiaisTotaisDoCurso = totalApostilas + totalVideos + totalQuestoes;
+
+            List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
+                Usuario usuario = matricula.getUsuario();
+                int materiaisConcluidos;
+                try {
+                    List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(matricula);
+                    materiaisConcluidos = (int) materiais.stream().filter(mat -> Boolean.TRUE.equals(mat.getFinalizado())).count();
+                    try {
+                        List<servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario> respostas = listarRespostasDoUsuarioUseCase.execute(usuario);
+                        long respostasNoCurso = respostas.stream()
+                                .filter(r -> r != null && r.getTentativa() != null && r.getTentativa().getMatricula() != null && r.getTentativa().getMatricula().getCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso().equals(curso.getIdCurso()))
+                                .map(r -> {
+                                    if (r.getAlternativa() != null && r.getAlternativa().getQuestao() != null && r.getAlternativa().getQuestao().getIdQuestaoComposto() != null) {
+                                        return r.getAlternativa().getQuestao().getIdQuestaoComposto();
+                                    }
+                                    return null;
+                                })
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .count();
+                        materiaisConcluidos += (int) respostasNoCurso;
+                    } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    materiaisConcluidos = 0;
+                }
+
+                java.time.LocalDateTime ultimoAcesso = matricula.getUltimoAcesso();
+
+                Double avaliacao = null;
+                if (ultimoAcesso != null) {
+                    List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksUsuario = feedbacksDoCurso.stream()
+                            .filter(f -> f.getFkUsuario() != null && f.getFkUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                            .collect(java.util.stream.Collectors.toList());
+                    if (!feedbacksUsuario.isEmpty()) {
+                        avaliacao = feedbacksUsuario.stream()
+                                .mapToInt(servicos.gratitude.be_gratitude_capacita.core.domain.Feedback::getEstrelas)
+                                .average()
+                                .orElse(Double.NaN);
+                    }
+                }
+
+                Integer ultimaNotaAcertos = null;
+                Integer ultimaNotaTotal = null;
+                try {
+                    List<Tentativa> tentativas = listarTentativaPorMatriculaUseCase.execute(matricula);
+                    if (tentativas != null && !tentativas.isEmpty()) {
+                        tentativas.sort((a, b) -> {
+                            java.time.LocalDateTime da = a.getDtTentativa();
+                            java.time.LocalDateTime db = b.getDtTentativa();
+                            if (da == null && db == null) return 0;
+                            if (da == null) return 1;
+                            if (db == null) return -1;
+                            return db.compareTo(da);
+                        });
+                        Tentativa last = tentativas.get(0);
+                        if (last != null) {
+                            ultimaNotaAcertos = last.getNotaAcertos();
+                            ultimaNotaTotal = last.getNotaTotal();
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                return new ParticipanteCursoResponse(
+                        usuario.getIdUsuario(),
+                        usuario.getNome(),
+                        materiaisConcluidos,
+                        materiaisTotaisDoCurso,
+                        avaliacao,
+                        ultimoAcesso,
+                        ultimaNotaAcertos,
+                        ultimaNotaTotal
+                );
+            }).collect(java.util.stream.Collectors.toList());
+
+            if (participantes.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            int effSize = (limit != null && limit > 0) ? limit : size;
+            int startIndex = (offset != null && offset >= 0) ? offset : (page * effSize);
+            int start = Math.min(startIndex, participantes.size());
+            int end = Math.min(start + effSize, participantes.size());
+            List<ParticipanteCursoResponse> slice = participantes.subList(start, end);
+
+            int respPage = (offset != null && limit != null && limit > 0) ? (offset / limit) : page;
+            PagedResponse<ParticipanteCursoResponse> resp = new PagedResponse<>(slice, respPage, effSize, participantes.size());
+            return ResponseEntity.ok(resp);
+        } catch (ValorInvalidoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
 
