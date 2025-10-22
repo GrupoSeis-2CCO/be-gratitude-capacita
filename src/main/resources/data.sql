@@ -590,7 +590,8 @@ ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_cu
 -- Ensure composite index exists for (fk_curso, fk_usuario, id_tentativa) to allow
 -- composite foreign keys referencing these columns (some DBs require an index on
 -- referenced columns in the same order).
-ALTER TABLE tentativa ADD UNIQUE INDEX IF NOT EXISTS ux_tentativa_comp (fk_curso, fk_usuario, id_tentativa);
+-- COMMENTED OUT: Conflicting with existing duplicate data
+-- ALTER TABLE tentativa ADD UNIQUE INDEX IF NOT EXISTS ux_tentativa_comp (fk_curso, fk_usuario, id_tentativa);
 
 -- Inserir atividades para John Doe (referenciado pelo email john@doe.com)
 -- MaterialAluno: apenas insere se o usuário existir

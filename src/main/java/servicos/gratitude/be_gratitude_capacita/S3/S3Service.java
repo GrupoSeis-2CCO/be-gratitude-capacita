@@ -17,8 +17,6 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repo
 
 @Service
 public class S3Service {
-        private final S3Client s3Client = S3Client.create();
-
         @Autowired
         private ApostilaRepository apostilaRepository;
 
@@ -34,6 +32,12 @@ public class S3Service {
         @Value("${aws.s3.region}")
         private String region;
 
+        @Value("${aws.accessKeyId:test}")
+        private String accessKeyId;
+
+        @Value("${aws.secretAccessKey:test}")
+        private String secretAccessKey;
+
         /**
          * Envia arquivo para o bucket Bronze, Silver ou Gold.
          * 
@@ -43,8 +47,10 @@ public class S3Service {
          * @throws IOException
          */
         public String uploadFile(MultipartFile file, String tipoBucket) throws IOException {
+                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
                 S3Client s3 = S3Client.builder()
                                 .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
                                 .build();
 
                 // Extrai apenas o nome do arquivo, sem caminho

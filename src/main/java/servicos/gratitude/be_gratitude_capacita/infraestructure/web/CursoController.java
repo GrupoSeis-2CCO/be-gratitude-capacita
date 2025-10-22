@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataIntegrityViolationException;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.AtualizarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.CriarCursoCommand;
+import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.PublicarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.*;
@@ -20,6 +21,7 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.questao
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.matricula.ListarMatriculaPorCursoUseCase;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.MaterialResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.CursoResponse;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.PublicarCursoRequest;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
 
 import java.util.List;
@@ -41,6 +43,7 @@ public class CursoController {
     private final ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase;
     private final ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
+    private final PublicarCursoUseCase publicarCursoUseCase;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -55,7 +58,8 @@ public class CursoController {
             ListarAvaliacaoPorCursoUseCase listarAvaliacaoPorCursoUseCase,
             ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
             ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
-            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase) {
+            EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase,
+            PublicarCursoUseCase publicarCursoUseCase) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
@@ -69,6 +73,7 @@ public class CursoController {
         this.listarQuestoesPorAvaliacaoUseCase = listarQuestoesPorAvaliacaoUseCase;
         this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
+        this.publicarCursoUseCase = publicarCursoUseCase;
     }
 
     @GetMapping("/{idCurso}/materiais")
@@ -339,6 +344,35 @@ public class CursoController {
                     HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir curso", e);
+        }
+    }
+
+    @PostMapping("/{idCurso}/publicar")
+    public ResponseEntity<CursoResponse> publicarCurso(
+            @PathVariable Integer idCurso,
+            @RequestBody PublicarCursoRequest request) {
+        try {
+            PublicarCursoCommand command = new PublicarCursoCommand(
+                idCurso,
+                request.getNotificarTodos(),
+                request.getIdsAlunosSelecionados()
+            );
+
+            Curso cursoPublicado = publicarCursoUseCase.execute(command);
+            CursoResponse response = new CursoResponse();
+            response.setIdCurso(cursoPublicado.getIdCurso());
+            response.setTituloCurso(cursoPublicado.getTituloCurso());
+            response.setDescricao(cursoPublicado.getDescricao());
+            response.setImagem(cursoPublicado.getImagem());
+            response.setOcultado(cursoPublicado.getOcultado());
+            response.setDuracaoEstimada(cursoPublicado.getDuracaoEstimada());
+
+            return ResponseEntity.ok(response);
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Erro ao publicar curso: " + e.getMessage());
         }
     }
 }
