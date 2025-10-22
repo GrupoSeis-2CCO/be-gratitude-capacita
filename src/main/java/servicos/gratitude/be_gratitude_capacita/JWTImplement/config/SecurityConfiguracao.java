@@ -2,6 +2,7 @@ package servicos.gratitude.be_gratitude_capacita.JWTImplement.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,10 @@ public class SecurityConfiguracao {
     public SecurityConfiguracao(AutenticacaoService autenticacaoService) {
         this.autenticacaoService = autenticacaoService;
     }
+
+    // CSV de origens permitidas; use "*" para permitir todas (sem credenciais)
+    @Value("${app.cors.allowed-origins:*}")
+    private String allowedOriginsCsv;
 
     private static final String[] URLS_PERMITIDAS = {
             "/swagger-ui/**",
@@ -134,6 +139,18 @@ public class SecurityConfiguracao {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuracao = new CorsConfiguration();
         configuracao.applyPermitDefaultValues();
+        // Origens permitidas (de propriedade app.cors.allowed-origins)
+        if ("*".equals(allowedOriginsCsv.trim())) {
+            // Usa padrões para permitir qualquer origem (sem credenciais)
+            configuracao.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            configuracao.setAllowedOrigins(Arrays.stream(allowedOriginsCsv.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList());
+        }
+        // Cabeçalhos comuns usados por Axios e JWT
+        configuracao.setAllowedHeaders(List.of("*"));
         configuracao.setAllowedMethods(
                 Arrays.asList(
                         HttpMethod.GET.name(),
@@ -144,7 +161,7 @@ public class SecurityConfiguracao {
                         HttpMethod.OPTIONS.name(),
                         HttpMethod.HEAD.name(),
                         HttpMethod.TRACE.name()));
-        configuracao.setExposedHeaders(List.of(HttpHeaders.CONTENT_DISPOSITION));
+        configuracao.setExposedHeaders(List.of(HttpHeaders.CONTENT_DISPOSITION, HttpHeaders.AUTHORIZATION));
 
         UrlBasedCorsConfigurationSource origem = new UrlBasedCorsConfigurationSource();
         origem.registerCorsConfiguration("/**", configuracao);
