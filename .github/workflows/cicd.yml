@@ -3,7 +3,7 @@ name: CI/CD para DigitalOcean
 on:
   push:
     branches:
-      - main # O branch que acionará o deploy
+      - main
 
 # ⚠️ SECRETS NECESSÁRIOS NO GITHUB (Settings > Secrets and variables > Actions)
 # 
