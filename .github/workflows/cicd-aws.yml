@@ -39,8 +39,8 @@ jobs:
           echo "JAR renomeado para: target/app.jar"
           ls -lh target/app.jar
 
-      # 6. Copiar JAR para bastion (EC2 pública)
-      - name: Copiar JAR para Bastion
+      # 6. Copiar JAR e Script.sql para bastion (EC2 pública)
+      - name: Copiar JAR e Script.sql para Bastion
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -48,7 +48,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: /home/${{ secrets.REMOTE_USER }}/backend-deploy/
           ARGS: "-rltgoDzvO"
-          SOURCE: "./target/app.jar"
+          SOURCE: "./target/app.jar ./src/main/resources/Database/Script.sql ./src/main/resources/data.sql"
 
       # 7. Copiar a chave SSH para o bastion e transferir JAR para backend privado
       - name: Transferir JAR do Bastion para Backend Privado
@@ -74,13 +74,15 @@ jobs:
             # Criar diretório no backend
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "sudo mkdir -p /usr/share/api && sudo chown ubuntu:ubuntu /usr/share/api"
             
-            # Transferir JAR
+            # Transferir JAR e scripts SQL
             scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/app.jar ubuntu@$BACKEND_IP:/usr/share/api/app.jar
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/Script.sql ubuntu@$BACKEND_IP:/home/ubuntu/Script.sql || echo "Script.sql não encontrado, ignorando..."
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/data.sql ubuntu@$BACKEND_IP:/home/ubuntu/data.sql || echo "data.sql não encontrado, ignorando..."
             
             # Verificar
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /usr/share/api/app.jar"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /usr/share/api/app.jar /home/ubuntu/*.sql"
             
-            echo "JAR transferido com sucesso"
+            echo "JAR e scripts SQL transferidos com sucesso"
 
       # 8. Configurar Docker Compose e iniciar container da API na EC2 privada
       - name: Configurar e Iniciar API via Docker Compose
@@ -191,6 +193,16 @@ jobs:
             
             echo ".env criado com secrets"
             
+            # Executar Script.sql para criar o schema do banco (antes de iniciar Spring Boot)
+            echo "=== Executando Script.sql para criar schema do banco ==="
+            if [ -f "/home/ubuntu/Script.sql" ]; then
+                echo "Executando Script.sql..."
+                sudo mysql -u ${{ secrets.DATABASE_USER }} -p'${{ secrets.DATABASE_PASSWORD }}' capacita < /home/ubuntu/Script.sql
+                echo "Schema criado com sucesso"
+            else
+                echo "AVISO: Script.sql não encontrado. Verifique se o arquivo foi copiado corretamente."
+            fi
+            
             # Garantir que não exista um container solto chamado rabbitmq que conflite com o compose
             # (remove forçado caso exista; compose criará novamente)
             if sudo docker ps -a --format '{{.Names}}' | grep -q '^rabbitmq$' ; then
@@ -221,6 +233,18 @@ jobs:
             echo "Verificando se a aplicação está respondendo na porta 8080..."
             sleep 5
             curl -f http://localhost:8080/actuator/health || curl -f http://localhost:8080/ || echo "Aplicação ainda não está respondendo (pode levar alguns segundos)"
+            
+            # Executar data.sql para popular o banco (após Spring Boot iniciar)
+            echo "=== Executando data.sql para popular banco de dados ==="
+            if [ -f "/home/ubuntu/data.sql" ]; then
+                echo "Aguardando Spring Boot inicializar completamente..."
+                sleep 10
+                echo "Executando data.sql..."
+                sudo mysql -u ${{ secrets.DATABASE_USER }} -p'${{ secrets.DATABASE_PASSWORD }}' capacita < /home/ubuntu/data.sql
+                echo "Banco de dados populado com sucesso"
+            else
+                echo "AVISO: data.sql não encontrado. Banco ficará vazio."
+            fi
             
             ENDSSH
             
