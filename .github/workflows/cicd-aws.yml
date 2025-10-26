@@ -39,30 +39,46 @@ jobs:
           echo "JAR renomeado para: target/app.jar"
           ls -lh target/app.jar
 
-      # 6. Transferir JAR diretamente do runner para EC2 privada usando ProxyJump via bastion
-      - name: Transferir JAR para EC2 Privada (via Bastion - ProxyJump)
-        run: |
-          set -e
+      # 6. Copiar JAR para bastion (EC2 pública)
+      - name: Copiar JAR para Bastion
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.BASTION_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: /home/${{ secrets.REMOTE_USER }}/backend-deploy/
+          ARGS: "-rltgoDzvO"
+          SOURCE: "./target/app.jar"
 
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
-          echo "IP do Backend: $BACKEND_IP"
-
-          # Confirma artefato
-          ls -lh ./target/app.jar
-
-          # Criar /opt/app no backend via ProxyJump (usa bastion como salto)
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app"
-
-          # Copiar JAR do runner direto para backend via bastion (ProxyJump)
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -o ProxyJump=${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ./target/app.jar ubuntu@$BACKEND_IP:/opt/app/app.jar
-
-          # Verificar no backend
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
-        shell: bash
+      # 7. Copiar a chave SSH para o bastion e transferir JAR para backend privado
+      - name: Transferir JAR do Bastion para Backend Privado
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            
+            BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
+            echo "IP do Backend: $BACKEND_IP"
+            
+            # Escrever chave no bastion temporariamente
+            mkdir -p ~/.ssh
+            echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            
+            # Criar diretório no backend
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app"
+            
+            # Transferir JAR
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/app.jar ubuntu@$BACKEND_IP:/opt/app/app.jar
+            
+            # Verificar
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
+            
+            # Limpar chave
+            rm -f ~/.ssh/id_rsa
 
       # 8. Configurar e reiniciar serviço Spring Boot na EC2 privada
       - name: Configurar e Reiniciar Spring Boot na EC2 Privada
