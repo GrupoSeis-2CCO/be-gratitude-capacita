@@ -1,0 +1,31 @@
+services:
+  api:
+    image: amazoncorretto:21
+    container_name: api-spring
+    command: sh -c "mkdir -p /usr/share/api && java -jar /usr/share/api/app.jar"
+    volumes:
+      - /usr/share/api:/usr/share/api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/${DATABASE_NAME:-capacita}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
+      SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET_BRONZE: ${AWS_S3_BUCKET_BRONZE}
+      AWS_S3_BUCKET_SILVER: ${AWS_S3_BUCKET_SILVER}
+      AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_VALIDITY: ${JWT_VALIDITY:-3600000}
+      SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-host.docker.internal}
+      SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-guest}
+      SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
