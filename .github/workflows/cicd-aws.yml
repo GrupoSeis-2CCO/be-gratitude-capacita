@@ -55,13 +55,13 @@ jobs:
           ls -lh ./target/app.jar
 
           # Criar /opt/app no backend via ProxyJump (usa bastion como salto)
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${ { secrets.REMOTE_USER } }@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app"
 
           # Copiar JAR do runner direto para backend via bastion (ProxyJump)
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -o ProxyJump=${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ./target/app.jar ubuntu@$BACKEND_IP:/opt/app/app.jar
 
           # Verificar no backend
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${ { secrets.REMOTE_USER } }@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -J ${{ secrets.REMOTE_USER }}@${{ secrets.BASTION_HOST }} ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
         shell: bash
 
       # 8. Configurar e reiniciar serviço Spring Boot na EC2 privada
