@@ -69,18 +69,18 @@ jobs:
             chmod 600 ~/.ssh/id_rsa
             
             # Criar diretório no backend
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "sudo mkdir -p /opt/app && sudo chown ubuntu:ubuntu /opt/app"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "sudo mkdir -p /usr/share/api && sudo chown ubuntu:ubuntu /usr/share/api"
             
             # Transferir JAR
-            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/app.jar ubuntu@$BACKEND_IP:/opt/app/app.jar
+            scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa /home/${{ secrets.REMOTE_USER }}/backend-deploy/app.jar ubuntu@$BACKEND_IP:/usr/share/api/app.jar
             
             # Verificar
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /usr/share/api/app.jar"
             
             echo "JAR transferido com sucesso"
 
-      # 8. Configurar e reiniciar serviço Spring Boot na EC2 privada
-      - name: Configurar e Reiniciar Spring Boot na EC2 Privada
+      # 8. Configurar Docker Compose e iniciar container da API na EC2 privada
+      - name: Configurar e Iniciar API via Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.BASTION_HOST }}
@@ -91,92 +91,126 @@ jobs:
             
             BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
             
-            echo "=== Configurando Spring Boot na EC2 privada ==="
+            echo "=== Configurando Docker Compose na EC2 privada ==="
             
             # Escrever chave no bastion
             mkdir -p ~/.ssh
             echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
             
-            # Criar/atualizar application.properties na EC2 privada
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP <<'ENDSSH'
+            # Criar compose-api.yaml na EC2 privada via SSH
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "bash -s" <<'ENDSSH'
             set -e
             
-            # Criar application.properties
-            cat > /opt/app/application.properties <<'EOF'
-            # Application name
-            spring.application.name=crud-gratitude-servicos
+            # Criar diretório para compose
+            mkdir -p /home/ubuntu/api
             
-            # Server
-            server.port=8080
-            
-            # Database MySQL (local na EC2 privada)
-            spring.datasource.url=jdbc:mysql://localhost:3306/capacita?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-            spring.datasource.username=root
-            spring.datasource.password=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-            
-            # JPA / Hibernate
-            spring.jpa.hibernate.ddl-auto=update
-            spring.jpa.show-sql=false
-            spring.jpa.defer-datasource-initialization=true
-            spring.sql.init.mode=never
-            
-            # AWS S3 (configurar conforme seus buckets)
-            aws.s3.region=us-east-1
-            aws.s3.bucket.bronze=${{ secrets.BRONZE_BUCKET }}
-            aws.s3.bucket.silver=${{ secrets.SILVER_BUCKET }}
-            aws.s3.bucket.gold=${{ secrets.GOLD_BUCKET }}
-            
-            # JWT
-            jwt.validity=3600000
-            jwt.secret=${{ secrets.JWT_SECRET }}
+            # Criar compose-api.yaml (inclui rabbitmq + api)
+            cat > /home/ubuntu/api/compose-api.yaml <<'EOF'
+            version: "3.8"
+
+            services:
+              rabbitmq:
+                image: rabbitmq:3-management
+                container_name: rabbitmq
+                environment:
+                  RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
+                  RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+                volumes:
+                  - rabbitmq_data:/var/lib/rabbitmq
+                ports:
+                  - "5672:5672"
+                  - "15672:15672"
+                restart: unless-stopped
+
+              api:
+                image: amazoncorretto:21
+                container_name: api-spring
+                command: sh -c "mkdir -p /usr/share/api && java -jar /usr/share/api/app.jar"
+                volumes:
+                  - /usr/share/api:/usr/share/api
+                ports:
+                  - "8080:8080"
+                environment:
+                  SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/${DATABASE_NAME:-capacita}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+                  SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-capacita_app}
+                  SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
+                  SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
+                  SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
+                  AWS_REGION: ${AWS_REGION:-us-east-1}
+                  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+                  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+                  AWS_S3_BUCKET_BRONZE: ${AWS_S3_BUCKET_BRONZE}
+                  AWS_S3_BUCKET_SILVER: ${AWS_S3_BUCKET_SILVER}
+                  AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
+                  JWT_SECRET: ${JWT_SECRET}
+                  JWT_VALIDITY: ${JWT_VALIDITY:-3600000}
+                  SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-localhost}
+                  SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
+                  SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
+                  SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+                  SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
+                extra_hosts:
+                  - "host.docker.internal:host-gateway"
+                depends_on:
+                  - rabbitmq
+                restart: unless-stopped
+
+            volumes:
+              rabbitmq_data:
             EOF
+
+            echo "compose-api.yaml criado"
+
+            # Criar arquivo .env com secrets
+            cat > /home/ubuntu/api/.env <<ENVEOF
+            DATABASE_NAME=capacita
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            HIBERNATE_DDL_AUTO=none
+            SHOW_SQL=false
+            AWS_REGION=us-east-1
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_S3_BUCKET_BRONZE=${{ secrets.BRONZE_BUCKET }}
+            AWS_S3_BUCKET_SILVER=${{ secrets.SILVER_BUCKET }}
+            AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_VALIDITY=3600000
+            SPRING_RABBITMQ_HOST=localhost
+            SPRING_RABBITMQ_PORT=5672
+            SPRING_RABBITMQ_USERNAME=guest
+            SPRING_RABBITMQ_PASSWORD=guest
+            ENVEOF
             
-            echo "application.properties criado/atualizado"
+            echo ".env criado com secrets"
             
-            # Verificar se o serviço systemd existe, senão criar
-            if [ ! -f /etc/systemd/system/spring-app.service ]; then
-                echo "Criando serviço systemd..."
-                
-                sudo tee /etc/systemd/system/spring-app.service > /dev/null <<'SERVICEEOF'
-            [Unit]
-            Description=Spring Boot Gratitude App
-            After=mysql.service
-            
-            [Service]
-            User=ubuntu
-            WorkingDirectory=/opt/app
-            Environment="JAVA_HOME=/opt/jdk-21"
-            Environment="PATH=/opt/jdk-21/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            ExecStart=/opt/jdk-21/bin/java -jar /opt/app/app.jar --spring.config.location=file:/opt/app/application.properties
-            Restart=always
-            RestartSec=10
-            
-            [Install]
-            WantedBy=multi-user.target
-            SERVICEEOF
-                
-                sudo systemctl daemon-reload
-                sudo systemctl enable spring-app.service
-                
-                echo "Serviço systemd criado e habilitado"
+            # (Opcional) Iniciar RabbitMQ se não estiver rodando
+            if ! sudo docker ps --format '{{.Names}}' | grep -q '^rabbitmq$' ; then
+                echo "Iniciando container RabbitMQ..."
+                sudo docker run -d --restart unless-stopped --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management || true
+            else
+                echo "Container rabbitmq já em execução"
             fi
             
-            # Reiniciar serviço
-            echo "Reiniciando serviço Spring Boot..."
-            sudo systemctl restart spring-app.service
+            # Parar container antigo se existir
+            cd /home/ubuntu/api
+            sudo docker-compose -f compose-api.yaml down || true
             
-            echo "Aguardando serviço inicializar..."
+            # Iniciar container da API
+            echo "Iniciando container da API via Docker Compose..."
+            sudo docker-compose -f compose-api.yaml up -d
+            
+            echo "Aguardando container inicializar..."
             sleep 10
             
             # Verificar status
-            echo "Status do serviço:"
-            sudo systemctl status spring-app.service --no-pager || true
+            echo "Status do container:"
+            sudo docker ps -a | grep api-spring || true
             
             # Verificar logs
-            echo "Logs do serviço (últimas 50 linhas):"
-            sudo journalctl -u spring-app.service -n 50 --no-pager
+            echo "Logs do container (últimas 50 linhas):"
+            sudo docker logs api-spring --tail 50 || true
             
             # Verificar se a aplicação está respondendo
             echo "Verificando se a aplicação está respondendo na porta 8080..."
@@ -188,11 +222,9 @@ jobs:
             # Limpar chave
             rm -f ~/.ssh/id_rsa
             
-            echo "=== Deploy do backend concluído ==="
+            echo "=== Deploy do backend via Docker concluído ==="
             echo "Backend está rodando em: $BACKEND_IP:8080"
-            echo "Acessível via frontend público através do proxy NGINX"
-
-      # 9. Verificar conectividade do frontend ao backend
+            echo "Acessível via frontend público através do proxy NGINX"      # 9. Verificar conectividade do frontend ao backend
       - name: Testar Conectividade Frontend -> Backend
         uses: appleboy/ssh-action@v1.0.3
         with:
