@@ -77,8 +77,7 @@ jobs:
             # Verificar
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "ls -lh /opt/app/app.jar"
             
-            # Limpar chave
-            rm -f ~/.ssh/id_rsa
+            echo "JAR transferido com sucesso"
 
       # 8. Configurar e reiniciar serviço Spring Boot na EC2 privada
       - name: Configurar e Reiniciar Spring Boot na EC2 Privada
@@ -93,6 +92,11 @@ jobs:
             BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
             
             echo "=== Configurando Spring Boot na EC2 privada ==="
+            
+            # Escrever chave no bastion
+            mkdir -p ~/.ssh
+            echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
             
             # Criar/atualizar application.properties na EC2 privada
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP <<'ENDSSH'
@@ -180,6 +184,9 @@ jobs:
             curl -f http://localhost:8080/actuator/health || curl -f http://localhost:8080/ || echo "Aplicação ainda não está respondendo (pode levar alguns segundos)"
             
             ENDSSH
+            
+            # Limpar chave
+            rm -f ~/.ssh/id_rsa
             
             echo "=== Deploy do backend concluído ==="
             echo "Backend está rodando em: $BACKEND_IP:8080"
