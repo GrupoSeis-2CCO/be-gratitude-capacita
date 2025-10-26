@@ -191,15 +191,14 @@ jobs:
             
             echo ".env criado com secrets"
             
-            # (Opcional) Iniciar RabbitMQ se não estiver rodando
-            if ! sudo docker ps --format '{{.Names}}' | grep -q '^rabbitmq$' ; then
-                echo "Iniciando container RabbitMQ..."
-                sudo docker run -d --restart unless-stopped --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management || true
-            else
-                echo "Container rabbitmq já em execução"
+            # Garantir que não exista um container solto chamado rabbitmq que conflite com o compose
+            # (remove forçado caso exista; compose criará novamente)
+            if sudo docker ps -a --format '{{.Names}}' | grep -q '^rabbitmq$' ; then
+                echo "Removendo container rabbitmq pré-existente para evitar conflito com docker compose"
+                sudo docker rm -f rabbitmq || true
             fi
-            
-            # Parar container antigo se existir
+
+            # Parar containers gerenciados pelo compose (se existirem)
             cd /home/ubuntu/api
             sudo docker compose -f compose-api.yaml down || true
 
