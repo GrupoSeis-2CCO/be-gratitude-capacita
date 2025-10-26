@@ -68,6 +68,9 @@ jobs:
             echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
             
+            # Remover entrada antiga de known_hosts para o backend (evita WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED)
+            ssh-keygen -f ~/.ssh/known_hosts -R $BACKEND_IP || true
+
             # Criar diretório no backend
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "sudo mkdir -p /usr/share/api && sudo chown ubuntu:ubuntu /usr/share/api"
             
@@ -98,6 +101,9 @@ jobs:
             echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
             
+            # Remover entrada antiga de known_hosts para o backend (evita WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED)
+            ssh-keygen -f ~/.ssh/known_hosts -R $BACKEND_IP || true
+
             # Criar compose-api.yaml na EC2 privada via SSH
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "bash -s" <<'ENDSSH'
             set -e
@@ -145,7 +151,7 @@ jobs:
                   AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
                   JWT_SECRET: ${JWT_SECRET}
                   JWT_VALIDITY: ${JWT_VALIDITY:-3600000}
-                  SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-localhost}
+                  SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-rabbitmq}
                   SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
                   SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
                   SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
@@ -177,10 +183,10 @@ jobs:
             AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_VALIDITY=3600000
-            SPRING_RABBITMQ_HOST=localhost
+            SPRING_RABBITMQ_HOST=rabbitmq
             SPRING_RABBITMQ_PORT=5672
-            SPRING_RABBITMQ_USERNAME=guest
-            SPRING_RABBITMQ_PASSWORD=guest
+            SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
+            SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
             ENVEOF
             
             echo ".env criado com secrets"
@@ -195,11 +201,11 @@ jobs:
             
             # Parar container antigo se existir
             cd /home/ubuntu/api
-            sudo docker-compose -f compose-api.yaml down || true
-            
+            sudo docker compose -f compose-api.yaml down || true
+
             # Iniciar container da API
             echo "Iniciando container da API via Docker Compose..."
-            sudo docker-compose -f compose-api.yaml up -d
+            sudo docker compose -f compose-api.yaml up -d
             
             echo "Aguardando container inicializar..."
             sleep 10
