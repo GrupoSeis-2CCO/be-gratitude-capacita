@@ -90,36 +90,52 @@ public class S3Service {
          * e retorna a URL pública.
          */
         public String uploadCourseImage(MultipartFile file) throws IOException {
-                if (file == null || file.isEmpty()) {
-                        throw new IllegalArgumentException("Arquivo de imagem ausente");
-                }
+            System.out.println("[S3Service] Iniciando upload de imagem de curso...");
+            if (file == null || file.isEmpty()) {
+                System.out.println("[S3Service] Falha: arquivo de imagem ausente ou vazio.");
+                throw new IllegalArgumentException("Arquivo de imagem ausente");
+            }
 
-                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-                S3Client s3 = S3Client.builder()
-                                .region(Region.of(region))
-                                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                                .build();
+            System.out.println("[S3Service] Bucket de imagens: " + bucketImages);
+            System.out.println("[S3Service] Região: " + region);
+            System.out.println("[S3Service] Content-Type: " + file.getContentType());
+            System.out.println("[S3Service] Tamanho do arquivo: " + file.getSize() + " bytes");
 
-                String originalFilename = file.getOriginalFilename();
-                if (originalFilename == null) {
-                        throw new IllegalArgumentException("Nome do arquivo não pode ser nulo");
-                }
-                String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
-                filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
-                String uniqueFilename = java.util.UUID.randomUUID() + "_" + filename;
+            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+            S3Client s3 = S3Client.builder()
+                    .region(Region.of(region))
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                    .build();
 
-                // Opcional: prefixo para organização
-                String key = "cursos/" + uniqueFilename;
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                System.out.println("[S3Service] Falha: nome do arquivo nulo.");
+                throw new IllegalArgumentException("Nome do arquivo não pode ser nulo");
+            }
+            String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
+            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+            String uniqueFilename = java.util.UUID.randomUUID() + "_" + filename;
+            String key = "cursos/" + uniqueFilename;
 
+            System.out.println("[S3Service] Nome do arquivo original: " + originalFilename);
+            System.out.println("[S3Service] Nome do arquivo S3: " + key);
+
+            try {
                 s3.putObject(
-                                PutObjectRequest.builder()
-                                                .bucket(bucketImages)
-                                                .key(key)
-                                                .contentType(file.getContentType())
-                                                .build(),
-                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
-
-                return "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
+                        PutObjectRequest.builder()
+                                .bucket(bucketImages)
+                                .key(key)
+                                .contentType(file.getContentType())
+                                .build(),
+                        software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+                String url = "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
+                System.out.println("[S3Service] Upload concluído. URL gerada: " + url);
+                return url;
+            } catch (Exception e) {
+                System.out.println("[S3Service] Erro ao enviar para S3: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
         }
 
         /**

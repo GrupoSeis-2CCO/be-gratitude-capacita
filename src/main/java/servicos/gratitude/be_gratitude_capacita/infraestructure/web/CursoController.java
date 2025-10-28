@@ -229,12 +229,22 @@ public class CursoController {
             @RequestParam(value = "duracaoEstimada", required = false) Integer duracaoEstimada,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
         try {
+            System.out.println("[CursoController] Recebendo cadastro de curso via multipart...");
+            System.out.println("  - Título: " + tituloCurso);
+            System.out.println("  - Descrição: " + descricao);
+            System.out.println("  - Duração: " + duracaoEstimada);
+            System.out.println("  - Imagem recebida? " + (imagem != null && !imagem.isEmpty()));
             String imagemUrl = null;
             if (imagem != null && !imagem.isEmpty()) {
+                System.out.println("[CursoController] Enviando imagem para S3...");
                 imagemUrl = s3Service.uploadCourseImage(imagem);
+                System.out.println("[CursoController] URL da imagem recebida do S3: " + imagemUrl);
             }
             CriarCursoCommand command = new CriarCursoCommand(tituloCurso, descricao, imagemUrl, duracaoEstimada);
-            return ResponseEntity.status(HttpStatus.CREATED).body(criarCursoUseCase.execute(command));
+            System.out.println("[CursoController] Criando curso com imagemUrl: " + imagemUrl);
+            Curso cursoCriado = criarCursoUseCase.execute(command);
+            System.out.println("[CursoController] Curso criado. ID: " + cursoCriado.getIdCurso() + ", Imagem: " + cursoCriado.getImagem());
+            return ResponseEntity.status(HttpStatus.CREATED).body(cursoCriado);
         } catch (ConflitoException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         } catch (DataIntegrityViolationException e) {
