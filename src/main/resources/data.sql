@@ -23,6 +23,11 @@ INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_
   (4, 'Procedimentos Técnicos e Documentais na Reurb', 'Levantamentos, plantas, memoriais descritivos e fluxo documental dos processos de regularização.', 'https://static.poder360.com.br/2020/05/governo-ceara-regularizacao-fundiaria.jpg', 0, 25)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
 
+-- Exemplo: curso com imagem hospedada no bucket S3 de imagens do frontend
+INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada) VALUES
+  (6, 'Gestão de Projetos Urbanos', 'Planejamento e execução de projetos no contexto urbano.', 'https://gratitude-imagens-frontend.s3.us-east-1.amazonaws.com/cursos/exemplo_imagem_curso.jpg', 0, 24)
+ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada);
+
 -- Vídeo e apostila de exemplo para o curso 4
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
   (5, 'Introdução à Regularização Fundiária', 'Visão geral da regularização fundiária: conceitos, objetivos e impacto social.', 'http://exemplo.com/video_regulacao_intro', 1, 4)

@@ -29,6 +29,9 @@ public class S3Service {
         @Value("${aws.s3.bucket.gold}")
         private String bucketGold;
 
+        @Value("${aws.s3.bucket.images:gratitude-imagens-frontend}")
+        private String bucketImages;
+
         @Value("${aws.s3.region}")
         private String region;
 
@@ -80,6 +83,43 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
 
                 return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + uniqueFilename;
+        }
+
+        /**
+         * Envia imagem de curso para o bucket dedicado (gratitude-imagens-frontend)
+         * e retorna a URL pública.
+         */
+        public String uploadCourseImage(MultipartFile file) throws IOException {
+                if (file == null || file.isEmpty()) {
+                        throw new IllegalArgumentException("Arquivo de imagem ausente");
+                }
+
+                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+                S3Client s3 = S3Client.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                                .build();
+
+                String originalFilename = file.getOriginalFilename();
+                if (originalFilename == null) {
+                        throw new IllegalArgumentException("Nome do arquivo não pode ser nulo");
+                }
+                String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
+                filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+                String uniqueFilename = java.util.UUID.randomUUID() + "_" + filename;
+
+                // Opcional: prefixo para organização
+                String key = "cursos/" + uniqueFilename;
+
+                s3.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(bucketImages)
+                                                .key(key)
+                                                .contentType(file.getContentType())
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+
+                return "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
         }
 
         /**

@@ -2,9 +2,11 @@ package servicos.gratitude.be_gratitude_capacita.infraestructure.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.multipart.MultipartFile;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.AtualizarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.CriarCursoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.curso.PublicarCursoCommand;
@@ -24,6 +26,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.Pag
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.CursoResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.PublicarCursoRequest;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
+import servicos.gratitude.be_gratitude_capacita.S3.S3Service;
 
 import java.util.List;
 
@@ -45,6 +48,7 @@ public class CursoController {
     private final ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
     private final PublicarCursoUseCase publicarCursoUseCase;
+    private final S3Service s3Service;
 
     public CursoController(
             CriarCursoUseCase criarCursoUseCase,
@@ -60,7 +64,8 @@ public class CursoController {
             ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase,
             ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
             EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase,
-            PublicarCursoUseCase publicarCursoUseCase) {
+            PublicarCursoUseCase publicarCursoUseCase,
+            S3Service s3Service) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
         this.listarCursoPaginadoUseCase = listarCursoPaginadoUseCase;
@@ -75,6 +80,7 @@ public class CursoController {
         this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
         this.publicarCursoUseCase = publicarCursoUseCase;
+        this.s3Service = s3Service;
     }
 
     @GetMapping("/{idCurso}/materiais")
@@ -210,6 +216,32 @@ public class CursoController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Requisição inválida para cadastro do curso.", e);
         } catch (ResponseStatusException e) {
             throw e; // rethrow explicit status exceptions above
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao cadastrar curso", e);
+        }
+    }
+
+    // Variante multipart: permite enviar a imagem do curso e salvar a URL no banco
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Curso> cadastrarCursoMultipart(
+            @RequestParam("tituloCurso") String tituloCurso,
+            @RequestParam("descricao") String descricao,
+            @RequestParam(value = "duracaoEstimada", required = false) Integer duracaoEstimada,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        try {
+            String imagemUrl = null;
+            if (imagem != null && !imagem.isEmpty()) {
+                imagemUrl = s3Service.uploadCourseImage(imagem);
+            }
+            CriarCursoCommand command = new CriarCursoCommand(tituloCurso, descricao, imagemUrl, duracaoEstimada);
+            return ResponseEntity.status(HttpStatus.CREATED).body(criarCursoUseCase.execute(command));
+        } catch (ConflitoException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (DataIntegrityViolationException e) {
+            String msg = "Dados inválidos: um ou mais campos excedem o tamanho máximo permitido.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, msg, e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Requisição inválida para cadastro do curso.", e);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao cadastrar curso", e);
         }
@@ -369,6 +401,34 @@ public class CursoController {
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar curso", e);
+        }
+    }
+
+    // Variante multipart para atualização com imagem
+    @PutMapping(value = "/{idCurso}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Curso> atualizarCursoMultipart(
+            @PathVariable Integer idCurso,
+            @RequestParam(value = "tituloCurso", required = false) String tituloCurso,
+            @RequestParam(value = "descricao", required = false) String descricao,
+            @RequestParam(value = "duracaoEstimada", required = false) Integer duracaoEstimada,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        try {
+            String imagemUrl = null;
+            if (imagem != null && !imagem.isEmpty()) {
+                imagemUrl = s3Service.uploadCourseImage(imagem);
+            }
+            AtualizarCursoCommand command = new AtualizarCursoCommand(tituloCurso, descricao, imagemUrl, duracaoEstimada);
+            return ResponseEntity.status(HttpStatus.OK).body(atualizarCursoUseCase.execute(command, idCurso));
+        } catch (NaoEncontradoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (ConflitoException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Não foi possível atualizar: dados inválidos ou conflito de integridade.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() != null ? e.getMessage() : "Requisição inválida para atualização do curso.", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar curso", e);
         }
     }
 
