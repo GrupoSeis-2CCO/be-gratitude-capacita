@@ -13,4 +13,7 @@ public interface QuestaoRepository extends JpaRepository<QuestaoEntity, QuestaoE
     List<QuestaoEntity> findAllByAvaliacao(AvaliacaoEntity avaliacao);
     List<QuestaoEntity> findByFkAlternativaCorreta(AlternativaEntity alternativa);
     List<QuestaoEntity> findAllByIdQuestaoComposto_FkAvaliacaoAndNumeroQuestao(Integer fkAvaliacao, Integer numeroQuestao);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(MAX(q.idQuestaoComposto.idQuestao), 0) FROM QuestaoEntity q")
+    Integer findMaxIdQuestao();
 }

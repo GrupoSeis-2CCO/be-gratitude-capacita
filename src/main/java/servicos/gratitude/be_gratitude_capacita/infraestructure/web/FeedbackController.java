@@ -13,6 +13,7 @@ import servicos.gratitude.be_gratitude_capacita.core.application.exception.Valor
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.curso.EncontrarCursoPorIdUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.CriarFeedbackUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.feedback.ListarFeedbacksPorCurso;
+import servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario.BuscarUsuarioPorIdUseCase;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Curso;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Feedback;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.FeedbackResponse;
@@ -28,11 +29,13 @@ public class FeedbackController {
     private final CriarFeedbackUseCase criarFeedbackUseCase;
     private final ListarFeedbacksPorCurso listarFeedbacksPorCurso;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
+    private final BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase;
 
-    public FeedbackController(CriarFeedbackUseCase criarFeedbackUseCase, ListarFeedbacksPorCurso listarFeedbacksPorCurso, EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase) {
+    public FeedbackController(CriarFeedbackUseCase criarFeedbackUseCase, ListarFeedbacksPorCurso listarFeedbacksPorCurso, EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase, BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase) {
         this.criarFeedbackUseCase = criarFeedbackUseCase;
         this.listarFeedbacksPorCurso = listarFeedbacksPorCurso;
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
+        this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
     }
 
     @PostMapping
@@ -69,6 +72,28 @@ public class FeedbackController {
             // inject curso (with title) into each feedback so the response DTO can include cursoTitulo
             if (feedbacks != null) {
                 feedbacks.forEach(f -> f.setCurso(curso));
+
+                // For non-anonymous feedbacks, fetch full user info to obtain the name
+                for (Feedback f : feedbacks) {
+                    try {
+                        if (Boolean.TRUE.equals(f.getAnonimo())) continue;
+                        if (f.getFkUsuario() == null || f.getFkUsuario().getIdUsuario() == null) continue;
+                        Integer uid = f.getFkUsuario().getIdUsuario();
+                        servicos.gratitude.be_gratitude_capacita.core.domain.Usuario full = null;
+                        try {
+                            full = buscarUsuarioPorIdUseCase.execute(uid);
+                        } catch (Exception e) {
+                            // If user lookup fails, keep the lightweight user object (id only)
+                            full = null;
+                        }
+                        if (full != null) {
+                            f.setFkUsuario(full);
+                        }
+                    } catch (Exception e) {
+                        // defensive: do not fail the entire listing because of one user lookup
+                        log.warn("Failed to resolve user for feedback: {}", e.getMessage());
+                    }
+                }
             }
 
             log.info("Encontrados {} feedbacks para o curso {}", feedbacks == null ? 0 : feedbacks.size(), idCurso);
@@ -112,6 +137,22 @@ public class FeedbackController {
             }
 
             feedbacks.forEach(f -> f.setCurso(curso));
+            // For non-anonymous feedbacks, attempt to resolve full user info (name) so responses include aluno
+            for (Feedback f : feedbacks) {
+                try {
+                    if (Boolean.TRUE.equals(f.getAnonimo())) continue;
+                    if (f.getFkUsuario() == null || f.getFkUsuario().getIdUsuario() == null) continue;
+                    Integer uid = f.getFkUsuario().getIdUsuario();
+                    servicos.gratitude.be_gratitude_capacita.core.domain.Usuario full = null;
+                    try {
+                        full = buscarUsuarioPorIdUseCase.execute(uid);
+                    } catch (Exception ignore) { full = null; }
+                    if (full != null) f.setFkUsuario(full);
+                } catch (Exception e) {
+                    log.warn("Failed to resolve user for feedback (paginated): {}", e.getMessage());
+                }
+            }
+
             List<FeedbackResponse> mapped = FeedbackResponse.fromDomains(feedbacks);
 
             // Offset/limit alias support

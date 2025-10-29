@@ -127,6 +127,16 @@ ON DUPLICATE KEY UPDATE
   data_entrada = VALUES(data_entrada),
   ultimo_acesso = VALUES(ultimo_acesso);
 
+-- Adiciona usuário Alexandre (pedido: alexandre.nichiojr@sptech.school)
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url, data_entrada, ultimo_acesso) VALUES
+  (21, 'Alexandre Nichio Jr', '30000000001', 'alexandre.nichiojr@sptech.school', 'senhaAlex', 1, NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Adiciona usuário Giorgio (pedido: giorgio.antunes@sptech.school)
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url, data_entrada, ultimo_acesso) VALUES
+  (22, 'Giorgio Antunes', '30000000002', 'giorgio.antunes@sptech.school', 'senhaGiorgio', 1, NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
+
 -- Dados iniciais para tabela matricula
 
 select * from tentativa
@@ -183,6 +193,12 @@ ON DUPLICATE KEY UPDATE
 -- Garantir que John Doe (se existir) tem matrícula no curso 1 para que inserts posteriores em material_aluno e tentativa não quebrem FKs
 INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado)
   SELECT id_usuario, 1, '2025-02-01 08:00:00', '2025-03-05 14:20:00', 1, '2025-03-05 14:20:00' FROM usuario WHERE email = 'john@doe.com'
+ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
+
+-- Garantir que Alexandre (id 21) e Giorgio (id 22) estão matriculados no curso 1 para receber notificações quando o curso for publicado
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
+  (21, 1, '2025-02-01 08:00:00', '2025-03-01 10:00:00', 0, NULL),
+  (22, 1, '2025-02-01 08:00:00', '2025-03-01 10:00:00', 0, NULL)
 ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
 
 
@@ -455,6 +471,248 @@ INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliaca
   (20, 1, 40, 1, 13, 44)  -- errado (correta é 43)
 ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
+-- -----------------------------------------------------------------------------
+-- Additional distinct questions for evaluations 2, 3 and 4
+-- Goal: provide separate question sets (10 questions each) for each evaluation
+-- without changing existing question IDs used above (we append new IDs)
+-- Evaluation 2 (fk_avaliacao = 2) - Course 2 (Legislação Urbana e Instrumentos da Reurb)
+INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
+  (101, 2, 'Qual é a lei federal que instituiu a Reurb?', 1, NULL),
+  (102, 2, 'O que caracteriza a modalidade Reurb-S?', 2, NULL),
+  (103, 2, 'Qual decreto regulamentou aspectos da Reurb em âmbito federal?', 3, NULL),
+  (104, 2, 'Que instrumento jurídico pode regularizar a ocupação em áreas urbanas?', 4, NULL),
+  (105, 2, 'Quando a Reurb pode dispensar regularização registral imediata?', 5, NULL),
+  (106, 2, 'Qual é o papel do cadastro social na Reurb?', 6, NULL),
+  (107, 2, 'Qual órgão municipal normalmente conduz a Reurb?', 7, NULL),
+  (108, 2, 'O que é titulação fundiária na Reurb?', 8, NULL),
+  (109, 2, 'Qual a função do decreto na implementação da Reurb?', 9, NULL),
+  (110, 2, 'Qual é a principal diferença entre Reurb-S e Reurb-E?', 10, NULL)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao), fk_alternativa_correta = VALUES(fk_alternativa_correta);
+
+-- Alternatives for evaluation 2 questions (ids 1001..1040)
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (1001, 2, 101, 'Lei 13.465/2017', 1),
+  (1002, 2, 101, 'Lei 8.666/1993', 2),
+  (1003, 2, 101, 'Decreto 9.310/2018', 3),
+  (1004, 2, 101, 'Constituição Federal', 4),
+
+  (1005, 2, 102, 'Regularização administrativa simplificada', 1),
+  (1006, 2, 102, 'Apenas medidas judiciais', 2),
+  (1007, 2, 102, 'Exclusivamente contratos privados', 3),
+  (1008, 2, 102, 'Medida de expulsão', 4),
+
+  (1009, 2, 103, 'Decreto 9.310/2018', 1),
+  (1010, 2, 103, 'Portaria 123/2020', 2),
+  (1011, 2, 103, 'Lei 13.465/2017', 3),
+  (1012, 2, 103, 'Instrução normativa municipal', 4),
+
+  (1013, 2, 104, 'Usucapião coletivo', 1),
+  (1014, 2, 104, 'Contrato de prestação de serviços', 2),
+  (1015, 2, 104, 'Licença ambiental', 3),
+  (1016, 2, 104, 'Protocolo administrativo', 4),
+
+  (1017, 2, 105, 'Quando há situação de interesse social reconhecido', 1),
+  (1018, 2, 105, 'Nunca', 2),
+  (1019, 2, 105, 'Sempre que houver pendências registrárias', 3),
+  (1020, 2, 105, 'Somente por decisão judicial', 4),
+
+  (1021, 2, 106, 'Identificar beneficiários e sua situação socioeconômica', 1),
+  (1022, 2, 106, 'Executar projetos de engenharia', 2),
+  (1023, 2, 106, 'Substituir documentos de registro', 3),
+  (1024, 2, 106, 'Emitir alvarás', 4),
+
+  (1025, 2, 107, 'Secretaria Municipal de Habitação', 1),
+  (1026, 2, 107, 'Tribunal de Justiça', 2),
+  (1027, 2, 107, 'Ministério da Fazenda', 3),
+  (1028, 2, 107, 'Conselho Tutelar', 4),
+
+  (1029, 2, 108, 'Entrega de título de propriedade', 1),
+  (1030, 2, 108, 'Pagamento de impostos atrasados', 2),
+  (1031, 2, 108, 'Levantamento topográfico', 3),
+  (1032, 2, 108, 'Cadastro ambiental', 4),
+
+  (1033, 2, 109, 'Estabelecer normativas aplicáveis', 1),
+  (1034, 2, 109, 'Financiar obras', 2),
+  (1035, 2, 109, 'Executar medições', 3),
+  (1036, 2, 109, 'Emitir título de propriedade', 4),
+
+  (1037, 2, 110, 'Reurb-S é voltada à regularização fundiária simplificada', 1),
+  (1038, 2, 110, 'Reurb-S exige desapropriação', 2),
+  (1039, 2, 110, 'Reurb-E é sempre extrajudicial', 3),
+  (1040, 2, 110, 'Não há diferenças', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Set correct alternatives for evaluation 2 questions
+UPDATE questao SET fk_alternativa_correta = 1001 WHERE id_questao = 101;
+UPDATE questao SET fk_alternativa_correta = 1005 WHERE id_questao = 102;
+UPDATE questao SET fk_alternativa_correta = 1009 WHERE id_questao = 103;
+UPDATE questao SET fk_alternativa_correta = 1013 WHERE id_questao = 104;
+UPDATE questao SET fk_alternativa_correta = 1017 WHERE id_questao = 105;
+UPDATE questao SET fk_alternativa_correta = 1021 WHERE id_questao = 106;
+UPDATE questao SET fk_alternativa_correta = 1025 WHERE id_questao = 107;
+UPDATE questao SET fk_alternativa_correta = 1029 WHERE id_questao = 108;
+UPDATE questao SET fk_alternativa_correta = 1033 WHERE id_questao = 109;
+UPDATE questao SET fk_alternativa_correta = 1037 WHERE id_questao = 110;
+
+-- Evaluation 3 (fk_avaliacao = 3) - Course 3 (Diagnóstico Socioeconômico e Cadastro Social)
+INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
+  (201, 3, 'O que é o Cadastro Social no contexto da Reurb?', 1, NULL),
+  (202, 3, 'Qual dada-chave coleta informações familiares?', 2, NULL),
+  (203, 3, 'Para que serve o diagnóstico socioeconômico?', 3, NULL),
+  (204, 3, 'Que método é usado para levantamento domiciliar?', 4, NULL),
+  (205, 3, 'Como garantir a qualidade dos dados coletados?', 5, NULL),
+  (206, 3, 'Que informação é vital para priorizar beneficiários?', 6, NULL),
+  (207, 3, 'Quem normalmente aplica entrevistas no campo?', 7, NULL),
+  (208, 3, 'O que caracteriza dados socioeconômicos confiáveis?', 8, NULL),
+  (209, 3, 'Como tratar dados sensíveis no cadastro?', 9, NULL),
+  (210, 3, 'Qual a periodicidade recomendada para atualização do cadastro?', 10, NULL)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao), fk_alternativa_correta = VALUES(fk_alternativa_correta);
+
+-- Alternatives for evaluation 3 (ids 2001..2040)
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (2001, 3, 201, 'Instrumento para mapear famílias e sua situação', 1),
+  (2002, 3, 201, 'Documento de propriedade', 2),
+  (2003, 3, 201, 'Relatório de engenharia apenas', 3),
+  (2004, 3, 201, 'Lista de materiais didáticos', 4),
+
+  (2005, 3, 202, 'Renda familiar', 1),
+  (2006, 3, 202, 'Cor da fachada', 2),
+  (2007, 3, 202, 'Distância até o mar', 3),
+  (2008, 3, 202, 'Número de quartos', 4),
+
+  (2009, 3, 203, 'Identificar vulnerabilidades e necessidades', 1),
+  (2010, 3, 203, 'Emitir certidões', 2),
+  (2011, 3, 203, 'Iniciar desapropriação', 3),
+  (2012, 3, 203, 'Cobrar tributos', 4),
+
+  (2013, 3, 204, 'Questionário domiciliar', 1),
+  (2014, 3, 204, 'Análise de imagens de satélite apenas', 2),
+  (2015, 3, 204, 'Laudo pericial exclusivo', 3),
+  (2016, 3, 204, 'Reunião pública sem visita', 4),
+
+  (2017, 3, 205, 'Treinamento de entrevistadores e validação cruzada', 1),
+  (2018, 3, 205, 'Coleta sem supervisão', 2),
+  (2019, 3, 205, 'Apenas uso de formulários eletrônicos sem validação', 3),
+  (2020, 3, 205, 'Ignorar inconsistências', 4),
+
+  (2021, 3, 206, 'Renda per capita e composição familiar', 1),
+  (2022, 3, 206, 'Tipo de piso da residência', 2),
+  (2023, 3, 206, 'Número de árvores', 3),
+  (2024, 3, 206, 'Cor do telhado', 4),
+
+  (2025, 3, 207, 'Agentes municipais treinados', 1),
+  (2026, 3, 207, 'Técnicos de bancos privados', 2),
+  (2027, 3, 207, 'Apenas moradores sem treinamento', 3),
+  (2028, 3, 207, 'Empreiteiros de obras', 4),
+
+  (2029, 3, 208, 'Consistência, completude e atualidade', 1),
+  (2030, 3, 208, 'Quantidade de fotos', 2),
+  (2031, 3, 208, 'Número de páginas do relatório', 3),
+  (2032, 3, 208, 'Tamanho do arquivo CSV', 4),
+
+  (2033, 3, 209, 'Anonimização e tratamento conforme LGPD', 1),
+  (2034, 3, 209, 'Divulgação pública irrestrita', 2),
+  (2035, 3, 209, 'Venda dos dados', 3),
+  (2036, 3, 209, 'Armazenamento em papel apenas', 4),
+
+  (2037, 3, 210, 'Atualização anual recomendada', 1),
+  (2038, 3, 210, 'Nunca atualizar', 2),
+  (2039, 3, 210, 'Atualização diária obrigatória', 3),
+  (2040, 3, 210, 'Atualização a cada década', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Set correct alternatives for evaluation 3 questions
+UPDATE questao SET fk_alternativa_correta = 2001 WHERE id_questao = 201;
+UPDATE questao SET fk_alternativa_correta = 2005 WHERE id_questao = 202;
+UPDATE questao SET fk_alternativa_correta = 2009 WHERE id_questao = 203;
+UPDATE questao SET fk_alternativa_correta = 2013 WHERE id_questao = 204;
+UPDATE questao SET fk_alternativa_correta = 2017 WHERE id_questao = 205;
+UPDATE questao SET fk_alternativa_correta = 2021 WHERE id_questao = 206;
+UPDATE questao SET fk_alternativa_correta = 2025 WHERE id_questao = 207;
+UPDATE questao SET fk_alternativa_correta = 2029 WHERE id_questao = 208;
+UPDATE questao SET fk_alternativa_correta = 2033 WHERE id_questao = 209;
+UPDATE questao SET fk_alternativa_correta = 2037 WHERE id_questao = 210;
+
+-- Evaluation 4 (fk_avaliacao = 4) - Course 4 (Procedimentos Técnicos e Documentais na Reurb)
+INSERT INTO questao (id_questao, fk_avaliacao, enunciado, numero_questao, fk_alternativa_correta) VALUES
+  (301, 4, 'Qual documento técnico descreve a topografia do lote?', 1, NULL),
+  (302, 4, 'O que é memorial descritivo?', 2, NULL),
+  (303, 4, 'Que planta é necessária para registro?', 3, NULL),
+  (304, 4, 'Quem deve assinar projetos técnicos?', 4, NULL),
+  (305, 4, 'Qual a finalidade de um laudo técnico?', 5, NULL),
+  (306, 4, 'O que é planta baixa?', 6, NULL),
+  (307, 4, 'Quando é exigido o ART/RC relativo ao projeto?', 7, NULL),
+  (308, 4, 'Qual documento facilita o registro imobiliário?', 8, NULL),
+  (309, 4, 'Que informação mínima uma planta deve apresentar?', 9, NULL),
+  (310, 4, 'Como garantir a validade dos documentos técnicos?', 10, NULL)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), enunciado = VALUES(enunciado), numero_questao = VALUES(numero_questao), fk_alternativa_correta = VALUES(fk_alternativa_correta);
+
+-- Alternatives for evaluation 4 (ids 3001..3040)
+INSERT INTO alternativa (id_alternativa, fk_avaliacao, fk_questao, texto, ordem_alternativa) VALUES
+  (3001, 4, 301, 'Planta topográfica', 1),
+  (3002, 4, 301, 'Relatório socioeconômico', 2),
+  (3003, 4, 301, 'Contrato de locação', 3),
+  (3004, 4, 301, 'Documento de arrecadação', 4),
+
+  (3005, 4, 302, 'Descrição técnica detalhada do imóvel', 1),
+  (3006, 4, 302, 'Contrato de compra', 2),
+  (3007, 4, 302, 'Planta de situação', 3),
+  (3008, 4, 302, 'Declaração de vizinhos', 4),
+
+  (3009, 4, 303, 'Planta cadastrada e assinada por profissional habilitado', 1),
+  (3010, 4, 303, 'Documento de identidade do proprietário', 2),
+  (3011, 4, 303, 'Relatório financeiro', 3),
+  (3012, 4, 303, 'Protocolo municipal genérico', 4),
+
+  (3013, 4, 304, 'Engenheiro ou arquiteto habilitado', 1),
+  (3014, 4, 304, 'Testemunhas do bairro', 2),
+  (3015, 4, 304, 'Prefeitura', 3),
+  (3016, 4, 304, 'Cartório sem assinatura técnica', 4),
+
+  (3017, 4, 305, 'Fundamentar tecnicamente a situação do imóvel', 1),
+  (3018, 4, 305, 'Substituir o registro imobiliário', 2),
+  (3019, 4, 305, 'Cobrar IPTU atrasado', 3),
+  (3020, 4, 305, 'Emitir nota fiscal', 4),
+
+  (3021, 4, 306, 'Desenho em planta representando o pavimento', 1),
+  (3022, 4, 306, 'Relatório socioeconômico', 2),
+  (3023, 4, 306, 'Documento de arrecadação', 3),
+  (3024, 4, 306, 'Declaração de ocupação', 4),
+
+  (3025, 4, 307, 'Ao assumir responsabilidade técnica pelo projeto', 1),
+  (3026, 4, 307, 'Apenas para obras comerciais', 2),
+  (3027, 4, 307, 'Somente quando houver financiamento', 3),
+  (3028, 4, 307, 'Nunca exigido', 4),
+
+  (3029, 4, 308, 'Planta devidamente assinada e registrada', 1),
+  (3030, 4, 308, 'Fotos das fachadas', 2),
+  (3031, 4, 308, 'Comprovante de residência', 3),
+  (3032, 4, 308, 'Carta de vizinhança', 4),
+
+  (3033, 4, 309, 'Escala, orientação e medidas principais', 1),
+  (3034, 4, 309, 'Cor do telhado', 2),
+  (3035, 4, 309, 'Número de moradores', 3),
+  (3036, 4, 309, 'Marca do mobiliário', 4),
+
+  (3037, 4, 310, 'Assinatura de responsável técnico e carimbo profissional', 1),
+  (3038, 4, 310, 'Apenas carimbo da prefeitura', 2),
+  (3039, 4, 310, 'Assinatura de vizinhos', 3),
+  (3040, 4, 310, 'Declaração de proprietário sem assinatura técnica', 4)
+ON DUPLICATE KEY UPDATE fk_avaliacao = VALUES(fk_avaliacao), fk_questao = VALUES(fk_questao), texto = VALUES(texto), ordem_alternativa = VALUES(ordem_alternativa);
+
+-- Set correct alternatives for evaluation 4 questions
+UPDATE questao SET fk_alternativa_correta = 3001 WHERE id_questao = 301;
+UPDATE questao SET fk_alternativa_correta = 3005 WHERE id_questao = 302;
+UPDATE questao SET fk_alternativa_correta = 3009 WHERE id_questao = 303;
+UPDATE questao SET fk_alternativa_correta = 3013 WHERE id_questao = 304;
+UPDATE questao SET fk_alternativa_correta = 3017 WHERE id_questao = 305;
+UPDATE questao SET fk_alternativa_correta = 3021 WHERE id_questao = 306;
+UPDATE questao SET fk_alternativa_correta = 3025 WHERE id_questao = 307;
+UPDATE questao SET fk_alternativa_correta = 3029 WHERE id_questao = 308;
+UPDATE questao SET fk_alternativa_correta = 3033 WHERE id_questao = 309;
+UPDATE questao SET fk_alternativa_correta = 3037 WHERE id_questao = 310;
+
+
 -- Tentativa 41 (curso 2, avaliação 2): responde questão 3 corretamente (1/1)
 INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
   (20, 2, 41, 2, 3, 5)   -- questão 3, alternativa correta "Para definir controllers REST" (id 5)
@@ -531,6 +789,13 @@ INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES
 (12, 1, 3, 'Intermediário, faltaram exercícios.'),
 (15, 1, 4, 'Conteúdo relevante, mas poderia ter mais exemplos.')
 ON DUPLICATE KEY UPDATE estrelas = VALUES(estrelas), motivo = VALUES(motivo);
+
+-- Marcar um feedback como anônimo (usuário 10, curso 1) quando a coluna 'anonimo' existir
+-- Fazemos o UPDATE somente se a coluna 'anonimo' estiver presente (JOIN em information_schema)
+UPDATE feedback f
+JOIN information_schema.COLUMNS c ON c.TABLE_SCHEMA = DATABASE() AND c.TABLE_NAME = 'feedback' AND c.COLUMN_NAME = 'anonimo'
+SET f.anonimo = 1
+WHERE f.fk_curso = 1 AND f.fk_usuario = 10;
 
 -- Remove avaliações (tentativas, respostas e feedback) para usuários que NÃO têm 4 materiais no curso 1
 -- Usuários alvo: 1, 13, 14, 16, 17, 19 (mantemos 10,11,12,15 que têm 4 materiais)

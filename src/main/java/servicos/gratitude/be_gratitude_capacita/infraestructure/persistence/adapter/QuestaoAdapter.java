@@ -26,7 +26,14 @@ public class QuestaoAdapter implements QuestaoGateway {
     public Questao save(Questao questao) {
         QuestaoEntity entity = QuestaoMapper.toEntity(questao);
 
-        return QuestaoMapper.toDomain(questaoRepository.save(entity));
+        // If the composite id has no idQuestao, assign a new id based on max(id_questao)+1
+        if (entity.getIdQuestaoComposto() != null && entity.getIdQuestaoComposto().getIdQuestao() == null) {
+            int next = Optional.ofNullable(questaoRepository.findMaxIdQuestao()).orElse(0) + 1;
+            entity.getIdQuestaoComposto().setIdQuestao(next);
+        }
+
+        QuestaoEntity saved = questaoRepository.save(entity);
+        return QuestaoMapper.toDomain(saved);
     }
 
     @Override

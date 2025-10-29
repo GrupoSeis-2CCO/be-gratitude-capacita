@@ -121,7 +121,7 @@ CREATE TABLE alternativa (
     id_alternativa INT  AUTO_INCREMENT,
     FK_questao INT,  
     FK_avaliacao INT NOT NULL,
-    texto VARCHAR(50) NOT NULL,
+    texto VARCHAR(256) NOT NULL,
     ordem_alternativa INT NOT NULL,  
     primary key(id_alternativa),
     FOREIGN KEY (FK_avaliacao) REFERENCES avaliacao(id_avaliacao)
@@ -154,7 +154,7 @@ select * from tentativa;
 CREATE TABLE questao (
     id_questao INT AUTO_INCREMENT PRIMARY KEY,
     fk_avaliacao INT,
-    enunciado VARCHAR(100),
+    enunciado VARCHAR(512),
     numero_questao INT,
     fk_alternativa_correta INT,
     FOREIGN KEY (fk_avaliacao) REFERENCES avaliacao(id_avaliacao)
