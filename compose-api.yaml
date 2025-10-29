@@ -4,34 +4,22 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
-    hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_DEFAULT_VHOST: /
-    ports:
-      - "5672:5672"      # AMQP port (protocolo)
-      - "15672:15672"    # Management Console → http://localhost:15672 (guest/guest)
+      RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
+      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    networks:
-      - capacita-net
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      timeout: 10s
-      retries: 10
-      interval: 3s
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     restart: unless-stopped
 
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
-    hostname: mailhog
     ports:
-      - "1025:1025"   # SMTP (aplicação envia para cá)
-      - "8025:8025"   # Web UI (ver emails)
-    networks:
-      - capacita-net
+      - "1025:1025"  # Porta SMTP (para envio de emails pelo backend)
+      - "8025:8025"  # Painel web do Mailhog
     restart: unless-stopped
 
   api:
@@ -45,7 +33,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/${DATABASE_NAME:-capacita}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-capacita_app}
-      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-"#Gfcapacita123"}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
       SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
       AWS_REGION: ${AWS_REGION:-us-east-1}
@@ -61,18 +49,18 @@ services:
       SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
       SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
       SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: ""
+      SPRING_MAIL_PASSWORD: ""
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: false
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       - rabbitmq
-    networks:
-      - capacita-net
+      - mailhog
     restart: unless-stopped
 
-networks:
-  capacita-net:
-    driver: bridge
-
 volumes:
-  rabbitmq-data:
-  mysql-data:
+  rabbitmq_data:
