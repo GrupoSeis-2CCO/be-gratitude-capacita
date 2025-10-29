@@ -66,11 +66,25 @@ public class AvaliacaoController {
 
     @PostMapping
     public ResponseEntity<Avaliacao> cadastrarAvaliacao(
-            @RequestBody CriarAvaliacaoCommand request
+            @RequestBody servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.CreateAvaliacaoRequest request
     ){
         try {
-            System.out.println("[AvaliacaoController] fkCurso recebido: " + request.fkCurso());
-            return ResponseEntity.status(HttpStatus.OK).body(criarAvaliacaoUseCase.execute(request));
+            System.out.println("[AvaliacaoController] fkCurso recebido: " + request.fkCurso);
+            // Primeiro cria a avaliação básica (nota mínima e vínculo ao curso)
+            servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand cmd =
+                    new servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand(request.fkCurso, request.notaMinima);
+            var created = criarAvaliacaoUseCase.execute(cmd);
+
+            // Se vierem questões no payload, reaproveita o endpoint de atualização para persistir questões/alternativas
+            if (request.questoes != null && !request.questoes.isEmpty()) {
+                AvaliacaoUpdateRequest updateReq = new AvaliacaoUpdateRequest();
+                updateReq.acertosMinimos = request.notaMinima != null ? request.notaMinima.intValue() : null;
+                updateReq.questoes = request.questoes;
+                // Reaproveita o método que já lida com criação/atualização/deleção de questões e alternativas
+                this.atualizarAvaliacaoCompleta(created.getIdAvaliacao(), updateReq);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(created);
         } catch (NaoEncontradoException e){
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e

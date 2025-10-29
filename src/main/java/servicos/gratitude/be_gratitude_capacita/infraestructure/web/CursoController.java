@@ -471,12 +471,16 @@ public class CursoController {
     @PostMapping("/{idCurso}/publicar")
     public ResponseEntity<CursoResponse> publicarCurso(
             @PathVariable Integer idCurso,
-            @RequestBody PublicarCursoRequest request) {
+            @RequestBody(required = false) PublicarCursoRequest request) {
         try {
+            // Accept missing request body for convenience (assume notify all when absent)
+            Boolean notificarTodos = (request != null) ? request.getNotificarTodos() : Boolean.TRUE;
+            java.util.List<Integer> idsSelecionados = (request != null) ? request.getIdsAlunosSelecionados() : null;
+
             PublicarCursoCommand command = new PublicarCursoCommand(
                 idCurso,
-                request.getNotificarTodos(),
-                request.getIdsAlunosSelecionados()
+                notificarTodos,
+                idsSelecionados
             );
 
             Curso cursoPublicado = publicarCursoUseCase.execute(command);

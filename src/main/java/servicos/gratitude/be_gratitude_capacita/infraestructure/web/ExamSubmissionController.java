@@ -9,6 +9,12 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.enti
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.TentativaEntityCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.RespostaDoUsuarioEntityCompoundKey;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.*;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.QuestaoRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.AlternativaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.QuestaoEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.AlternativaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.entitiesCompoundKeys.QuestaoEntityCompoundKey;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 import java.util.Optional;
 import java.time.LocalDateTime;
@@ -26,10 +32,15 @@ public class ExamSubmissionController {
     private MatriculaRepository matriculaRepository;
     @Autowired
     private AvaliacaoRepository avaliacaoRepository;
+    @Autowired
+    private QuestaoRepository questaoRepository;
+    @Autowired
+    private AlternativaRepository alternativaRepository;
 
 
 
     @PostMapping("/{examId}/submit")
+    @Transactional
     public ResponseEntity<?> submitExam(
             @PathVariable Integer examId,
             @RequestBody ExamSubmissionDTO submission
@@ -86,10 +97,43 @@ public class ExamSubmissionController {
         TentativaEntityCompoundKey tentativaKeyCompleto = tentativa.getIdTentativaComposto();
 
 
-        // 3. Salvar respostas
-        for (Map.Entry<Integer, Integer> entry : submission.answers.entrySet()) {
-            Integer questaoId = entry.getKey();
+        // 3. Validar e salvar respostas
+        // Note: frontend serializes object keys as strings in JSON ("1": 42). Accept string keys
+        // and convert to Integer here to avoid 400 binding errors when mapping to Map<Integer,Integer>.
+        if (submission.answers == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Nenhuma resposta fornecida"));
+        }
+        for (Map.Entry<String, Integer> entry : submission.answers.entrySet()) {
+            Integer questaoId;
+            try {
+                questaoId = Integer.valueOf(entry.getKey());
+            } catch (NumberFormatException nfe) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid question id: " + entry.getKey()));
+            }
             Integer alternativaId = entry.getValue();
+            if (alternativaId == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Alternativa nula para questão " + questaoId));
+            }
+
+            // Verificar que a questão pertence à avaliação
+            QuestaoEntityCompoundKey qKey = new QuestaoEntityCompoundKey();
+            qKey.setIdQuestao(questaoId);
+            qKey.setFkAvaliacao(examId);
+            Optional<QuestaoEntity> questaoOpt = questaoRepository.findById(qKey);
+            if (questaoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", String.format("Questão %d não pertence à avaliação %d", questaoId, examId)));
+            }
+
+            // Verificar que alternativa existe e pertence à questão/avaliação
+            Optional<AlternativaEntity> altOpt = alternativaRepository.findById(alternativaId);
+            if (altOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", String.format("Alternativa %d não encontrada (questão %d)", alternativaId, questaoId)));
+            }
+            AlternativaEntity alternativa = altOpt.get();
+            if (!questaoId.equals(alternativa.getFkQuestao()) || !examId.equals(alternativa.getFkAvaliacao())) {
+                return ResponseEntity.badRequest().body(Map.of("error", String.format("Alternativa %d não pertence à questão %d na avaliação %d", alternativaId, questaoId, examId)));
+            }
+
             RespostaDoUsuarioEntity resposta = new RespostaDoUsuarioEntity();
             RespostaDoUsuarioEntityCompoundKey respostaKey = new RespostaDoUsuarioEntityCompoundKey();
             // Use sempre a chave composta da tentativa gerenciada
@@ -113,7 +157,8 @@ public class ExamSubmissionController {
 
     public static class ExamSubmissionDTO {
         public Integer userId;
-        public Map<Integer, Integer> answers;
+        // keys come as strings from JSON object keys, so use String -> Integer map and parse later
+        public Map<String, Integer> answers;
 
         @Override
         public String toString() {

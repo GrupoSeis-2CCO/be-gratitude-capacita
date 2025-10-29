@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/exam")
 public class ExamController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExamController.class);
     private final AvaliacaoGateway avaliacaoGateway;
     private final ListarQuestoesPorAvaliacaoUseCase listarQuestoesPorAvaliacaoUseCase;
     private final ListarAlternativasPorQuestaoUseCase listarAlternativasPorQuestaoUseCase;
@@ -34,11 +35,15 @@ public class ExamController {
 
     @GetMapping("/{examId}")
     public ResponseEntity<ExamDTO> getExam(@PathVariable Integer examId) {
+        log.info("[ExamController] GET /exam/{} requested", examId);
         Avaliacao avaliacao = avaliacaoGateway.findById(examId);
         if (avaliacao == null) {
+            log.warn("[ExamController] Avaliação {} não encontrada", examId);
             return ResponseEntity.notFound().build();
         }
+        log.info("[ExamController] Avaliação encontrada id={} fkCurso={}", avaliacao.getIdAvaliacao(), avaliacao.getFkCurso() != null ? avaliacao.getFkCurso().getIdCurso() : null);
         List<Questao> questoes = listarQuestoesPorAvaliacaoUseCase.execute(examId);
+        log.info("[ExamController] Encontradas {} questões para avaliação {}", questoes != null ? questoes.size() : 0, examId);
         ExamDTO dto = new ExamDTO();
         dto.idAvaliacao = avaliacao.getIdAvaliacao();
         dto.nomeCurso = avaliacao.getFkCurso() != null ? avaliacao.getFkCurso().toString() : null;
@@ -48,6 +53,7 @@ public class ExamController {
             qdto.enunciado = q.getEnunciado();
             qdto.numeroQuestao = q.getNumeroQuestao();
             List<Alternativa> alternativas = listarAlternativasPorQuestaoUseCase.execute(q);
+            log.debug("[ExamController] Questão id={} numero={} alternativas={}", q.getIdQuestaoComposto() != null ? q.getIdQuestaoComposto().getIdQuestao() : null, q.getNumeroQuestao(), alternativas != null ? alternativas.size() : 0);
             qdto.alternativas = alternativas.stream().map(a -> {
                 ExamDTO.AlternativeDTO adto = new ExamDTO.AlternativeDTO();
                 adto.idAlternativa = a.getAlternativaChaveComposta() != null ? a.getAlternativaChaveComposta().getIdAlternativa() : null;

@@ -73,6 +73,8 @@ public class SecurityConfiguracao {
             "/cursos/*/materiais",
             "/cursos/*/materiais/*",
             "/cursos/*/detalhes",
+            "/cursos/*/publicar",
+            "/debug/notificacao/**",
             "/materiais-alunos/finalizar-por-material/video/**",
             "/tentativas/*/*",
             "/participantes/*/avaliacoes",
