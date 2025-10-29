@@ -4,14 +4,34 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
-      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:5672"      # AMQP port (protocolo)
+      - "15672:15672"    # Management Console → http://localhost:15672 (guest/guest)
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - capacita-net
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      timeout: 10s
+      retries: 10
+      interval: 3s
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    hostname: mailhog
+    ports:
+      - "1025:1025"   # SMTP (aplicação envia para cá)
+      - "8025:8025"   # Web UI (ver emails)
+    networks:
+      - capacita-net
     restart: unless-stopped
 
   api:
@@ -45,7 +65,14 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - rabbitmq
+    networks:
+      - capacita-net
     restart: unless-stopped
 
+networks:
+  capacita-net:
+    driver: bridge
+
 volumes:
-  rabbitmq_data:
+  rabbitmq-data:
+  mysql-data:
