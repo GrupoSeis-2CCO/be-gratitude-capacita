@@ -123,8 +123,15 @@ public class DebugNotificacaoController {
             Object json = mapper.readValue(resp.body(), Object.class);
             return ResponseEntity.ok(json);
         } catch (Exception e) {
-            LOG.error("Falha ao consultar MailHog: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            LOG.error("Falha ao consultar MailHog: {}", errorMsg);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMsg);
+            errorResponse.put("mailhogUrl", mailhogApiBase);
+            errorResponse.put("hint", "Verifique se o MailHog está rodando: docker ps | grep mailhog");
+            
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
         }
     }
 
@@ -134,10 +141,18 @@ public class DebugNotificacaoController {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest req = HttpRequest.newBuilder().uri(new URI(mailhogApiBase + "/api/v1/messages")).method("DELETE", HttpRequest.BodyPublishers.noBody()).build();
             HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
-            return ResponseEntity.ok(Map.of("deleted", true));
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("deleted", true);
+            result.put("statusCode", resp.statusCode());
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            LOG.error("Falha ao apagar mensagens no MailHog: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            LOG.error("Falha ao apagar mensagens no MailHog: {}", errorMsg);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMsg);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
         }
     }
 
@@ -187,8 +202,12 @@ public class DebugNotificacaoController {
             resp.put("email", u.getEmail());
             return ResponseEntity.ok(resp);
         } catch (Exception e) {
-            LOG.error("Falha ao enviar notificação para usuario {}: {}", idUsuario, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            LOG.error("Falha ao enviar notificação para usuario {}: {}", idUsuario, errorMsg);
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMsg);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
@@ -228,8 +247,12 @@ public class DebugNotificacaoController {
 
             return ResponseEntity.ok(Map.of("enviadas", 1, "email", req.emailAluno));
         } catch (Exception e) {
-            LOG.error("Falha ao enviar notificação para email {}: {}", req != null ? req.emailAluno : "-", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            String errorMsg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            LOG.error("Falha ao enviar notificação para email {}: {}", req != null ? req.emailAluno : "-", errorMsg);
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMsg);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }
