@@ -131,6 +131,14 @@ jobs:
                   - "5672:5672"
                   - "15672:15672"
                 restart: unless-stopped
+              
+              mailhog:
+                image: mailhog/mailhog
+                container_name: mailhog
+                ports:
+                  - "1025:1025"  # SMTP
+                  - "8025:8025"  # Painel web
+                restart: unless-stopped
 
               api:
                 image: amazoncorretto:21
