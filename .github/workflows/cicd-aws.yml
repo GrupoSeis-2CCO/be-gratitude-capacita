@@ -204,9 +204,9 @@ jobs:
 
             echo "=== Resetando senha do MySQL root ==="
             sudo mysql -u root <<MYSQL_RESET
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}';
-FLUSH PRIVILEGES;
-MYSQL_RESET
+            ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}';
+            FLUSH PRIVILEGES;
+            MYSQL_RESET
 
             echo "Senha do root resetada com sucesso"
             
