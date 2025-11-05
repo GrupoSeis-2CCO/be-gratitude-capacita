@@ -201,6 +201,14 @@ jobs:
             ENVEOF
             
             echo ".env criado com secrets"
+
+            echo "=== Resetando senha do MySQL root ==="
+            sudo mysql -u root <<MYSQL_RESET
+            ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}';
+            FLUSH PRIVILEGES;
+            MYSQL_RESET
+
+            echo "Senha do root resetada com sucesso"
             
             # Executar Script.sql para criar o schema do banco (antes de iniciar Spring Boot)
             echo "=== Executando Script.sql para criar schema do banco ==="
