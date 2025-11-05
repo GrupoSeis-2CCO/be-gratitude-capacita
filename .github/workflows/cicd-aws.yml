@@ -203,7 +203,7 @@ jobs:
             echo ".env criado com secrets"
 
             echo "=== Resetando senha do MySQL root ==="
-            sudo mysql -u root <<MYSQL_RESET
+            sudo mysql -u root <<'MYSQL_RESET'
             ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}';
             FLUSH PRIVILEGES;
             MYSQL_RESET
@@ -214,7 +214,7 @@ jobs:
             echo "=== Executando Script.sql para criar schema do banco ==="
             if [ -f "/home/ubuntu/Script.sql" ]; then
                 echo "Executando Script.sql..."
-                sudo mysql -u ${{ secrets.DATABASE_USER }} -p'${{ secrets.DATABASE_PASSWORD }}' capacita < /home/ubuntu/Script.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/Script.sql
                 echo "Schema criado com sucesso"
             else
                 echo "AVISO: Script.sql não encontrado. Verifique se o arquivo foi copiado corretamente."
@@ -257,7 +257,7 @@ jobs:
                 echo "Aguardando Spring Boot inicializar completamente..."
                 sleep 10
                 echo "Executando data.sql..."
-                sudo mysql -u ${{ secrets.DATABASE_USER }} -p'${{ secrets.DATABASE_PASSWORD }}' capacita < /home/ubuntu/data.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/data.sql
                 echo "Banco de dados populado com sucesso"
             else
                 echo "AVISO: data.sql não encontrado. Banco ficará vazio."
@@ -270,7 +270,9 @@ jobs:
             
             echo "=== Deploy do backend via Docker concluído ==="
             echo "Backend está rodando em: $BACKEND_IP:8080"
-            echo "Acessível via frontend público através do proxy NGINX"      # 9. Verificar conectividade do frontend ao backend
+            echo "Acessível via frontend público através do proxy NGINX"
+
+      # 9. Verificar conectividade do frontend ao backend
       - name: Testar Conectividade Frontend -> Backend
         uses: appleboy/ssh-action@v1.0.3
         with:
