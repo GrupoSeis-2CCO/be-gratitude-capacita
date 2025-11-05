@@ -1,4 +1,4 @@
-name: CI/CD Backend - EC2 Privada (Spring Boot e Database)
+name: CI/CD Backend - EC2 Privada (Spring Boot | Database | MailHog)
 
 on:
   push:
