@@ -108,7 +108,7 @@ jobs:
             ssh-keygen -f ~/.ssh/known_hosts -R $BACKEND_IP || true
 
             # Criar compose-api.yaml na EC2 privada via SSH
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "bash -s" <<'ENDSSH'
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP "bash -s" <<ENDSSH
             set -e
             
             # Criar diretório para compose
