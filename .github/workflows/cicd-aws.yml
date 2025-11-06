@@ -182,22 +182,22 @@ jobs:
             # Criar arquivo .env com secrets
             cat > /home/ubuntu/api/.env <<ENVEOF
             DATABASE_NAME=capacita
-            DATABASE_USER=\${{ secrets.DATABASE_USER }}
-            DATABASE_PASSWORD=\${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
             HIBERNATE_DDL_AUTO=none
             SHOW_SQL=false
             AWS_REGION=us-east-1
-            AWS_ACCESS_KEY_ID=\${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=\${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_S3_BUCKET_BRONZE=\${{ secrets.BRONZE_BUCKET }}
-            AWS_S3_BUCKET_SILVER=\${{ secrets.SILVER_BUCKET }}
-            AWS_S3_BUCKET_GOLD=\${{ secrets.GOLD_BUCKET }}
-            JWT_SECRET=\${{ secrets.JWT_SECRET }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_S3_BUCKET_BRONZE=${{ secrets.BRONZE_BUCKET }}
+            AWS_S3_BUCKET_SILVER=${{ secrets.SILVER_BUCKET }}
+            AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_VALIDITY=3600000
             SPRING_RABBITMQ_HOST=rabbitmq
             SPRING_RABBITMQ_PORT=5672
-            SPRING_RABBITMQ_USERNAME=\${{ secrets.SPRING_RABBITMQ_USERNAME }}
-            SPRING_RABBITMQ_PASSWORD=\${{ secrets.SPRING_RABBITMQ_PASSWORD }}
+            SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
+            SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
             ENVEOF
             
             echo ".env criado com secrets"
