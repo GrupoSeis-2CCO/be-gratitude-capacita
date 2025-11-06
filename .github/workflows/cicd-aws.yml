@@ -179,34 +179,30 @@ jobs:
 
             echo "compose-api.yaml criado"
 
-            # Criar arquivo .env com secrets
-            cat > /home/ubuntu/api/.env <<ENVEOF
-            DATABASE_NAME=capacita
-            DATABASE_USER=${{ secrets.DATABASE_USER }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            HIBERNATE_DDL_AUTO=none
-            SHOW_SQL=false
-            AWS_REGION=us-east-1
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_S3_BUCKET_BRONZE=${{ secrets.BRONZE_BUCKET }}
-            AWS_S3_BUCKET_SILVER=${{ secrets.SILVER_BUCKET }}
-            AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            JWT_VALIDITY=3600000
-            SPRING_RABBITMQ_HOST=rabbitmq
-            SPRING_RABBITMQ_PORT=5672
-            SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
-            SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
-            ENVEOF
+            # Criar arquivo .env com secrets (usando echo para evitar problemas de escape)
+            rm -f /home/ubuntu/api/.env
+            echo "DATABASE_NAME=capacita" >> /home/ubuntu/api/.env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> /home/ubuntu/api/.env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> /home/ubuntu/api/.env
+            echo "HIBERNATE_DDL_AUTO=none" >> /home/ubuntu/api/.env
+            echo "SHOW_SQL=false" >> /home/ubuntu/api/.env
+            echo "AWS_REGION=us-east-1" >> /home/ubuntu/api/.env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> /home/ubuntu/api/.env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> /home/ubuntu/api/.env
+            echo "AWS_S3_BUCKET_BRONZE=${{ secrets.BRONZE_BUCKET }}" >> /home/ubuntu/api/.env
+            echo "AWS_S3_BUCKET_SILVER=${{ secrets.SILVER_BUCKET }}" >> /home/ubuntu/api/.env
+            echo "AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}" >> /home/ubuntu/api/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /home/ubuntu/api/.env
+            echo "JWT_VALIDITY=3600000" >> /home/ubuntu/api/.env
+            echo "SPRING_RABBITMQ_HOST=rabbitmq" >> /home/ubuntu/api/.env
+            echo "SPRING_RABBITMQ_PORT=5672" >> /home/ubuntu/api/.env
+            echo "SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}" >> /home/ubuntu/api/.env
+            echo "SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}" >> /home/ubuntu/api/.env
             
             echo ".env criado com secrets"
 
             echo "=== Resetando senha do MySQL root ==="
-            sudo mysql -u root <<MYSQL_RESET
-            ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '\${{ secrets.MYSQL_ROOT_PASSWORD }}';
-            FLUSH PRIVILEGES;
-            MYSQL_RESET
+            sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
 
             echo "Senha do root resetada com sucesso"
             
@@ -214,7 +210,7 @@ jobs:
             echo "=== Executando Script.sql para criar schema do banco ==="
             if [ -f "/home/ubuntu/Script.sql" ]; then
                 echo "Executando Script.sql..."
-                sudo mysql -u root -p'\${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/Script.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/Script.sql
                 echo "Schema criado com sucesso"
             else
                 echo "AVISO: Script.sql não encontrado. Verifique se o arquivo foi copiado corretamente."
@@ -257,7 +253,7 @@ jobs:
                 echo "Aguardando Spring Boot inicializar completamente..."
                 sleep 10
                 echo "Executando data.sql..."
-                sudo mysql -u root -p'\${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/data.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/data.sql
                 echo "Banco de dados populado com sucesso"
             else
                 echo "AVISO: data.sql não encontrado. Banco ficará vazio."
