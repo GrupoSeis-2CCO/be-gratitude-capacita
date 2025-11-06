@@ -112,9 +112,6 @@ jobs:
               bash <<ENDSSH
             set -e
             
-            # Definir senha do MySQL como variável
-            MYSQL_ROOT_PASS='${{ secrets.MYSQL_ROOT_PASSWORD }}'
-            
             # Criar diretório para compose
             mkdir -p /home/ubuntu/api
             
@@ -206,8 +203,8 @@ jobs:
             echo ".env criado com secrets"
 
             echo "=== Resetando senha do MySQL root ==="
-            sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '\$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;" || \
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '\$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;"
+            sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;" || \
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
 
             echo "Senha do root resetada com sucesso"
             
@@ -215,7 +212,7 @@ jobs:
             echo "=== Executando Script.sql para criar schema do banco ==="
             if [ -f "/home/ubuntu/Script.sql" ]; then
                 echo "Executando Script.sql..."
-                sudo mysql -u root -p"\$MYSQL_ROOT_PASS" capacita < /home/ubuntu/Script.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/Script.sql
                 echo "Schema criado com sucesso"
             else
                 echo "AVISO: Script.sql não encontrado. Verifique se o arquivo foi copiado corretamente."
@@ -258,7 +255,7 @@ jobs:
                 echo "Aguardando Spring Boot inicializar completamente..."
                 sleep 10
                 echo "Executando data.sql..."
-                sudo mysql -u root -p"\$MYSQL_ROOT_PASS" capacita < /home/ubuntu/data.sql
+                sudo mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' capacita < /home/ubuntu/data.sql
                 echo "Banco de dados populado com sucesso"
             else
                 echo "AVISO: data.sql não encontrado. Banco ficará vazio."
