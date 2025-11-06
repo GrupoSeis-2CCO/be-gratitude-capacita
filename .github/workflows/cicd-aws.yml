@@ -109,8 +109,11 @@ jobs:
 
             # Criar compose-api.yaml na EC2 privada via SSH
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@$BACKEND_IP \
-              "MYSQL_ROOT_PASS='${{ secrets.MYSQL_ROOT_PASSWORD }}' bash -s" <<'ENDSSH'
+              bash <<ENDSSH
             set -e
+            
+            # Definir senha do MySQL como variável
+            MYSQL_ROOT_PASS='${{ secrets.MYSQL_ROOT_PASSWORD }}'
             
             # Criar diretório para compose
             mkdir -p /home/ubuntu/api
@@ -124,8 +127,8 @@ jobs:
                 image: rabbitmq:3-management
                 container_name: rabbitmq
                 environment:
-                  RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
-                  RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+                  RABBITMQ_DEFAULT_USER: \${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
+                  RABBITMQ_DEFAULT_PASS: \${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
                 volumes:
                   - rabbitmq_data:/var/lib/rabbitmq
                 ports:
@@ -150,23 +153,23 @@ jobs:
                 ports:
                   - "8080:8080"
                 environment:
-                  SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/${DATABASE_NAME:-capacita}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-                  SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-capacita_app}
-                  SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
-                  SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
-                  SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
-                  AWS_REGION: ${AWS_REGION:-us-east-1}
-                  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-                  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-                  AWS_S3_BUCKET_BRONZE: ${AWS_S3_BUCKET_BRONZE}
-                  AWS_S3_BUCKET_SILVER: ${AWS_S3_BUCKET_SILVER}
-                  AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
-                  JWT_SECRET: ${JWT_SECRET}
-                  JWT_VALIDITY: ${JWT_VALIDITY:-3600000}
-                  SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-rabbitmq}
-                  SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
-                  SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
-                  SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+                  SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/\${DATABASE_NAME:-capacita}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+                  SPRING_DATASOURCE_USERNAME: \${DATABASE_USER:-capacita_app}
+                  SPRING_DATASOURCE_PASSWORD: \${DATABASE_PASSWORD}
+                  SPRING_JPA_HIBERNATE_DDL_AUTO: \${HIBERNATE_DDL_AUTO:-none}
+                  SPRING_JPA_SHOW_SQL: \${SHOW_SQL:-false}
+                  AWS_REGION: \${AWS_REGION:-us-east-1}
+                  AWS_ACCESS_KEY_ID: \${AWS_ACCESS_KEY_ID}
+                  AWS_SECRET_ACCESS_KEY: \${AWS_SECRET_ACCESS_KEY}
+                  AWS_S3_BUCKET_BRONZE: \${AWS_S3_BUCKET_BRONZE}
+                  AWS_S3_BUCKET_SILVER: \${AWS_S3_BUCKET_SILVER}
+                  AWS_S3_BUCKET_GOLD: \${AWS_S3_BUCKET_GOLD}
+                  JWT_SECRET: \${JWT_SECRET}
+                  JWT_VALIDITY: \${JWT_VALIDITY:-3600000}
+                  SPRING_RABBITMQ_HOST: \${SPRING_RABBITMQ_HOST:-rabbitmq}
+                  SPRING_RABBITMQ_PORT: \${SPRING_RABBITMQ_PORT:-5672}
+                  SPRING_RABBITMQ_USERNAME: \${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
+                  SPRING_RABBITMQ_PASSWORD: \${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
                   SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
                 extra_hosts:
                   - "host.docker.internal:host-gateway"
@@ -203,8 +206,8 @@ jobs:
             echo ".env criado com secrets"
 
             echo "=== Resetando senha do MySQL root ==="
-            sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;" || \
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;"
+            sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '\$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;" || \
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '\$MYSQL_ROOT_PASS'; FLUSH PRIVILEGES;"
 
             echo "Senha do root resetada com sucesso"
             
@@ -212,7 +215,7 @@ jobs:
             echo "=== Executando Script.sql para criar schema do banco ==="
             if [ -f "/home/ubuntu/Script.sql" ]; then
                 echo "Executando Script.sql..."
-                sudo mysql -u root -p"$MYSQL_ROOT_PASS" capacita < /home/ubuntu/Script.sql
+                sudo mysql -u root -p"\$MYSQL_ROOT_PASS" capacita < /home/ubuntu/Script.sql
                 echo "Schema criado com sucesso"
             else
                 echo "AVISO: Script.sql não encontrado. Verifique se o arquivo foi copiado corretamente."
@@ -255,7 +258,7 @@ jobs:
                 echo "Aguardando Spring Boot inicializar completamente..."
                 sleep 10
                 echo "Executando data.sql..."
-                sudo mysql -u root -p"$MYSQL_ROOT_PASS" capacita < /home/ubuntu/data.sql
+                sudo mysql -u root -p"\$MYSQL_ROOT_PASS" capacita < /home/ubuntu/data.sql
                 echo "Banco de dados populado com sucesso"
             else
                 echo "AVISO: data.sql não encontrado. Banco ficará vazio."
