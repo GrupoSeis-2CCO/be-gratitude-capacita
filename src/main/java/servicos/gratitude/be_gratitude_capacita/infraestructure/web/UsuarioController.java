@@ -19,6 +19,8 @@ import servicos.gratitude.be_gratitude_capacita.JWTImplement.autenticacao.Usuari
 import servicos.gratitude.be_gratitude_capacita.JWTImplement.autenticacao.UsuarioTokenDto;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.usuario.AtualizarSenhaCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.usuario.CriarUsuarioCommand;
+import servicos.gratitude.be_gratitude_capacita.core.dto.UsuarioCadastroDTO;
+import jakarta.validation.Valid;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.NaoEncontradoException;
 import servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario.*;
@@ -90,13 +92,22 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> cadastarUsuario(
-            @RequestBody CriarUsuarioCommand request) {
+    public ResponseEntity<Usuario> cadastrarUsuario(@Valid @RequestBody UsuarioCadastroDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(criarUsuarioUseCase.execute(request));
+            // Map DTO -> Command (mantém lógica existente)
+                CriarUsuarioCommand cmd = new CriarUsuarioCommand(
+                    dto.nome(),
+                    dto.cpf(),
+                    dto.email(),
+                    dto.idCargo()
+                );
+            Usuario created = criarUsuarioUseCase.execute(cmd);
+            // Persistir
+            servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity entity = UsuarioMapper.toEntity(created);
+            servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity saved = usuarioRepository.save(entity);
+            return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDomain(saved));
         } catch (ConflitoException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
         }
     }
 
