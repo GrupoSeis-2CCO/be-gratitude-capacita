@@ -790,6 +790,11 @@ INSERT INTO feedback (fk_usuario, fk_curso, estrelas, motivo) VALUES
 (15, 1, 4, 'Conteúdo relevante, mas poderia ter mais exemplos.')
 ON DUPLICATE KEY UPDATE estrelas = VALUES(estrelas), motivo = VALUES(motivo);
 
+-- Garantir que valores de 'estrelas' fiquem no intervalo 1..5 (caso existam dados legados com outra escala)
+UPDATE feedback
+SET estrelas = LEAST(GREATEST(COALESCE(estrelas, 1), 1), 5)
+WHERE estrelas IS NOT NULL;
+
 -- Marcar um feedback como anônimo (usuário 10, curso 1) quando a coluna 'anonimo' existir
 -- Fazemos o UPDATE somente se a coluna 'anonimo' estiver presente (JOIN em information_schema)
 UPDATE feedback f

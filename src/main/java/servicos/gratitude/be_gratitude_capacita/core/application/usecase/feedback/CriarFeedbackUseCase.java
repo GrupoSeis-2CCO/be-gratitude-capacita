@@ -63,6 +63,11 @@ public class CriarFeedbackUseCase {
             throw new ConflitoException("Só é possível avaliar após concluir todos os materiais do curso");
         }
 
+        // validação: estrelas devem estar no intervalo 1..5
+        if (command.estrelas() == null || command.estrelas() < 1 || command.estrelas() > 5) {
+            throw new ValorInvalidoException("Campo 'estrelas' deve estar entre 1 e 5");
+        }
+
         Feedback feedback = new Feedback();
 
         feedback.setCurso(curso);
