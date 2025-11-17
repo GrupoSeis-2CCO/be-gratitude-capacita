@@ -61,7 +61,7 @@ public class SecurityConfiguracao {
             "/webjars/**",
             "/v3/api-docs/**",
             "/actuator/*",
-            "/usuarios/login/**",
+        "/usuarios/login/**",
             "/cargos/**",
             "/h2-console/**",
             "/error",
@@ -74,6 +74,8 @@ public class SecurityConfiguracao {
             "/cursos/*/materiais/*",
             "/cursos/*/detalhes",
             "/cursos/*/publicar",
+            "/materiais",
+            "/materiais/**",
             "/debug/notificacao/**",
             "/materiais-alunos/finalizar-por-material/video/**",
             "/tentativas/*/*",
@@ -90,9 +92,15 @@ public class SecurityConfiguracao {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .cors(Customizer.withDefaults())
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(URLS_PERMITIDAS).permitAll()
-                        .anyRequest().authenticated())
+        .authorizeHttpRequests(authorize -> authorize
+            // URLs gerais permitidas (documentação, públicos, etc.)
+            .requestMatchers(URLS_PERMITIDAS).permitAll()
+            // Registro de usuário e login devem ser públicos para obter o primeiro token
+            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios", "/usuarios/login").permitAll()
+            // Permite CORS preflight (OPTIONS) para endpoints de auth sem exigir token
+            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/usuarios", "/usuarios/login").permitAll()
+            // Demais endpoints exigem autenticação
+            .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(autenticacaoEntryPoint))
                 .sessionManagement(management -> management
