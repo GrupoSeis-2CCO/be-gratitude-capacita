@@ -1,5 +1,3 @@
-name: CI/CD Backend - EC2 Privada (Spring Boot e Database)
-
 on:
   push:
     branches:
@@ -10,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout do códigO
+      # 1. Checkout do código
       #Teste com secretes
       - name: Checkout do Repositório
         uses: actions/checkout@v4

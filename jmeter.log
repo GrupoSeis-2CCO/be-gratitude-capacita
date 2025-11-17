@@ -1,0 +1,22 @@
+2025-11-16 22:08:02,386 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2025-11-16 22:08:02,403 INFO o.a.j.JMeter: Loading user properties from: /opt/jmeter/bin/user.properties
+2025-11-16 22:08:02,403 INFO o.a.j.JMeter: Loading system properties from: /opt/jmeter/bin/system.properties
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: Version 5.6.3
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: java.version=21.0.8
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: java.vm.name=OpenJDK 64-Bit Server VM
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: os.name=Linux
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: os.arch=amd64
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: os.version=6.17.3-arch2-1
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: file.encoding=UTF-8
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: java.awt.headless=null
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: Max memory     =1073741824
+2025-11-16 22:08:02,408 INFO o.a.j.JMeter: Available Processors =4
+2025-11-16 22:08:02,418 INFO o.a.j.JMeter: Default Locale=English (EN)
+2025-11-16 22:08:02,418 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2025-11-16 22:08:02,419 INFO o.a.j.JMeter: JMeterHome=/opt/jmeter
+2025-11-16 22:08:02,419 INFO o.a.j.JMeter: user.dir  =/home/nikiox/Desktop/ProjetoPI/be-gratitude-capacita
+2025-11-16 22:08:02,419 INFO o.a.j.JMeter: PWD       =/home/nikiox/Desktop/ProjetoPI/be-gratitude-capacita
+2025-11-16 22:08:02,419 INFO o.a.j.JMeter: IP: 172.18.0.1 Name: arch FullName: arch
+2025-11-16 22:08:02,428 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2025-11-16 22:08:02,578 INFO o.a.j.JMeterGuiLauncher: Setting LAF to: com.github.weisj.darklaf.DarkLaf:com.github.weisj.darklaf.theme.DarculaTheme
