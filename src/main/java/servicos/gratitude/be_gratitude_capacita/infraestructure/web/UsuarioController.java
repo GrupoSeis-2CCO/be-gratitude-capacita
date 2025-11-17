@@ -27,6 +27,17 @@ import servicos.gratitude.be_gratitude_capacita.core.application.usecase.usuario
 import servicos.gratitude.be_gratitude_capacita.core.domain.Usuario;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.UsuarioMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter.TokenJwtAdapter;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MaterialAlunoRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.TentativaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.RespostaDoUsuarioRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.FeedbackRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MatriculaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.TentativaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.RespostaDoUsuarioEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.FeedbackEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +58,10 @@ public class UsuarioController {
     private final AutenticarUsuarioUseCase autenticarUsuarioUseCase;
     private final servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.UsuarioRepository usuarioRepository;
     private final servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MatriculaRepository matriculaRepository;
+    private final MaterialAlunoRepository materialAlunoRepository;
+    private final TentativaRepository tentativaRepository;
+    private final RespostaDoUsuarioRepository respostaDoUsuarioRepository;
+    private final FeedbackRepository feedbackRepository;
     private final TokenJwtAdapter tokenJwtAdapter;
 
     public UsuarioController(
@@ -60,6 +75,10 @@ public class UsuarioController {
             AutenticarUsuarioUseCase autenticarUsuarioUseCase,
             servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.UsuarioRepository usuarioRepository,
             servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MatriculaRepository matriculaRepository,
+            MaterialAlunoRepository materialAlunoRepository,
+            TentativaRepository tentativaRepository,
+            RespostaDoUsuarioRepository respostaDoUsuarioRepository,
+            FeedbackRepository feedbackRepository,
             TokenJwtAdapter tokenJwtAdapter) {
         this.criarUsuarioUseCase = criarUsuarioUseCase;
         this.listarUsuariosUseCase = listarUsuariosUseCase;
@@ -71,6 +90,10 @@ public class UsuarioController {
         this.autenticarUsuarioUseCase = autenticarUsuarioUseCase;
         this.usuarioRepository = usuarioRepository;
         this.matriculaRepository = matriculaRepository;
+        this.materialAlunoRepository = materialAlunoRepository;
+        this.tentativaRepository = tentativaRepository;
+        this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;
+        this.feedbackRepository = feedbackRepository;
         this.tokenJwtAdapter = tokenJwtAdapter;
     }
 
@@ -135,14 +158,55 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{idUsuario}")
+    @Transactional
     public ResponseEntity deletarUsuario(
             @PathVariable Integer idUsuario) {
         try {
-            deletarUsuarioUseCase.execute(idUsuario);
+            // Verifica existência e carrega usuário
+            UsuarioEntity usuarioEntity = usuarioRepository.findById(idUsuario)
+                    .orElseThrow(() -> new NaoEncontradoException("Não foi encontrado um usuário com o id informado"));
+
+            // Remove dependências em ordem segura:
+            // 1) Respostas -> Tentativas -> Material_Aluno -> Feedback -> Matrículas -> Usuário
+
+            // Matrículas do usuário
+            java.util.List<MatriculaEntity> matriculas = matriculaRepository.findAllByUsuario(usuarioEntity);
+
+            // Para cada matrícula, remover materiais e tentativas com respostas
+            for (MatriculaEntity m : matriculas) {
+                // material_aluno
+                var materiais = materialAlunoRepository.findAllByMatricula(m);
+                if (!materiais.isEmpty()) materialAlunoRepository.deleteAll(materiais);
+
+                // tentativas e respostas
+                java.util.List<TentativaEntity> tentativas = tentativaRepository.findAllByMatricula(m);
+                for (TentativaEntity t : tentativas) {
+                    java.util.List<RespostaDoUsuarioEntity> respostas = respostaDoUsuarioRepository.findAllByTentativa(t);
+                    if (!respostas.isEmpty()) respostaDoUsuarioRepository.deleteAll(respostas);
+                }
+                if (!tentativas.isEmpty()) tentativaRepository.deleteAll(tentativas);
+            }
+
+            // feedbacks do usuário
+            java.util.List<FeedbackEntity> feedbacksDoUsuario = feedbackRepository.findAllByFkUsuario(usuarioEntity);
+            if (!feedbacksDoUsuario.isEmpty()) feedbackRepository.deleteAll(feedbacksDoUsuario);
+
+            // remove matrículas
+            if (!matriculas.isEmpty()) matriculaRepository.deleteAll(matriculas);
+
+            // por fim, remove o usuário
+            usuarioRepository.deleteById(idUsuario);
+
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("[Usuários] Falha ao excluir usuário {} por violação de integridade: {}", idUsuario, dive.getMessage());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Não foi possível apagar o usuário devido a vínculos no sistema.");
+        } catch (Exception e) {
+            LOG.error("[Usuários] Erro inesperado ao excluir usuário {}: {}", idUsuario, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao apagar o usuário.");
         }
     }
 
