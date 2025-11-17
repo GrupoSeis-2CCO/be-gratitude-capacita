@@ -2,6 +2,7 @@
 package servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.adapter;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,18 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Usuario;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.UsuarioGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.CargoEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.MatriculaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.TentativaEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.RespostaDoUsuarioEntity;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.FeedbackEntity;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.CursoMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.UsuarioMapper;
-import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.CargoRepository;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.UsuarioRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MatriculaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.MaterialAlunoRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.TentativaRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.RespostaDoUsuarioRepository;
+import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.FeedbackRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +30,26 @@ import java.util.Optional;
 public class UsuarioAdapter implements UsuarioGateway {
     private static final Logger log = LoggerFactory.getLogger(UsuarioAdapter.class);
     private final UsuarioRepository usuarioRepository;
+    private final MatriculaRepository matriculaRepository;
+    private final MaterialAlunoRepository materialAlunoRepository;
+    private final TentativaRepository tentativaRepository;
+    private final RespostaDoUsuarioRepository respostaDoUsuarioRepository;
+    private final FeedbackRepository feedbackRepository;
 
-    public UsuarioAdapter(UsuarioRepository usuarioRepository) {
+    public UsuarioAdapter(
+            UsuarioRepository usuarioRepository,
+            MatriculaRepository matriculaRepository,
+            MaterialAlunoRepository materialAlunoRepository,
+            TentativaRepository tentativaRepository,
+            RespostaDoUsuarioRepository respostaDoUsuarioRepository,
+            FeedbackRepository feedbackRepository
+    ) {
         this.usuarioRepository = usuarioRepository;
+        this.matriculaRepository = matriculaRepository;
+        this.materialAlunoRepository = materialAlunoRepository;
+        this.tentativaRepository = tentativaRepository;
+        this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     @Override
@@ -122,7 +148,38 @@ public class UsuarioAdapter implements UsuarioGateway {
     }
 
     @Override
+    @Transactional
     public void deleteById(Integer id) {
+        UsuarioEntity usuarioEntity = usuarioRepository.findById(id).orElse(null);
+        if (usuarioEntity == null) {
+            return;
+        }
+        // 1) Remover dependências
+        // Matrículas do usuário
+        java.util.List<MatriculaEntity> matriculas = matriculaRepository.findAllByUsuario(usuarioEntity);
+
+        for (MatriculaEntity m : matriculas) {
+            // material_aluno
+            var materiais = materialAlunoRepository.findAllByMatricula(m);
+            if (!materiais.isEmpty()) materialAlunoRepository.deleteAll(materiais);
+
+            // tentativas e respostas
+            java.util.List<TentativaEntity> tentativas = tentativaRepository.findAllByMatricula(m);
+            for (TentativaEntity t : tentativas) {
+                java.util.List<RespostaDoUsuarioEntity> respostas = respostaDoUsuarioRepository.findAllByTentativa(t);
+                if (!respostas.isEmpty()) respostaDoUsuarioRepository.deleteAll(respostas);
+            }
+            if (!tentativas.isEmpty()) tentativaRepository.deleteAll(tentativas);
+        }
+
+        // feedbacks do usuário
+        java.util.List<FeedbackEntity> feedbacksDoUsuario = feedbackRepository.findAllByFkUsuario(usuarioEntity);
+        if (!feedbacksDoUsuario.isEmpty()) feedbackRepository.deleteAll(feedbacksDoUsuario);
+
+        // remove matrículas
+        if (!matriculas.isEmpty()) matriculaRepository.deleteAll(matriculas);
+
+        // 2) Remover usuário
         usuarioRepository.deleteById(id);
     }
 }
