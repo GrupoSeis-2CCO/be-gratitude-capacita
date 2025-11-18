@@ -21,6 +21,22 @@ public class AtualizarCursoUseCase {
             throw new NaoEncontradoException("Não encontrado curso com id informado");
         }
 
+        // Validation: titulo required and length constraints
+        if (command.tituloCurso() == null || command.tituloCurso().trim().isEmpty()){
+            throw new IllegalArgumentException("Título do curso é obrigatório.");
+        }
+        if (command.tituloCurso().length() > 100){
+            throw new IllegalArgumentException("Título do curso deve ter no máximo 100 caracteres.");
+        }
+
+        if (command.descricao() != null && command.descricao().length() > 255){
+            throw new IllegalArgumentException("Descrição do curso deve ter no máximo 255 caracteres.");
+        }
+
+        if (command.duracaoEstimada() != null && command.duracaoEstimada() < 0){
+            throw new IllegalArgumentException("Duração estimada inválida.");
+        }
+
         Curso cursoComMesmoTitulo = cursoGateway.findByTitulo(command.tituloCurso());
 
         if (Objects.nonNull(cursoComMesmoTitulo) && (cursoComMesmoTitulo.getIdCurso() != idCurso)){

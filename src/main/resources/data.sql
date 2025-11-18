@@ -880,3 +880,20 @@ SELECT id_material_aluno, fk_video, fk_apostila, finalizada, ultimo_acesso, fk_c
 
 SELECT id_questao, fk_alternativa_correta FROM questao WHERE fk_avaliacao = 1;
 SELECT * FROM avaliacao WHERE fk_curso = 1;
+
+-- Ajuste: garantir pelo menos 4 participantes com ultimo_acesso recente (dentro dos últimos 15 dias)
+-- Atualiza `usuario`, `matricula` e `material_aluno` para refletir acessos recentes em novembro/2025
+UPDATE usuario SET ultimo_acesso = '2025-11-10 09:00:00' WHERE id_usuario = 1;
+UPDATE usuario SET ultimo_acesso = '2025-11-15 10:00:00' WHERE id_usuario = 10;
+UPDATE usuario SET ultimo_acesso = '2025-11-05 14:30:00' WHERE id_usuario = 11;
+UPDATE usuario SET ultimo_acesso = '2025-11-18 08:45:00' WHERE id_usuario = 12;
+
+UPDATE matricula SET ultimo_senso = '2025-11-10 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-11-15 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
+
+UPDATE material_aluno SET ultimo_acesso = '2025-11-10 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-11-15 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
