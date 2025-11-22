@@ -12,4 +12,6 @@ public interface TentativaGateway {
     List<Tentativa> findAllByUsuario(Integer fkUsuario);
     Tentativa findById(TentativaCompoundKey idComposto);
     Boolean existsById(TentativaCompoundKey idComposto);
+    long countByAvaliacaoId(Integer idAvaliacao);
+    int deleteByAvaliacaoId(Integer idAvaliacao);
 }

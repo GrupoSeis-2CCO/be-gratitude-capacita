@@ -12,6 +12,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapp
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.QuestaoMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.mapper.compoundKeysMapper.AlternativaCompoundKeyMapper;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.AlternativaRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -179,17 +180,20 @@ public class AlternativaAdapter implements AlternativaGateway {
 
     @Override
     public void deleteById(AlternativaCompoundKey idComposto) {
-        // Buscar a AlternativaEntity
         Optional<AlternativaEntity> altOpt = alternativaRepository.findById(idComposto.getIdAlternativa());
-        if (altOpt.isPresent()) {
-            AlternativaEntity altEntity = altOpt.get();
-            // Remover referência em questões que usam como fkAlternativaCorreta
-            var questoes = questaoRepository.findByFkAlternativaCorreta(altEntity);
-            for (var questao : questoes) {
-                questao.setFkAlternativaCorreta(null);
-                questaoRepository.save(questao);
-            }
+        if (altOpt.isEmpty()) {
+            return;
+        }
+        AlternativaEntity altEntity = altOpt.get();
+        var questoes = questaoRepository.findByFkAlternativaCorreta(altEntity);
+        for (var questao : questoes) {
+            questao.setFkAlternativaCorreta(null);
+            questaoRepository.save(questao);
+        }
+        try {
             alternativaRepository.deleteById(idComposto.getIdAlternativa());
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Não foi possível deletar alternativa id={} devido a FK em respostas; será ignorada para concluir exclusão da avaliação. Causa: {}", idComposto.getIdAlternativa(), ex.getMessage());
         }
     }
 }

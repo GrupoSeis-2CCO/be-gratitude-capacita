@@ -90,7 +90,7 @@ public class ApostilaController {
             @RequestBody AtualizarApostilaCommand request,
             @PathVariable Integer idApostila) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(atualizarDadosApostilaUseCase.execute(request, idApostila));
         } catch (ConflitoException e) {
             throw new ResponseStatusException(
@@ -105,7 +105,7 @@ public class ApostilaController {
     public ResponseEntity<Apostila> atualizarOcultoApostila(
             @PathVariable Integer idApostila) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(atualizarOcultoApostilaUseCase.execute(idApostila));
+            return ResponseEntity.status(HttpStatus.OK).body(atualizarOcultoApostilaUseCase.execute(idApostila));
         } catch (ConflitoException e) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, e.getMessage(), e);

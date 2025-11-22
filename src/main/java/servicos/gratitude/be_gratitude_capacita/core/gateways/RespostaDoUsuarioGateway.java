@@ -12,4 +12,6 @@ public interface RespostaDoUsuarioGateway {
     List<RespostaDoUsuario> findAllByTentativa(Tentativa tentativa);
     Boolean existsById(RespostaDoUsuarioCompoundKey idComposto);
     Boolean existsByAlternativa(servicos.gratitude.be_gratitude_capacita.core.domain.Alternativa alternativa);
+    long countByExamId(Integer examId);
+    void deleteByExamId(Integer examId);
 }

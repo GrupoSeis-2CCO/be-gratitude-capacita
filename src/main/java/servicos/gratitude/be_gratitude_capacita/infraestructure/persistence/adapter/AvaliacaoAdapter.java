@@ -60,4 +60,9 @@ public class AvaliacaoAdapter implements AvaliacaoGateway {
         return avaliacaoRepository.findFirstByFkCurso_IdCurso(idCurso)
                 .map(AvaliacaoMapper::toDomain);
     }
+
+    @Override
+    public void deleteById(Integer id) {
+        avaliacaoRepository.deleteById(id);
+    }
 }

@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.DefinirAcertosMinimosCommand;
 import servicos.gratitude.be_gratitude_capacita.core.application.exception.ConflitoException;
@@ -17,6 +18,7 @@ import servicos.gratitude.be_gratitude_capacita.core.gateways.AvaliacaoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.QuestaoGateway;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.AlternativaGateway;
 import servicos.gratitude.be_gratitude_capacita.core.gateways.RespostaDoUsuarioGateway;
+import servicos.gratitude.be_gratitude_capacita.core.gateways.TentativaGateway;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.AvaliacaoCompletaResponse;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.AvaliacaoUpdateRequest;
 import servicos.gratitude.be_gratitude_capacita.core.domain.Questao;
@@ -39,6 +41,7 @@ public class AvaliacaoController {
     private final QuestaoGateway questaoGateway;
     private final AlternativaGateway alternativaGateway;
     private final RespostaDoUsuarioGateway respostaDoUsuarioGateway;
+    private final TentativaGateway tentativaGateway;
 
     public AvaliacaoController(
         CriarAvaliacaoUseCase criarAvaliacaoUseCase,
@@ -46,7 +49,8 @@ public class AvaliacaoController {
         AvaliacaoGateway avaliacaoGateway,
         QuestaoGateway questaoGateway,
         AlternativaGateway alternativaGateway,
-        RespostaDoUsuarioGateway respostaDoUsuarioGateway
+        RespostaDoUsuarioGateway respostaDoUsuarioGateway,
+        TentativaGateway tentativaGateway
     ) {
         this.criarAvaliacaoUseCase = criarAvaliacaoUseCase;
         this.atualizarAcertosMinimosAvaliacaoUseCase = atualizarAcertosMinimosAvaliacaoUseCase;
@@ -54,6 +58,7 @@ public class AvaliacaoController {
         this.questaoGateway = questaoGateway;
         this.alternativaGateway = alternativaGateway;
         this.respostaDoUsuarioGateway = respostaDoUsuarioGateway;
+        this.tentativaGateway = tentativaGateway;
     }
     @GetMapping
     public ResponseEntity<?> listarAvaliacoes() {
@@ -73,6 +78,14 @@ public class AvaliacaoController {
             // Primeiro cria a avaliação básica (nota mínima e vínculo ao curso)
             servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand cmd =
                     new servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand(request.fkCurso, request.notaMinima);
+            // Validação: nota mínima não pode ser maior que quantidade de questões (cada questão vale 1 ponto)
+            if (request.questoes != null && !request.questoes.isEmpty() && request.notaMinima != null) {
+                int qtdQuestoes = request.questoes.size();
+                if (request.notaMinima.intValue() > qtdQuestoes) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(null);
+                }
+            }
             var created = criarAvaliacaoUseCase.execute(cmd);
 
             // Se vierem questões no payload, reaproveita o endpoint de atualização para persistir questões/alternativas
@@ -147,6 +160,15 @@ public class AvaliacaoController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+        // Endpoint para checar se existe alguma resposta registrada para a avaliação
+        @GetMapping("/{idAvaliacao}/respostas/existe")
+        public ResponseEntity<?> checkExamHasResponses(@PathVariable Integer idAvaliacao) {
+            Avaliacao avaliacao = avaliacaoGateway.findById(idAvaliacao);
+            if (avaliacao == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("hasResponses", false));
+            long count = respostaDoUsuarioGateway.countByExamId(idAvaliacao);
+            return ResponseEntity.ok(java.util.Map.of("hasResponses", count > 0, "respostasCount", count));
+        }
+
     // Novo endpoint para atualizar avaliação completa (nota mínima, questões e alternativas)
     @PutMapping("/{idAvaliacao}")
     public ResponseEntity<?> atualizarAvaliacaoCompleta(@PathVariable Integer idAvaliacao, @RequestBody AvaliacaoUpdateRequest request) {
@@ -156,9 +178,24 @@ public class AvaliacaoController {
         if (avaliacao == null) {
             return ResponseEntity.notFound().build();
         }
+        // Validação: acertos mínimos não pode ser maior que quantidade de questões enviadas
+        if (request.acertosMinimos != null && request.questoes != null && !request.questoes.isEmpty()) {
+            int qtdQuestoes = request.questoes.size();
+            if (request.acertosMinimos > qtdQuestoes) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Acertos mínimos não pode ser maior que número de questões (" + qtdQuestoes + ")");
+            }
+        }
         avaliacao.setAcertosMinimos(request.acertosMinimos);
         avaliacaoGateway.save(avaliacao);
 
+        // Validação PATCH: comparar com quantidade de questões já existentes na avaliação
+        var questoesExistentesPatch = questaoGateway.findAllByAvaliacao(avaliacao);
+        int qtdQuestoesPatch = questoesExistentesPatch != null ? questoesExistentesPatch.size() : 0;
+        if (qtdQuestoesPatch > 0 && request.acertosMinimos > qtdQuestoesPatch) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Acertos mínimos não pode ser maior que número de questões (" + qtdQuestoesPatch + ")");
+        }
         // Atualiza/Cria/Remove questões
         var questoesExistentes = questaoGateway.findAllByAvaliacao(avaliacao);
         Map<Integer, Questao> questoesPorId = new HashMap<>();
@@ -318,5 +355,246 @@ public class AvaliacaoController {
             }
         }
         return ResponseEntity.ok().build();
+    }
+
+    // PATCH parcial: se vier somente acertosMinimos, não alteramos questões/alternativas.
+    // Se vier subset de questões, atualizamos apenas essas sem remover as ausentes.
+    @PatchMapping("/{idAvaliacao}")
+    public ResponseEntity<?> patchAvaliacao(@PathVariable Integer idAvaliacao, @RequestBody AvaliacaoUpdateRequest request) {
+        System.out.println("[AvaliacaoController] PATCH /avaliacoes/" + idAvaliacao);
+        Avaliacao avaliacao = avaliacaoGateway.findById(idAvaliacao);
+        if (avaliacao == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        boolean updated = false;
+        if (request.acertosMinimos != null) {
+            avaliacao.setAcertosMinimos(request.acertosMinimos);
+            avaliacaoGateway.save(avaliacao);
+            updated = true;
+        }
+        // Se não há questões no payload, finaliza aqui (apenas acertos mínimos)
+        if (request.questoes == null || request.questoes.isEmpty()) {
+            return updated ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        // Atualiza apenas questões presentes (sem deletar ausentes)
+        var questoesExistentes = questaoGateway.findAllByAvaliacao(avaliacao);
+        Map<Integer, Questao> questoesPorId = new HashMap<>();
+        Map<Integer, Questao> questoesPorNumero = new HashMap<>();
+        for (Questao qExistente : questoesExistentes) {
+            if (qExistente.getIdQuestaoComposto() != null && qExistente.getIdQuestaoComposto().getIdQuestao() != null) {
+                questoesPorId.putIfAbsent(qExistente.getIdQuestaoComposto().getIdQuestao(), qExistente);
+            }
+            if (qExistente.getNumeroQuestao() != null) {
+                questoesPorNumero.putIfAbsent(qExistente.getNumeroQuestao(), qExistente);
+            }
+        }
+
+        for (AvaliacaoUpdateRequest.QuestaoUpdateRequest qReq : request.questoes) {
+            java.util.List<AvaliacaoUpdateRequest.AlternativaUpdateRequest> alternativasPayload =
+                qReq.alternativas != null ? qReq.alternativas : java.util.Collections.emptyList();
+
+            Questao questaoSelecionada = null;
+            if (qReq.idQuestao != null) {
+                questaoSelecionada = questoesPorId.get(qReq.idQuestao);
+            }
+            if (questaoSelecionada == null && qReq.numeroQuestao != null) {
+                questaoSelecionada = questoesPorNumero.get(qReq.numeroQuestao);
+            }
+            if (questaoSelecionada == null) {
+                // criação de nova questão
+                questaoSelecionada = new Questao();
+                questaoSelecionada.setAvaliacao(avaliacao);
+                if (qReq.idQuestao != null || qReq.numeroQuestao != null) {
+                    QuestaoCompoundKey novoKey = new QuestaoCompoundKey();
+                    novoKey.setFkAvaliacao(idAvaliacao);
+                    if (qReq.idQuestao != null) novoKey.setIdQuestao(qReq.idQuestao);
+                    questaoSelecionada.setIdQuestaoComposto(novoKey);
+                }
+            } else {
+                questaoSelecionada.setAvaliacao(avaliacao);
+            }
+            questaoSelecionada.setEnunciado(qReq.enunciado);
+            questaoSelecionada.setNumeroQuestao(qReq.numeroQuestao);
+            Questao savedQuestao = questaoGateway.save(questaoSelecionada);
+            Integer questaoId = savedQuestao.getIdQuestaoComposto().getIdQuestao();
+            questoesPorId.put(questaoId, savedQuestao);
+            if (savedQuestao.getNumeroQuestao() != null) questoesPorNumero.put(savedQuestao.getNumeroQuestao(), savedQuestao);
+
+            // Atualiza alternativas presentes (sem excluir as não enviadas)
+            var alternativasExistentes = alternativaGateway.findAllByQuestao(savedQuestao);
+            Map<Integer, Alternativa> alternativasPorId = new HashMap<>();
+            Map<Integer, Alternativa> alternativasPorOrdem = new HashMap<>();
+            for (Alternativa altExistente : alternativasExistentes) {
+                if (altExistente.getAlternativaChaveComposta() != null && altExistente.getAlternativaChaveComposta().getIdAlternativa() != null) {
+                    alternativasPorId.putIfAbsent(altExistente.getAlternativaChaveComposta().getIdAlternativa(), altExistente);
+                }
+                if (altExistente.getOrdem() != null) {
+                    alternativasPorOrdem.putIfAbsent(altExistente.getOrdem(), altExistente);
+                }
+            }
+            for (AvaliacaoUpdateRequest.AlternativaUpdateRequest aReq : alternativasPayload) {
+                Alternativa alternativaSelecionada = null;
+                if (aReq.idAlternativa != null) alternativaSelecionada = alternativasPorId.get(aReq.idAlternativa);
+                if (alternativaSelecionada == null && aReq.ordemAlternativa != null) alternativaSelecionada = alternativasPorOrdem.get(aReq.ordemAlternativa);
+                if (alternativaSelecionada == null) {
+                    alternativaSelecionada = new Alternativa();
+                    if (aReq.idAlternativa != null) {
+                        AlternativaCompoundKey aKey = new AlternativaCompoundKey();
+                        aKey.setIdAlternativa(aReq.idAlternativa);
+                        aKey.setIdQuestao(savedQuestao.getIdQuestaoComposto().getIdQuestao());
+                        aKey.setIdAvaliacao(idAvaliacao);
+                        alternativaSelecionada.setAlternativaChaveComposta(aKey);
+                    }
+                }
+                alternativaSelecionada.setQuestao(savedQuestao);
+                alternativaSelecionada.setTexto(aReq.texto);
+                alternativaSelecionada.setOrdem(aReq.ordemAlternativa);
+                Alternativa savedAlternativa = alternativaGateway.save(alternativaSelecionada);
+                if (savedAlternativa.getAlternativaChaveComposta() != null && savedAlternativa.getAlternativaChaveComposta().getIdAlternativa() != null) {
+                    alternativasPorId.put(savedAlternativa.getAlternativaChaveComposta().getIdAlternativa(), savedAlternativa);
+                }
+                if (savedAlternativa.getOrdem() != null) {
+                    alternativasPorOrdem.put(savedAlternativa.getOrdem(), savedAlternativa);
+                }
+            }
+
+            // Atualiza alternativa correta se enviada
+            if (qReq.fkAlternativaCorreta != null) {
+                var alternativasAtualizadas = alternativaGateway.findAllByQuestao(savedQuestao);
+                Alternativa alternativaCorreta = alternativasAtualizadas.stream()
+                    .filter(alt -> alt.getAlternativaChaveComposta() != null && Objects.equals(qReq.fkAlternativaCorreta, alt.getAlternativaChaveComposta().getIdAlternativa()))
+                    .findFirst()
+                    .orElseGet(() -> alternativasAtualizadas.stream()
+                        .filter(alt -> alt.getOrdem() != null && Objects.equals(alt.getOrdem(), qReq.fkAlternativaCorreta))
+                        .findFirst()
+                        .orElse(null));
+                savedQuestao.setFkAlternativaCorreta(alternativaCorreta);
+                questaoGateway.save(savedQuestao);
+            }
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Exclui completamente uma avaliação se não houver respostas de usuários associadas
+     * a nenhuma alternativa das suas questões. Caso existam respostas, retorna 409 e não exclui.
+     */
+    @DeleteMapping("/{idAvaliacao}")
+    @Transactional
+    public ResponseEntity<?> deletarAvaliacao(@PathVariable Integer idAvaliacao, @RequestParam(name="force", required=false, defaultValue="false") Boolean force) {
+        java.util.UUID requestId = java.util.UUID.randomUUID();
+        System.out.println("[AvaliacaoController]["+requestId+"] DELETE /avaliacoes/" + idAvaliacao + " force=" + force);
+        Avaliacao avaliacao = avaliacaoGateway.findById(idAvaliacao);
+        if (avaliacao == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Avaliação não encontrada");
+        }
+
+        // Carrega questões e alternativas
+        var questoes = questaoGateway.findAllByAvaliacao(avaliacao);
+        // Contar respostas associadas à avaliação
+        long respostasCount = respostaDoUsuarioGateway.countByExamId(idAvaliacao);
+        // Se houver respostas e não for forçado, retornamos conflito
+        if (respostasCount > 0 && !force) {
+            java.util.Map<String,Object> body = new java.util.HashMap<>();
+            body.put("message", "Não é possível excluir: já existem respostas registradas.");
+            body.put("respostasCount", respostasCount);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+        }
+
+        // Se for forçado e existem respostas, remover todas as respostas primeiro
+        // antes de tentar deletar alternativas/questões para evitar violações de FK.
+        if (force) {
+            // Remover respostas (se houver)
+            if (respostasCount > 0) {
+                System.out.println("[AvaliacaoController]["+requestId+"] Iniciando remoção de respostas: total=" + respostasCount);
+                try {
+                    respostaDoUsuarioGateway.deleteByExamId(idAvaliacao);
+                    long remaining = respostaDoUsuarioGateway.countByExamId(idAvaliacao);
+                    System.out.println("[AvaliacaoController]["+requestId+"] Após remoção de respostas remaining=" + remaining);
+                    if (remaining > 0) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover todas as respostas (restantes=" + remaining + ")");
+                    }
+                } catch (Exception e) {
+                    System.out.println("[AvaliacaoController]["+requestId+"] Exceção ao remover respostas: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover respostas associadas; operação abortada.");
+                }
+            }
+            // Remover tentativas SEMPRE que for force
+            long tentativasCount = tentativaGateway.countByAvaliacaoId(idAvaliacao);
+            System.out.println("[AvaliacaoController]["+requestId+"] Tentativas associadas encontradas=" + tentativasCount);
+            if (tentativasCount > 0) {
+                int deletadas = tentativaGateway.deleteByAvaliacaoId(idAvaliacao);
+                long tentativasRestantes = tentativaGateway.countByAvaliacaoId(idAvaliacao);
+                System.out.println("[AvaliacaoController]["+requestId+"] Tentativas deletadas=" + deletadas + ", restantes=" + tentativasRestantes);
+                if (tentativasRestantes > 0) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover tentativas associadas (restantes=" + tentativasRestantes + ")");
+                }
+            }
+            // Verificação de alternativas ainda referenciadas por respostas globais (problema de PK global)
+            boolean alternativaComRespostaGlobal = false;
+            java.util.List<Integer> alternativasComResposta = new java.util.ArrayList<>();
+            for (Questao q : questoes) {
+                var alternativas = alternativaGateway.findAllByQuestao(q);
+                for (Alternativa alt : alternativas) {
+                    if (alt.getAlternativaChaveComposta() != null && respostaDoUsuarioGateway.existsByAlternativa(alt)) {
+                        alternativaComRespostaGlobal = true;
+                        alternativasComResposta.add(alt.getAlternativaChaveComposta().getIdAlternativa());
+                    }
+                }
+            }
+            if (alternativaComRespostaGlobal) {
+                java.util.Map<String,Object> body = new java.util.HashMap<>();
+                body.put("message", "Não foi possível excluir: alternativas ainda possuem respostas globais (provável reutilização de id_alternativa). Migração de chave necessária.");
+                body.put("alternativasComResposta", alternativasComResposta);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+            }
+        }
+
+        // Após possível remoção das respostas, verificar alternativas restantes (se necessário)
+        for (Questao q : questoes) {
+            var alternativas = alternativaGateway.findAllByQuestao(q);
+            for (Alternativa alt : alternativas) {
+                boolean hasResposta = respostaDoUsuarioGateway.existsByAlternativa(alt);
+                if (hasResposta && !force) {
+                    System.out.println("[AvaliacaoController]["+requestId+"] Não pode excluir: alternativa " + (alt.getAlternativaChaveComposta()!=null?alt.getAlternativaChaveComposta().getIdAlternativa():"null") + " possui respostas.");
+                    java.util.Map<String,Object> body = new java.util.HashMap<>();
+                    body.put("message", "Não é possível excluir: já existem respostas registradas.");
+                    body.put("respostasCount", respostasCount);
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+                }
+            }
+        }
+
+        // Sem respostas: excluir alternativas, questões e avaliação
+
+        for (Questao q : questoes) {
+            var alternativas = alternativaGateway.findAllByQuestao(q);
+            for (Alternativa alt : alternativas) {
+                if (alt.getAlternativaChaveComposta() != null) {
+                    // Segurança extra: não tentar deletar se ainda restar resposta (não deveria acontecer após verificação acima)
+                    if (respostaDoUsuarioGateway.existsByAlternativa(alt)) {
+                        System.out.println("[AvaliacaoController]["+requestId+"] Skip delete alternativa " + alt.getAlternativaChaveComposta().getIdAlternativa() + " (resposta residual detectada)");
+                        continue;
+                    }
+                    alternativaGateway.deleteById(alt.getAlternativaChaveComposta());
+                }
+            }
+            if (q.getIdQuestaoComposto() != null) {
+                questaoGateway.deleteById(q.getIdQuestaoComposto());
+            }
+        }
+
+        // Por fim excluir avaliação
+        // Alguns gateways podem não ter método delete; se tiver, utilizar. Caso contrário, definir no gateway.
+        // Supondo avaliacaoGateway.deleteById(idAvaliacao) exista.
+        try {
+            avaliacaoGateway.deleteById(idAvaliacao);
+            System.out.println("[AvaliacaoController]["+requestId+"] Avaliação " + idAvaliacao + " excluída.");
+        } catch (Exception e) {
+            System.out.println("[AvaliacaoController]["+requestId+"] Falha ao excluir avaliação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao excluir avaliação");
+        }
+        return ResponseEntity.ok().body("Avaliação excluída com sucesso");
     }
 }

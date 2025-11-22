@@ -38,6 +38,7 @@ public class AtualizarDadosApostilaUseCase {
         apostilaAtualizada.setTamanhoBytes(apostilaDoBanco.getTamanhoBytes());
         apostilaAtualizada.setFkCurso(apostilaDoBanco.getFkCurso());
         apostilaAtualizada.setNomeApostilaArmazenamento(apostilaDoBanco.getNomeApostilaArmazenamento());
+        apostilaAtualizada.setUrlArquivo(apostilaDoBanco.getUrlArquivo());
         apostilaAtualizada.setDataPostadoApostila(apostilaDoBanco.getDataPostadoApostila());
         apostilaAtualizada.setApostilaOculto(apostilaDoBanco.getApostilaOculto());
 

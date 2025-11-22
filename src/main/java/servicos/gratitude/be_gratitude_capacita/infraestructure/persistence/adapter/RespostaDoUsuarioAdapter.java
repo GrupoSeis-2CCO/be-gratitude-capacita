@@ -23,6 +23,80 @@ public class RespostaDoUsuarioAdapter implements RespostaDoUsuarioGateway {
         if (idAlternativa == null) return false;
         return respostaDoUsuarioRepository.existsByAlternativa_IdAlternativa(idAlternativa);
     }
+
+    @Override
+    public long countByExamId(Integer examId) {
+        try {
+            return respostaDoUsuarioRepository.countByExamId(examId);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    @Override
+    public void deleteByExamId(Integer examId) {
+        int jpqlDeleted = 0;
+        try {
+            jpqlDeleted = respostaDoUsuarioRepository.deleteByExamId(examId);
+        } catch (Exception e) {
+            System.out.println("[RespostaDoUsuarioAdapter] Erro JPQL deleteByExamId: " + e.getMessage());
+        }
+        try {
+            respostaDoUsuarioRepository.flush();
+        } catch (Exception e) {
+            System.out.println("[RespostaDoUsuarioAdapter] Falha ao flush após JPQL delete: " + e.getMessage());
+        }
+        long remainingAfterJpql = 0L;
+        try {
+            remainingAfterJpql = respostaDoUsuarioRepository.countByExamId(examId);
+        } catch (Exception e) {
+            System.out.println("[RespostaDoUsuarioAdapter] Erro ao contar após JPQL delete: " + e.getMessage());
+        }
+        if (remainingAfterJpql > 0) {
+            System.out.println("[RespostaDoUsuarioAdapter] Ainda restam " + remainingAfterJpql + " respostas após JPQL delete (" + jpqlDeleted + " removidas). Tentando native delete...");
+            int nativeDeleted = 0;
+            try {
+                nativeDeleted = respostaDoUsuarioRepository.nativeDeleteByExamId(examId);
+                respostaDoUsuarioRepository.flush();
+            } catch (Exception e) {
+                System.out.println("[RespostaDoUsuarioAdapter] Falha ao executar native deleteByExamId: " + e.getMessage());
+            }
+            long remainingAfterNative = 0L;
+            try {
+                remainingAfterNative = respostaDoUsuarioRepository.countByExamId(examId);
+            } catch (Exception e) {
+                System.out.println("[RespostaDoUsuarioAdapter] Erro ao contar após native delete: " + e.getMessage());
+            }
+            System.out.println("[RespostaDoUsuarioAdapter] Native delete removed=" + nativeDeleted + ", remaining=" + remainingAfterNative);
+        } else {
+            System.out.println("[RespostaDoUsuarioAdapter] Respostas removidas via JPQL: " + jpqlDeleted + ". Nenhuma restante.");
+        }
+
+        // Fallback final: se ainda existirem respostas presas por FK_alternativa (inconsistência de idAvaliacao), remover por escopo de alternativas
+        long altScopeRemaining = 0L;
+        try {
+            altScopeRemaining = respostaDoUsuarioRepository.countByExamAlternativeScope(examId);
+        } catch (Exception e) {
+            System.out.println("[RespostaDoUsuarioAdapter] Erro ao contar escopo de alternativas: " + e.getMessage());
+        }
+        if (altScopeRemaining > 0) {
+            System.out.println("[RespostaDoUsuarioAdapter] Fallback alternativas: restam " + altScopeRemaining + " respostas associadas via FK_alternativa. Executando remoção por alternativas...");
+            int altScopeDeleted = 0;
+            try {
+                altScopeDeleted = respostaDoUsuarioRepository.nativeDeleteByExamAlternativeScope(examId);
+                respostaDoUsuarioRepository.flush();
+            } catch (Exception e) {
+                System.out.println("[RespostaDoUsuarioAdapter] Falha ao executar nativeDeleteByExamAlternativeScope: " + e.getMessage());
+            }
+            long afterAltScope = 0L;
+            try {
+                afterAltScope = respostaDoUsuarioRepository.countByExamAlternativeScope(examId);
+            } catch (Exception e) {
+                System.out.println("[RespostaDoUsuarioAdapter] Erro ao contar após alt-scope delete: " + e.getMessage());
+            }
+            System.out.println("[RespostaDoUsuarioAdapter] Fallback alternativas removidas=" + altScopeDeleted + ", ainda restantes=" + afterAltScope);
+        }
+    }
     
     public RespostaDoUsuarioAdapter(RespostaDoUsuarioRepository respostaDoUsuarioRepository) {
         this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;

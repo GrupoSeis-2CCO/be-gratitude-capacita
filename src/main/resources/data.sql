@@ -897,3 +897,11 @@ UPDATE material_aluno SET ultimo_acesso = '2025-11-10 09:00:00' WHERE fk_usuario
 UPDATE material_aluno SET ultimo_acesso = '2025-11-15 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
 UPDATE material_aluno SET ultimo_acesso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
 UPDATE material_aluno SET ultimo_acesso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
+
+SELECT * 
+-- idCurso, tituloCurso, descricao
+ FROM curso;
+
+ select * from material_aluno;
+ SELECT descricao_apostila FROM apostila WHERE nome_apostila_armazenamento = 'regulacao_manual_intro.pdf';
+ SELECT descricaoApostila FROM apostila WHERE nomeApostilaOriginal = 'Manual de Introdução à Regularização Fundiária.pdf';
