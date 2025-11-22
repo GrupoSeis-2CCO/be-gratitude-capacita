@@ -60,4 +60,30 @@ public class TentativaAdapter implements TentativaGateway {
     public Boolean existsById(TentativaCompoundKey idComposto) {
         return tentativaRepository.existsById(TentativaCompoundKeyMapper.toEntity(idComposto));
     }
+
+    @Override
+    public long countByAvaliacaoId(Integer idAvaliacao) {
+        try {
+            return tentativaRepository.countByAvaliacaoId(idAvaliacao);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(TentativaAdapter.class).error("Erro ao contar tentativas por avaliacao {}", idAvaliacao, e);
+            return 0L;
+        }
+    }
+
+    @Override
+    public int deleteByAvaliacaoId(Integer idAvaliacao) {
+        int deleted = 0;
+        try {
+            deleted = tentativaRepository.deleteByAvaliacaoId(idAvaliacao);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(TentativaAdapter.class).error("Erro ao deletar tentativas por avaliacao {}", idAvaliacao, e);
+        }
+        try {
+            tentativaRepository.flush();
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(TentativaAdapter.class).warn("Falha ao flush após deletar tentativas avaliacao {}: {}", idAvaliacao, e.getMessage());
+        }
+        return deleted;
+    }
 }

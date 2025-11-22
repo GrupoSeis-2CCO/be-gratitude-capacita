@@ -24,4 +24,11 @@ public interface TentativaRepository extends JpaRepository<TentativaEntity, Tent
     // Recupera o maior id_tentativa globalmente para evitar colisões de PK (tabela usa PK apenas em id_tentativa)
     @Query("select coalesce(max(t.idTentativaComposto.idTentativa), 0) from TentativaEntity t")
     Integer findMaxTentativaId();
+
+    @org.springframework.data.jpa.repository.Query("select count(t) from TentativaEntity t where t.avaliacao.idAvaliacao = :idAvaliacao")
+    long countByAvaliacaoId(@Param("idAvaliacao") Integer idAvaliacao);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("delete from TentativaEntity t where t.avaliacao.idAvaliacao = :idAvaliacao")
+    int deleteByAvaliacaoId(@Param("idAvaliacao") Integer idAvaliacao);
 }

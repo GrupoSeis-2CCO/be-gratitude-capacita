@@ -13,4 +13,5 @@ public interface AvaliacaoGateway {
     java.util.List<Avaliacao> findAllByCurso(Curso curso);
     java.util.List<Avaliacao> findAll();
     Optional<Avaliacao> findByFkCursoId(Long idCurso);
+    void deleteById(Integer id);
 }
