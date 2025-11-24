@@ -64,6 +64,7 @@ public class SecurityConfiguracao {
         "/usuarios/login/**",
             "/cargos/**",
             "/h2-console/**",
+            "/api/cursos",
             "/error",
             "/uploads/**",
             "/proxy/image",

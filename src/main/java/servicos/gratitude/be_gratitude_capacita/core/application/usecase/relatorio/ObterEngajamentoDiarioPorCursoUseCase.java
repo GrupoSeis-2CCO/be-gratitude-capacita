@@ -22,4 +22,39 @@ public class ObterEngajamentoDiarioPorCursoUseCase {
 
         return relatorioGateway.obterEngajamentoDiarioPorCurso(fkCurso, from, to);
     }
+
+    public Map<String, Object> progresso(Integer fkCurso){
+        if (Objects.isNull(fkCurso)){
+            throw new ValorInvalidoException("Curso inválido para gerar progresso");
+        }
+        return relatorioGateway.obterProgressoCurso(fkCurso);
+    }
+
+    public Map<String, Object> desempenho(Integer fkCurso){
+        if (Objects.isNull(fkCurso)){
+            throw new ValorInvalidoException("Curso inválido para gerar desempenho");
+        }
+        return relatorioGateway.obterDesempenhoCurso(fkCurso);
+    }
+
+    public Map<String, Object> feedback(Integer fkCurso){
+        if (Objects.isNull(fkCurso)){
+            throw new ValorInvalidoException("Curso inválido para gerar feedback");
+        }
+        return relatorioGateway.obterFeedbackCurso(fkCurso);
+    }
+
+    public List<Map<String,Object>> colaboradores(Integer fkCurso, Integer limit, String order){
+        if (Objects.isNull(fkCurso)){
+            throw new ValorInvalidoException("Curso inválido para gerar ranking");
+        }
+        return relatorioGateway.obterColaboradoresCurso(fkCurso, limit, order);
+    }
+
+    public Map<String, Object> kpisEngajamento(Integer fkCurso, LocalDate from, LocalDate to){
+        if (Objects.isNull(fkCurso)){
+            throw new ValorInvalidoException("Curso inválido para gerar KPIs de engajamento");
+        }
+        return relatorioGateway.obterKpisEngajamento(fkCurso, from, to);
+    }
 }
