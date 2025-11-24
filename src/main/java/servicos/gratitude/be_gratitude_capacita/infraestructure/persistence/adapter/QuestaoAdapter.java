@@ -33,6 +33,21 @@ public class QuestaoAdapter implements QuestaoGateway {
         }
 
         QuestaoEntity saved = questaoRepository.save(entity);
+        try {
+            questaoRepository.flush();
+        } catch (Exception e) {
+            // não falhar em produção: apenas logar
+            System.out.println("[QuestaoAdapter] Falha ao flush após save: " + e.getMessage());
+        }
+        try {
+            if (saved.getIdQuestaoComposto() != null) {
+                System.out.println("[QuestaoAdapter] Questao salva: idQuestao=" + saved.getIdQuestaoComposto().getIdQuestao() + ", fkAvaliacao=" + saved.getIdQuestaoComposto().getFkAvaliacao());
+            } else {
+                System.out.println("[QuestaoAdapter] Questao salva sem chave composta visível imediatamente");
+            }
+        } catch (Exception e) {
+            System.out.println("[QuestaoAdapter] Erro ao logar questao salva: " + e.getMessage());
+        }
         return QuestaoMapper.toDomain(saved);
     }
 

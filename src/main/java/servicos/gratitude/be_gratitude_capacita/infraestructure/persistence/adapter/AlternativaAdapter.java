@@ -44,7 +44,15 @@ public class AlternativaAdapter implements AlternativaGateway {
         }
 
         if (entity.getIdAlternativa() == null) {
-            Integer maxId = alternativaRepository.findMaxIdAlternativaByFkQuestaoAndFkAvaliacao(fkQuestao, fkAvaliacao);
+            // Use a global max id to ensure id_alternativa is unique across all questions.
+            Integer maxId = null;
+            try {
+                maxId = alternativaRepository.findMaxIdAlternativaGlobal();
+            } catch (Exception e) {
+                // fallback to per-question max if global query fails for any reason
+                System.out.println("[AlternativaAdapter] Falha ao obter max global de idAlternativa, tentando por questao: " + e.getMessage());
+                maxId = alternativaRepository.findMaxIdAlternativaByFkQuestaoAndFkAvaliacao(fkQuestao, fkAvaliacao);
+            }
             int newId = (maxId != null ? maxId : 0) + 1;
             entity.setIdAlternativa(newId);
             log.debug("Gerado idAlternativa={} para questao={} avaliacao={}", newId, fkQuestao, fkAvaliacao);
@@ -60,7 +68,19 @@ public class AlternativaAdapter implements AlternativaGateway {
         chave.setIdAvaliacao(fkAvaliacao);
         entity.setAlternativaChaveComposta(chave);
 
-        return AlternativaMapper.toDomain(alternativaRepository.save(entity));
+        var saved = alternativaRepository.save(entity);
+        try {
+            alternativaRepository.flush();
+        } catch (Exception e) {
+            System.out.println("[AlternativaAdapter] Falha ao flush após save: " + e.getMessage());
+        }
+        try {
+            var savedChave = saved.getAlternativaChaveComposta();
+            System.out.println("[AlternativaAdapter] Alternativa salva: idAlternativa=" + (savedChave!=null?savedChave.getIdAlternativa():"null") + ", fkQuestao=" + saved.getFkQuestao() + ", fkAvaliacao=" + saved.getFkAvaliacao());
+        } catch (Exception e) {
+            System.out.println("[AlternativaAdapter] Erro ao logar alternativa salva: " + e.getMessage());
+        }
+        return AlternativaMapper.toDomain(saved);
     }
 
     private void ensureQuestaoAssociation(AlternativaEntity entity, Alternativa alternativa) {
@@ -159,7 +179,38 @@ public class AlternativaAdapter implements AlternativaGateway {
 
     @Override
     public List<Alternativa> findAllByQuestao(Questao questao) {
-        // Use only the composite key to avoid NPE when questao has partial data
+        // Try robust FK-based lookup first (avoids entity-equality pitfalls).
+        try {
+            Integer fkQuestao = null;
+            Integer fkAvaliacao = null;
+            if (questao != null) {
+                if (questao.getIdQuestaoComposto() != null) {
+                    fkQuestao = questao.getIdQuestaoComposto().getIdQuestao();
+                    fkAvaliacao = questao.getIdQuestaoComposto().getFkAvaliacao();
+                }
+                if (fkAvaliacao == null && questao.getAvaliacao() != null && questao.getAvaliacao().getIdAvaliacao() != null) {
+                    fkAvaliacao = questao.getAvaliacao().getIdAvaliacao();
+                }
+            }
+            if (fkQuestao != null && fkAvaliacao != null) {
+                var found = alternativaRepository.findAllByFkQuestaoAndFkAvaliacao(fkQuestao, fkAvaliacao);
+                try {
+                    long cnt = alternativaRepository.countByFkQuestaoAndFkAvaliacao(fkQuestao, fkAvaliacao);
+                    System.out.println("[AlternativaAdapter] FK-lookup questao=" + fkQuestao + " avaliacao=" + fkAvaliacao + " count=" + cnt + " listSize=" + (found!=null?found.size():0));
+                    if (found != null && !found.isEmpty()) {
+                        String ids = found.stream().map(e -> String.valueOf(e.getIdAlternativa())).reduce((a,b)->a+","+b).orElse("");
+                        System.out.println("[AlternativaAdapter] FK-lookup ids=[" + ids + "]");
+                    }
+                } catch (Exception e) {
+                    System.out.println("[AlternativaAdapter] Erro ao contar FK-lookup: " + e.getMessage());
+                }
+                return AlternativaMapper.toDomains(found, false);
+            }
+        } catch (Exception e) {
+            System.out.println("[AlternativaAdapter] Erro no lookup FK-based: " + e.getMessage());
+        }
+
+        // Fallback: use entity-based lookup (legacy behavior)
         return AlternativaMapper.toDomains(
                 alternativaRepository.findAllByQuestao(QuestaoMapper.toEntityKeyOnly(questao)),
                 false // do not include questao to avoid circular mapping and unnecessary loads

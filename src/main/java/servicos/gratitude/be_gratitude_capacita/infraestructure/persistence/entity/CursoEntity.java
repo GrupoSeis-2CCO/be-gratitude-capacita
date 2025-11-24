@@ -21,6 +21,8 @@ public class CursoEntity {
     private String imagem;
     private Boolean ocultado;
     private Integer duracaoEstimada;
+    @Column(name = "ordem_curso")
+    private Integer ordemCurso;
 
     public Integer getIdCurso() {
         return idCurso;
@@ -68,5 +70,13 @@ public class CursoEntity {
 
     public void setDuracaoEstimada(Integer duracaoEstimada) {
         this.duracaoEstimada = duracaoEstimada;
+    }
+
+    public Integer getOrdemCurso() {
+        return ordemCurso;
+    }
+
+    public void setOrdemCurso(Integer ordemCurso) {
+        this.ordemCurso = ordemCurso;
     }
 }

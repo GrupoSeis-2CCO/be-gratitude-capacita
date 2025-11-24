@@ -30,12 +30,13 @@ CREATE TABLE usuario (
 Select * from usuario;
 
 CREATE TABLE curso (
-    id_curso INT AUTO_INCREMENT ,
+    id_curso INT AUTO_INCREMENT,
     titulo_curso VARCHAR(50),
     descricao VARCHAR(100),
     imagem VARCHAR(1024),
     ocultado TINYINT,
     duracao_estimada INT,
+    ordem_curso INT NOT NULL DEFAULT 0,
     PRIMARY KEY(id_curso)
 );
 -- select * from curso;
