@@ -42,6 +42,20 @@ public class CriarCursoUseCase {
         curso.setDuracaoEstimada(command.duracaoEstimada());
         curso.setOcultado(true);
 
+        // Define ordem como última + 1
+        try {
+            java.util.List<Curso> existentes = cursoGateway.findAll();
+            int max = 0;
+            for (Curso c : existentes) {
+                if (c.getOrdemCurso() != null && c.getOrdemCurso() > max) {
+                    max = c.getOrdemCurso();
+                }
+            }
+            curso.setOrdemCurso(max + 1);
+        } catch (Exception ignored) {
+            curso.setOrdemCurso(1);
+        }
+
         return cursoGateway.save(curso);
     }
 }

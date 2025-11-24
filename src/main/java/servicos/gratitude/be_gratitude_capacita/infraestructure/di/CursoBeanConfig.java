@@ -59,4 +59,9 @@ public class CursoBeanConfig {
             notificacaoProducer
         );
     }
+
+    @Bean
+    public ReordenarCursosUseCase reordenarCursosUseCase(CursoAdapter cursoAdapter) {
+        return new ReordenarCursosUseCase(cursoAdapter);
+    }
 }

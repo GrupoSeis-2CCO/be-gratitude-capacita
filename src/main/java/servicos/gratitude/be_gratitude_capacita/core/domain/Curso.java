@@ -7,6 +7,8 @@ public class Curso {
     private String imagem;
     private Boolean ocultado;
     private Integer duracaoEstimada;
+    // Ordem (1-based) para exibição/reordenação manual
+    private Integer ordemCurso;
 
     public Integer getIdCurso() {
         return idCurso;
@@ -54,5 +56,13 @@ public class Curso {
 
     public void setDuracaoEstimada(Integer duracaoEstimada) {
         this.duracaoEstimada = duracaoEstimada;
+    }
+
+    public Integer getOrdemCurso() {
+        return ordemCurso;
+    }
+
+    public void setOrdemCurso(Integer ordemCurso) {
+        this.ordemCurso = ordemCurso;
     }
 }

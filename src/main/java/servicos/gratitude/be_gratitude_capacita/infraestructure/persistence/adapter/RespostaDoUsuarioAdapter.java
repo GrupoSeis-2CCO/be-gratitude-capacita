@@ -96,6 +96,17 @@ public class RespostaDoUsuarioAdapter implements RespostaDoUsuarioGateway {
             }
             System.out.println("[RespostaDoUsuarioAdapter] Fallback alternativas removidas=" + altScopeDeleted + ", ainda restantes=" + afterAltScope);
         }
+        // Safety: always attempt the alternative-scope native delete once more to handle cases where
+        // responses remain due to FK reuse or inconsistent idAvaliacao values. This makes force-delete
+        // more robust against migrations or reused alternative ids.
+        try {
+            int forcedAltScopeDeleted = respostaDoUsuarioRepository.nativeDeleteByExamAlternativeScope(examId);
+            respostaDoUsuarioRepository.flush();
+            long remainingAfterForced = respostaDoUsuarioRepository.countByExamAlternativeScope(examId);
+            System.out.println("[RespostaDoUsuarioAdapter] Forced alt-scope native delete removed=" + forcedAltScopeDeleted + ", remainingAltScope=" + remainingAfterForced);
+        } catch (Exception e) {
+            System.out.println("[RespostaDoUsuarioAdapter] Erro no forced nativeDeleteByExamAlternativeScope: " + e.getMessage());
+        }
     }
     
     public RespostaDoUsuarioAdapter(RespostaDoUsuarioRepository respostaDoUsuarioRepository) {

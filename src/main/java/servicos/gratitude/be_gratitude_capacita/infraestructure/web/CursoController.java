@@ -48,6 +48,7 @@ public class CursoController {
     private final ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase;
     private final EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase;
     private final PublicarCursoUseCase publicarCursoUseCase;
+    private final ReordenarCursosUseCase reordenarCursosUseCase;
     private final S3Service s3Service;
 
     public CursoController(
@@ -65,6 +66,7 @@ public class CursoController {
             ListarMatriculaPorCursoUseCase listarMatriculaPorCursoUseCase,
             EncontrarCursoPorIdUseCase encontrarCursoPorIdUseCase,
             PublicarCursoUseCase publicarCursoUseCase,
+            ReordenarCursosUseCase reordenarCursosUseCase,
             S3Service s3Service) {
         this.criarCursoUseCase = criarCursoUseCase;
         this.listarCursoUseCase = listarCursoUseCase;
@@ -80,6 +82,7 @@ public class CursoController {
         this.listarMatriculaPorCursoUseCase = listarMatriculaPorCursoUseCase;
         this.encontrarCursoPorIdUseCase = encontrarCursoPorIdUseCase;
         this.publicarCursoUseCase = publicarCursoUseCase;
+        this.reordenarCursosUseCase = reordenarCursosUseCase;
         this.s3Service = s3Service;
     }
 
@@ -274,6 +277,7 @@ public class CursoController {
             r.setImagem(c.getImagem());
             r.setOcultado(c.getOcultado());
             r.setDuracaoEstimada(c.getDuracaoEstimada());
+            r.setOrdemCurso(c.getOrdemCurso());
 
             // compute totals: apostilas + videos + questoes
             int totalApostilas = 0;
@@ -352,6 +356,7 @@ public class CursoController {
             r.setImagem(curso.getImagem());
             r.setOcultado(curso.getOcultado());
             r.setDuracaoEstimada(curso.getDuracaoEstimada());
+            r.setOrdemCurso(curso.getOrdemCurso());
 
             int totalApostilas = 0;
             int totalVideos = 0;
@@ -491,6 +496,7 @@ public class CursoController {
             response.setImagem(cursoPublicado.getImagem());
             response.setOcultado(cursoPublicado.getOcultado());
             response.setDuracaoEstimada(cursoPublicado.getDuracaoEstimada());
+            response.setOrdemCurso(cursoPublicado.getOrdemCurso());
 
             return ResponseEntity.ok(response);
         } catch (NaoEncontradoException e) {
@@ -498,6 +504,32 @@ public class CursoController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
                 "Erro ao publicar curso: " + e.getMessage());
+        }
+    }
+
+    // Reordena cursos (drag & drop) recebendo lista de {idCurso, ordemCurso}
+    @PutMapping("/reordenar")
+    public ResponseEntity<java.util.List<CursoResponse>> reordenar(@RequestBody java.util.List<ReordenarCursosUseCase.Item> itens) {
+        try {
+            java.util.List<Curso> atualizados = reordenarCursosUseCase.execute(itens);
+            java.util.List<CursoResponse> resp = new java.util.ArrayList<>();
+            for (Curso c : atualizados) {
+                CursoResponse r = new CursoResponse();
+                r.setIdCurso(c.getIdCurso());
+                r.setTituloCurso(c.getTituloCurso());
+                r.setDescricao(c.getDescricao());
+                r.setImagem(c.getImagem());
+                r.setOcultado(c.getOcultado());
+                r.setDuracaoEstimada(c.getDuracaoEstimada());
+                r.setOrdemCurso(c.getOrdemCurso());
+                // Totais computados (mantém lógica simples aqui, pode ser expandido se necessário)
+                try { r.setTotalMateriais(listarApostilaPorCursoUseCase.execute(c.getIdCurso()).size() + listarVideoPorCursoUseCase.execute(c.getIdCurso()).size()); } catch (Exception ignored) {}
+                try { r.setTotalAlunos(listarMatriculaPorCursoUseCase.execute(c).size()); } catch (Exception ignored) {}
+                resp.add(r);
+            }
+            return ResponseEntity.ok(resp);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao reordenar cursos", e);
         }
     }
 }

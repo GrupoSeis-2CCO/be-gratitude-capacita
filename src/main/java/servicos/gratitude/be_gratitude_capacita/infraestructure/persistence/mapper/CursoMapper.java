@@ -22,6 +22,7 @@ public class CursoMapper {
         entity.setDuracaoEstimada(curso.getDuracaoEstimada());
         entity.setOcultado(curso.getOcultado());
         entity.setIdCurso(curso.getIdCurso());
+        entity.setOrdemCurso(curso.getOrdemCurso());
 
         return entity;
     }
@@ -39,6 +40,7 @@ public class CursoMapper {
         curso.setDuracaoEstimada(entity.getDuracaoEstimada());
         curso.setOcultado(entity.getOcultado());
         curso.setIdCurso(entity.getIdCurso());
+        curso.setOrdemCurso(entity.getOrdemCurso());
 
         return curso;
     }
@@ -60,6 +62,7 @@ public class CursoMapper {
             entity.setDuracaoEstimada(cursoDaVez.getDuracaoEstimada());
             entity.setOcultado(cursoDaVez.getOcultado());
             entity.setIdCurso(cursoDaVez.getIdCurso());
+            entity.setOrdemCurso(cursoDaVez.getOrdemCurso());
 
             entities.add(entity);
         }
@@ -84,6 +87,7 @@ public class CursoMapper {
             curso.setDuracaoEstimada(entityDaVez.getDuracaoEstimada());
             curso.setOcultado(entityDaVez.getOcultado());
             curso.setIdCurso(entityDaVez.getIdCurso());
+            curso.setOrdemCurso(entityDaVez.getOrdemCurso());
 
             cursos.add(curso);
         }

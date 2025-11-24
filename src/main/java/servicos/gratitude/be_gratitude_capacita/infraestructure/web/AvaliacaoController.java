@@ -75,6 +75,12 @@ public class AvaliacaoController {
     ){
         try {
             System.out.println("[AvaliacaoController] fkCurso recebido: " + request.fkCurso);
+            try {
+                String payload = new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request);
+                System.out.println("[AvaliacaoController] Payload recebido (cadastrar): " + payload);
+            } catch (Exception e) {
+                System.out.println("[AvaliacaoController] Não foi possível serializar payload do request: " + e.getMessage());
+            }
             // Primeiro cria a avaliação básica (nota mínima e vínculo ao curso)
             servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand cmd =
                     new servicos.gratitude.be_gratitude_capacita.core.application.command.avaliacao.CriarAvaliacaoCommand(request.fkCurso, request.notaMinima);
@@ -139,6 +145,11 @@ public class AvaliacaoController {
 
                 var questoes = questaoGateway.findAllByAvaliacao(avaliacao);
                 for (var q : questoes) {
+                    try {
+                        System.out.println("[AvaliacaoController] getAvaliacaoByCurso - Questao id=" + (q.getIdQuestaoComposto()!=null?q.getIdQuestaoComposto().getIdQuestao():"null") + ", numero=" + q.getNumeroQuestao());
+                    } catch (Exception e) {
+                        System.out.println("[AvaliacaoController] Erro ao logar questao resumo (curso): " + e.getMessage());
+                    }
                     AvaliacaoCompletaResponse.QuestaoResponse qResp = new AvaliacaoCompletaResponse.QuestaoResponse();
                     qResp.idQuestao = q.getIdQuestaoComposto() != null ? q.getIdQuestaoComposto().getIdQuestao() : null;
                     qResp.enunciado = q.getEnunciado();
@@ -146,11 +157,13 @@ public class AvaliacaoController {
                     qResp.fkAlternativaCorreta = q.getFkAlternativaCorreta() != null && q.getFkAlternativaCorreta().getAlternativaChaveComposta() != null ? q.getFkAlternativaCorreta().getAlternativaChaveComposta().getIdAlternativa() : null;
                     qResp.alternativas = new java.util.ArrayList<>();
                     var alternativas = alternativaGateway.findAllByQuestao(q);
+                    System.out.println("[AvaliacaoController] getAvaliacaoByCurso - Questao id=" + qResp.idQuestao + " encontrou alternativas=" + (alternativas!=null?alternativas.size():0));
                     for (var alt : alternativas) {
                         AvaliacaoCompletaResponse.AlternativaResponse aResp = new AvaliacaoCompletaResponse.AlternativaResponse();
                         aResp.idAlternativa = alt.getAlternativaChaveComposta() != null ? alt.getAlternativaChaveComposta().getIdAlternativa() : null;
                         aResp.texto = alt.getTexto();
                         aResp.ordemAlternativa = alt.getOrdem();
+                        System.out.println("[AvaliacaoController] getAvaliacaoByCurso - Alternativa id=" + aResp.idAlternativa + " texto='" + aResp.texto + "' ordem=" + aResp.ordemAlternativa);
                         qResp.alternativas.add(aResp);
                     }
                     resp.questoes.add(qResp);
@@ -158,6 +171,47 @@ public class AvaliacaoController {
                 return ResponseEntity.ok(resp);
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Novo: buscar avaliação completa por id (espelha lógica de /curso/{idCurso})
+    @GetMapping("/{idAvaliacao}")
+    public ResponseEntity<AvaliacaoCompletaResponse> getAvaliacaoById(@PathVariable Integer idAvaliacao) {
+        Avaliacao avaliacao = avaliacaoGateway.findById(idAvaliacao);
+        if (avaliacao == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        AvaliacaoCompletaResponse resp = new AvaliacaoCompletaResponse();
+        resp.idAvaliacao = avaliacao.getIdAvaliacao();
+        resp.acertosMinimos = avaliacao.getAcertosMinimos();
+        resp.idCurso = avaliacao.getFkCurso() != null ? Long.valueOf(avaliacao.getFkCurso().getIdCurso()) : null;
+        resp.questoes = new java.util.ArrayList<>();
+
+        var questoes = questaoGateway.findAllByAvaliacao(avaliacao);
+        for (var q : questoes) {
+            try {
+                System.out.println("[AvaliacaoController] getAvaliacaoById - Questao id=" + (q.getIdQuestaoComposto()!=null?q.getIdQuestaoComposto().getIdQuestao():"null") + ", numero=" + q.getNumeroQuestao());
+            } catch (Exception e) {
+                System.out.println("[AvaliacaoController] Erro ao logar questao resumo (id): " + e.getMessage());
+            }
+            AvaliacaoCompletaResponse.QuestaoResponse qResp = new AvaliacaoCompletaResponse.QuestaoResponse();
+            qResp.idQuestao = q.getIdQuestaoComposto() != null ? q.getIdQuestaoComposto().getIdQuestao() : null;
+            qResp.enunciado = q.getEnunciado();
+            qResp.numeroQuestao = q.getNumeroQuestao();
+            qResp.fkAlternativaCorreta = q.getFkAlternativaCorreta() != null && q.getFkAlternativaCorreta().getAlternativaChaveComposta() != null ? q.getFkAlternativaCorreta().getAlternativaChaveComposta().getIdAlternativa() : null;
+            qResp.alternativas = new java.util.ArrayList<>();
+            var alternativas = alternativaGateway.findAllByQuestao(q);
+            System.out.println("[AvaliacaoController] getAvaliacaoById - Questao id=" + qResp.idQuestao + " encontrou alternativas=" + (alternativas!=null?alternativas.size():0));
+            for (var alt : alternativas) {
+                AvaliacaoCompletaResponse.AlternativaResponse aResp = new AvaliacaoCompletaResponse.AlternativaResponse();
+                aResp.idAlternativa = alt.getAlternativaChaveComposta() != null ? alt.getAlternativaChaveComposta().getIdAlternativa() : null;
+                aResp.texto = alt.getTexto();
+                aResp.ordemAlternativa = alt.getOrdem();
+                System.out.println("[AvaliacaoController] getAvaliacaoById - Alternativa id=" + aResp.idAlternativa + " texto='" + aResp.texto + "' ordem=" + aResp.ordemAlternativa);
+                qResp.alternativas.add(aResp);
+            }
+            resp.questoes.add(qResp);
+        }
+        return ResponseEntity.ok(resp);
     }
 
         // Endpoint para checar se existe alguma resposta registrada para a avaliação
@@ -173,6 +227,18 @@ public class AvaliacaoController {
     @PutMapping("/{idAvaliacao}")
     public ResponseEntity<?> atualizarAvaliacaoCompleta(@PathVariable Integer idAvaliacao, @RequestBody AvaliacaoUpdateRequest request) {
         System.out.println("[AvaliacaoController] PUT /avaliacoes/" + idAvaliacao);
+        try {
+            String payloadSummary = "questoes=" + (request.questoes != null ? request.questoes.size() : 0) + ", acertosMinimos=" + request.acertosMinimos;
+            System.out.println("[AvaliacaoController] Payload recebido (atualizar): " + payloadSummary);
+            try {
+                String full = new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request);
+                System.out.println("[AvaliacaoController] Payload completo (atualizar): " + full);
+            } catch (Exception e) {
+                System.out.println("[AvaliacaoController] Não foi possível serializar payload (atualizar): " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.out.println("[AvaliacaoController] Erro ao logar payload (atualizar): " + e.getMessage());
+        }
         Avaliacao avaliacao = avaliacaoGateway.findById(idAvaliacao);
         System.out.println("[AvaliacaoController] Resultado findById(" + idAvaliacao + "): " + (avaliacao != null ? "OK" : "null"));
         if (avaliacao == null) {

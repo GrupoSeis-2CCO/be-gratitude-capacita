@@ -33,8 +33,7 @@ public class CursoAdapter implements CursoGateway {
 
     @Override
     public List<Curso> findAll() {
-        List<CursoEntity> entities = cursoRepository.findAll();
-
+        List<CursoEntity> entities = cursoRepository.findAllByOrderByOrdemCursoAsc();
         return CursoMapper.toDomains(entities);
     }
 
@@ -92,5 +91,14 @@ public class CursoAdapter implements CursoGateway {
     @Override
     public void deleteById(Integer id) {
         cursoRepository.deleteById(id);
+    }
+
+    // Suporte para salvar vários cursos (usado em reordenação)
+    public void saveAll(List<Curso> cursos) {
+        if (cursos == null || cursos.isEmpty()) return;
+        for (Curso c : cursos) {
+            CursoEntity e = CursoMapper.toEntity(c);
+            cursoRepository.save(e);
+        }
     }
 }
