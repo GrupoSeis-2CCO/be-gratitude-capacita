@@ -207,7 +207,7 @@ ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ult
 
 -- Dados iniciais para tabela video (focado em Regularização Fundiária)
 INSERT INTO video (id_video, nome_video, descricao_video, url_video, ordem_video, fk_curso) VALUES
-  (1, 'Introdução à Regularização Fundiária', 'Visão geral e contexto histórico da regularização fundiária no Brasil.', 'https://www.youtube.com/watch?v=-jkPxfTDeHw&pp=ygUZcmVndWxhcml6YcOnw6NvIGZ1bmRpYXJpYQ%3D%3D', 1, 1),
+  (1, 'Introdução à Regularização Fundiária', 'Visão geral e contexto histórico da regularização fundiária no Brasil.', 'https://www.youtube.com/watch?v=-jkPxfTDeHw&pp=ygUZcmVndWxhcml6YcOnw6NvIGZ1bmRpYQ%3D%3D', 1, 1),
   (2, 'Marco Legal e Políticas Públicas', 'Principais leis, políticas e instrumentos legais relacionados à regularização fundiária.', 'http://exemplo.com/video_regulacao_legal', 2, 1),
   (3, 'Procedimentos Técnicos e Sociais', 'Etapas operacionais e participação social em processos de regularização fundiária.', 'http://exemplo.com/video_regulacao_procedimentos', 3, 1)
 ON DUPLICATE KEY UPDATE nome_video = VALUES(nome_video), descricao_video = VALUES(descricao_video), url_video = VALUES(url_video), ordem_video = VALUES(ordem_video), fk_curso = VALUES(fk_curso);
@@ -846,7 +846,7 @@ INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finaliz
   (19,1,NULL,1,0,'2025-02-11 09:45:00')
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
--- Tentativas adicionais distribuídas
+-- Tentativas adicionais
 INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
   (30, 10, 1, '2025-02-01 10:30:00', 1),
   (31, 10, 1, '2025-02-08 12:00:00', 1),
@@ -900,118 +900,47 @@ UPDATE material_aluno SET ultimo_acesso = '2025-11-15 10:00:00' WHERE fk_usuario
 UPDATE material_aluno SET ultimo_acesso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
 UPDATE material_aluno SET ultimo_acesso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
 
--- SELECT id_alternativa, FK_questao, FK_avaliacao, texto, ordem_alternativa
--- FROM alternativa
--- WHERE FK_avaliacao = 6
--- ORDER BY FK_questao, id_alternativa;
+-- =============================================================================
+-- DADOS PARA MÉTRICAS DE ENGAJAMENTO (NOVEMBRO 2025)
+-- Contexto: Data atual simulada = 24/11/2025
+-- =============================================================================
 
--- Detalhe por questão: alternativa correta x resposta do usuário
--- Parâmetros: :usuario_id, :tentativa_id
-SELECT
-  q.id_questao AS questao_id,
-  q.numero_questao,
-  q.enunciado,
-  q.fk_alternativa_correta AS alternativa_correta_id,
-  ac.texto AS alternativa_correta_texto,
-  r.FK_alternativa AS resposta_usuario_id,
-  au.texto AS resposta_usuario_texto,
-  CASE WHEN r.FK_alternativa IS NULL THEN 'NAO_RESPONDEU'
-       WHEN r.FK_alternativa = q.fk_alternativa_correta THEN 'CORRETA'
-       ELSE 'INCORRETA' END AS status
-FROM resposta_do_usuario r
-JOIN tentativa t
-  ON t.id_tentativa = r.FK_tentativa
-  AND t.fk_usuario = r.FK_usuario
-  AND t.fk_curso = r.FK_curso
-JOIN questao q
-  ON q.id_questao = r.FK_questao
-  AND q.fk_avaliacao = r.FK_avaliacao
-LEFT JOIN alternativa ac
-  ON ac.id_alternativa = q.fk_alternativa_correta
-LEFT JOIN alternativa au
-  ON au.id_alternativa = r.FK_alternativa
-WHERE r.FK_tentativa = :tentativa_id
-  AND r.FK_usuario = :usuario_id
-ORDER BY q.numero_questao;
+-- 1. % Ativos 3x ou mais (7 dias: 17/11 a 24/11)
+-- Usuário 20 (John Doe): Acessos em 3 dias distintos (20, 22, 24)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  (20, 1, 1, NULL, 1, '2025-11-20 10:00:00'),
+  (20, 1, NULL, 1, 1, '2025-11-22 14:00:00'),
+  (20, 1, 2, NULL, 1, '2025-11-24 09:00:00')
+ON DUPLICATE KEY UPDATE ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Usuário 10 (Ana Lima): Tentativas em 3 dias distintos (18, 21, 23)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (50, 10, 1, '2025-11-18 15:00:00', 1),
+  (51, 10, 1, '2025-11-21 16:00:00', 1),
+  (52, 10, 1, '2025-11-23 11:00:00', 1)
+ON DUPLICATE KEY UPDATE dt_tentativa = VALUES(dt_tentativa);
+
+-- Usuário 1 (João Silva): Acessos em 3 dias distintos (19, 20, 21)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  (1, 1, 1, NULL, 1, '2025-11-19 08:00:00'),
+  (1, 1, NULL, 1, 1, '2025-11-20 08:30:00'),
+  (1, 1, 2, NULL, 1, '2025-11-21 09:00:00')
+ON DUPLICATE KEY UPDATE ultimo_acesso = VALUES(ultimo_acesso);
 
 
-SELECT
-  SUM(CASE WHEN r.FK_alternativa IS NOT NULL AND r.FK_alternativa = q.fk_alternativa_correta THEN 1 ELSE 0 END) AS acertou,
-  COUNT(*) AS total_questoes,
-  ROUND(
-    SUM(CASE WHEN r.FK_alternativa IS NOT NULL AND r.FK_alternativa = q.fk_alternativa_correta THEN 1 ELSE 0 END) * 100.0
-    / NULLIF(COUNT(*),0)
-  , 2) AS percentual
-FROM questao q
-JOIN tentativa t
-  ON t.fk_avaliacao = q.fk_avaliacao
-  AND t.id_tentativa = 20
-  AND t.fk_usuario = 10
-LEFT JOIN resposta_do_usuario r
-  ON r.FK_questao = q.id_questao
- AND r.FK_avaliacao = q.fk_avaliacao
- AND r.FK_tentativa = 20
- AND r.FK_usuario = 10;
+-- 2. % Concluindo +1 Curso (7 dias: 17/11 a 24/11)
+-- Usuário 20 (John Doe): Concluiu curso 2 em 22/11
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-22 10:00:00' 
+WHERE fk_usuario = 20 AND fk_curso = 2;
 
- SELECT *
-FROM resposta_do_usuario r
-WHERE r.FK_tentativa = 20
-  AND r.FK_usuario = 10
-ORDER BY r.FK_questao;
+-- Usuário 11 (Bruno Costa): Concluiu curso 1 em 20/11
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-20 14:00:00' 
+WHERE fk_usuario = 11 AND fk_curso = 1;
 
-SELECT
-  r.FK_questao,
-  r.FK_alternativa AS resposta_id,
-  a.id_alternativa AS alternativa_id_na_tabela,
-  a.FK_questao AS alternativa_fk_questao,
-  a.FK_avaliacao AS alternativa_fk_avaliacao,
-  a.texto AS alternativa_texto
-FROM resposta_do_usuario r
-LEFT JOIN alternativa a ON a.id_alternativa = r.FK_alternativa
-WHERE r.FK_tentativa = 20
-  AND r.FK_usuario = 10
-ORDER BY r.FK_questao;
+-- Usuário 12 (Carla Nunes): Concluiu curso 1 em 23/11
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-23 18:00:00' 
+WHERE fk_usuario = 12 AND fk_curso = 1;
 
-SELECT
-  q.id_questao,
-  q.numero_questao,
-  q.enunciado,
-  q.fk_alternativa_correta AS alternativa_correta_id,
-  ac.id_alternativa AS alternativa_correta_id_na_tabela,
-  ac.texto AS alternativa_correta_texto
-FROM questao q
-LEFT JOIN alternativa ac
-  ON ac.id_alternativa = q.fk_alternativa_correta
-WHERE q.fk_avaliacao = (
-  SELECT t.fk_avaliacao
-  FROM tentativa t
-  WHERE t.id_tentativa = 20
-    AND t.fk_usuario = 10
-  LIMIT 1
-)
-ORDER BY q.numero_questao;
-
-SELECT
-  q.id_questao,
-  q.numero_questao,
-  q.fk_alternativa_correta AS correta_id,
-  r.FK_alternativa AS resposta_id,
-  CASE
-    WHEN r.FK_alternativa IS NULL THEN 'NAO_RESPONDEU'
-    WHEN r.FK_alternativa = q.fk_alternativa_correta THEN 'CORRETA'
-    ELSE 'INCORRETA'
-  END AS status
-FROM questao q
-LEFT JOIN resposta_do_usuario r
-  ON r.FK_questao = q.id_questao
- AND r.FK_avaliacao = q.fk_avaliacao
- AND r.FK_tentativa = 20
- AND r.FK_usuario = 10
-WHERE q.fk_avaliacao = (
-  SELECT t.fk_avaliacao
-  FROM tentativa t
-  WHERE t.id_tentativa = 20
-    AND t.fk_usuario = 10
-  LIMIT 1
-)
-ORDER BY q.numero_questao;
+-- Usuário 15 (Felipe Rocha): Concluiu curso 1 em 18/11
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-18 11:00:00' 
+WHERE fk_usuario = 15 AND fk_curso = 1;

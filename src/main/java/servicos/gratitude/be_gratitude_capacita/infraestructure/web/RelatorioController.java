@@ -65,6 +65,85 @@ public class RelatorioController {
         return ResponseEntity.ok(filled);
     }
 
+    @GetMapping("/curso/{fkCurso}/progresso")
+    public ResponseEntity<Map<String, Object>> obterProgresso(@PathVariable Integer fkCurso){
+        Map<String, Object> dados = obterEngajamentoUseCase.progresso(fkCurso);
+        if (dados == null || dados.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(dados);
+    }
+
+    @GetMapping("/curso/{fkCurso}/desempenho")
+    public ResponseEntity<Map<String,Object>> obterDesempenho(@PathVariable Integer fkCurso){
+        Map<String,Object> dados = obterEngajamentoUseCase.desempenho(fkCurso);
+        if (dados == null || dados.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(dados);
+    }
+
+    @GetMapping("/curso/{fkCurso}/feedback")
+    public ResponseEntity<Map<String,Object>> obterFeedback(@PathVariable Integer fkCurso){
+        Map<String,Object> dados = obterEngajamentoUseCase.feedback(fkCurso);
+        if (dados == null || dados.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(dados);
+    }
+
+    @GetMapping("/curso/{fkCurso}/colaboradores")
+    public ResponseEntity<List<Map<String,Object>>> obterColaboradores(@PathVariable Integer fkCurso,
+                                                                       @RequestParam(name="limit", required=false) Integer limit,
+                                                                       @RequestParam(name="order", required=false) String order){
+        List<Map<String,Object>> dados = obterEngajamentoUseCase.colaboradores(fkCurso, limit, order);
+        if (dados == null || dados.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(dados);
+    }
+
+    @GetMapping("/curso/{fkCurso}/dashboard")
+    public ResponseEntity<Map<String,Object>> obterDashboard(@PathVariable Integer fkCurso,
+                                                            @RequestParam(name = "days", required = false) Integer days,
+                                                            @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                            @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                                                            @RequestParam(name = "colaboradoresLimit", required = false) Integer colaboradoresLimit) {
+        // Determine date range
+        LocalDate start, end;
+        if (from != null && to != null) {
+            start = from;
+            end = to;
+        } else {
+            int d = (days == null || days <= 0) ? 14 : days;
+            end = LocalDate.now();
+            start = end.minusDays(d - 1);
+        }
+
+        Map<String,Object> out = new HashMap<>();
+        try {
+            // KPIs always calculated for the last 7 days relative to NOW (independent of filters)
+            LocalDate kpiEnd = LocalDate.now();
+            LocalDate kpiStart = kpiEnd.minusDays(7);
+            Map<String,Object> kpis = obterEngajamentoUseCase.kpisEngajamento(fkCurso, kpiStart, kpiEnd);
+
+            // Chart data uses the filtered range
+            List<Map<String,Object>> engajamento = obterEngajamentoUseCase.execute(fkCurso, start, end);
+            Map<String,Object> feedback = obterEngajamentoUseCase.feedback(fkCurso);
+
+            out.put("kpis", kpis);
+            out.put("engajamento", engajamento == null ? new java.util.ArrayList<>() : engajamento);
+            out.put("feedback", feedback == null ? new HashMap<>() : feedback);
+            out.put("generatedAt", java.time.OffsetDateTime.now().toString());
+            out.put("period", Map.of("start", start.toString(), "end", end.toString()));
+
+            return ResponseEntity.ok(out);
+        } catch (Exception ex) {
+            log.error("Erro ao gerar dashboard para curso {}: {}", fkCurso, ex.getMessage(), ex);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     private List<Map<String, Object>> fillDateRange(List<Map<String, Object>> existing, LocalDate from, LocalDate to) {
         Map<String, Integer> map = new HashMap<>();
         for (Map<String, Object> row : existing) {
