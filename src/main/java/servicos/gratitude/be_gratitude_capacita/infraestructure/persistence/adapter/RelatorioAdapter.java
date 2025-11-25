@@ -315,7 +315,8 @@ public class RelatorioAdapter implements RelatorioGateway {
         // 5. Inativos (> 15 dias antes do fim do período)
         // Consideramos inativo quem não teve acesso nos últimos 15 dias RELATIVO AO FIM DO PERIODO (toTs)
         // Ou seja, MAX(ultimo_acesso) < (toTs - 15 days)
-        String sqlInativos = "SELECT u.nome, u.email " +
+        String sqlInativos = "SELECT u.nome, u.email, " +
+            "DATEDIFF(:toTs, GREATEST(COALESCE(ma.last_mat, '1900-01-01'), COALESCE(t.last_tent, '1900-01-01'))) " +
             "FROM matricula m " +
             "JOIN usuario u ON u.id_usuario = m.fk_usuario " +
             "LEFT JOIN (SELECT fk_usuario, MAX(ultimo_acesso) as last_mat FROM material_aluno WHERE fk_curso = :fkCurso GROUP BY fk_usuario) ma ON ma.fk_usuario = m.fk_usuario " +
@@ -329,18 +330,22 @@ public class RelatorioAdapter implements RelatorioGateway {
         
         @SuppressWarnings("unchecked")
         List<Object[]> rowsInativos = qInativos.getResultList();
-        List<Map<String, String>> listaInativos = new ArrayList<>();
+        List<Map<String, Object>> listaInativos = new ArrayList<>();
         for (Object[] row : rowsInativos) {
-            Map<String, String> user = new HashMap<>();
+            Map<String, Object> user = new HashMap<>();
             user.put("nome", row[0] != null ? row[0].toString() : "Sem Nome");
             user.put("email", row[1] != null ? row[1].toString() : "Sem Email");
+            user.put("diasInativo", row[2] != null ? ((Number) row[2]).intValue() : 0);
             listaInativos.add(user);
         }
 
         Map<String, Object> out = new HashMap<>();
         out.put("ativosSemanaPct", (ativosSemana * 100.0) / totalAlunos);
+        out.put("ativosSemanaCount", ativosSemana);
         out.put("ativos3xSemanaPct", (ativos3x * 100.0) / totalAlunos);
+        out.put("ativos3xSemanaCount", ativos3x);
         out.put("concluindoMais1CursoPct", (concluiuMais1 * 100.0) / totalAlunos);
+        out.put("concluindoMais1CursoCount", concluiuMais1);
         out.put("inativosCount", listaInativos.size());
         out.put("inativosLista", listaInativos);
         
