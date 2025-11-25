@@ -22,36 +22,28 @@ public class FileUploadController {
             @RequestParam(value = "tipoBucket", defaultValue = "bronze") String tipoBucket) {
         logger.info("Recebendo upload de arquivo: {} (size: {} bytes)", file.getOriginalFilename(), file.getSize());
         try {
-            // Em ambiente de desenvolvimento preferimos salvar localmente e retornar uma URL
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null) originalFilename = "file";
-            String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
-            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
-            String uniqueFilename = System.currentTimeMillis() + "_" + filename;
-
-            // resolve uploads dir as an absolute, normalized path so we know exactly where files will be written
-            java.nio.file.Path uploadsDir = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize();
-            logger.info("Uploads directory resolved to: {}", uploadsDir.toString());
-
-            // ensure the uploads directory exists
-            java.nio.file.Files.createDirectories(uploadsDir);
-
-            java.nio.file.Path dest = uploadsDir.resolve(uniqueFilename).toAbsolutePath().normalize();
-            logger.info("Uploading file to resolved path: {}", dest.toString());
-
-            // ensure parent directories for the destination file exist (defensive)
-            if (dest.getParent() != null) {
-                java.nio.file.Files.createDirectories(dest.getParent());
+            // Detectar tipo de arquivo e enviar para S3
+            String contentType = file.getContentType();
+            String url;
+            
+            if (contentType != null && contentType.equals("application/pdf")) {
+                // Enviar PDF para S3
+                logger.info("Detectado arquivo PDF, enviando para S3...");
+                url = s3Service.uploadPdfFile(file);
+            } else if (contentType != null && contentType.startsWith("image/")) {
+                // Enviar imagem para S3
+                logger.info("Detectado arquivo de imagem, enviando para S3...");
+                url = s3Service.uploadCourseImage(file);
+            } else {
+                // Para outros tipos, também enviar como PDF (ou tratar como arquivo genérico)
+                logger.info("Tipo de arquivo: {}, enviando como PDF para S3...", contentType);
+                url = s3Service.uploadPdfFile(file);
             }
-
-            // usar transferTo para evitar carregar bytes na memória
-            file.transferTo(dest.toFile());
-
-            String url = "/uploads/" + uniqueFilename;
-            logger.info("Upload local realizado com sucesso. URL: {}", url);
+            
+            logger.info("Upload para S3 realizado com sucesso. URL: {}", url);
             return ResponseEntity.ok(url);
         } catch (Exception e) {
-            logger.error("Erro ao salvar arquivo localmente", e);
+            logger.error("Erro ao enviar arquivo para S3", e);
             return ResponseEntity.status(500).body("Erro ao salvar arquivo: " + e.getMessage());
         }
     }

@@ -86,6 +86,58 @@ public class S3Service {
         }
 
         /**
+         * Envia arquivo PDF (apostila) para o bucket S3 e retorna a URL pública.
+         */
+        public String uploadPdfFile(MultipartFile file) throws IOException {
+            System.out.println("[S3Service] Iniciando upload de PDF...");
+            if (file == null || file.isEmpty()) {
+                System.out.println("[S3Service] Falha: arquivo PDF ausente ou vazio.");
+                throw new IllegalArgumentException("Arquivo PDF ausente");
+            }
+
+            System.out.println("[S3Service] Bucket de arquivos: " + bucketImages);
+            System.out.println("[S3Service] Região: " + region);
+            System.out.println("[S3Service] Content-Type: " + file.getContentType());
+            System.out.println("[S3Service] Tamanho do arquivo: " + file.getSize() + " bytes");
+
+            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+            S3Client s3 = S3Client.builder()
+                    .region(Region.of(region))
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                    .build();
+
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                System.out.println("[S3Service] Falha: nome do arquivo nulo.");
+                throw new IllegalArgumentException("Nome do arquivo não pode ser nulo");
+            }
+            String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
+            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+            String uniqueFilename = java.util.UUID.randomUUID() + "_" + filename;
+            String key = "apostilas/" + uniqueFilename;
+
+            System.out.println("[S3Service] Nome do arquivo original: " + originalFilename);
+            System.out.println("[S3Service] Nome do arquivo S3: " + key);
+
+            try {
+                s3.putObject(
+                        PutObjectRequest.builder()
+                                .bucket(bucketImages)
+                                .key(key)
+                                .contentType(file.getContentType() != null ? file.getContentType() : "application/pdf")
+                                .build(),
+                        software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+                String url = "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
+                System.out.println("[S3Service] Upload de PDF concluído. URL gerada: " + url);
+                return url;
+            } catch (Exception e) {
+                System.out.println("[S3Service] Erro ao enviar PDF para S3: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
+        }
+
+        /**
          * Envia imagem de curso para o bucket dedicado (gratitude-imagens-frontend)
          * e retorna a URL pública.
          */
