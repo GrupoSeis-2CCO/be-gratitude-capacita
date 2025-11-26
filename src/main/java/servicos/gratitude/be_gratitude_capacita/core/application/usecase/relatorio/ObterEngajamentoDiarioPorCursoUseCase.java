@@ -57,4 +57,11 @@ public class ObterEngajamentoDiarioPorCursoUseCase {
         }
         return relatorioGateway.obterKpisEngajamento(fkCurso, from, to);
     }
+
+    public List<Map<String, Object>> mesesDisponiveisParticipante(Integer fkUsuario, Integer fkCurso){
+        if (Objects.isNull(fkUsuario)){
+            throw new ValorInvalidoException("Usuário inválido para buscar meses disponíveis");
+        }
+        return relatorioGateway.obterMesesDisponiveisParticipante(fkUsuario, fkCurso);
+    }
 }

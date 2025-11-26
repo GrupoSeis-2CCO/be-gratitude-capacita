@@ -35,4 +35,10 @@ public interface RelatorioGateway {
      * Chaves: ativosSemanaPct, ativos3xSemanaPct, concluindoMais1CursoPct, inativosCount, inativosLista (List<Map<nome,email>>)
      */
     Map<String, Object> obterKpisEngajamento(Integer fkCurso, LocalDate from, LocalDate to);
+
+    /**
+     * Retorna lista de meses/anos em que o participante tem materiais concluídos.
+     * Cada item contém: year (Integer), month (Integer), monthName (String)
+     */
+    List<Map<String, Object>> obterMesesDisponiveisParticipante(Integer fkUsuario, Integer fkCurso);
 }
