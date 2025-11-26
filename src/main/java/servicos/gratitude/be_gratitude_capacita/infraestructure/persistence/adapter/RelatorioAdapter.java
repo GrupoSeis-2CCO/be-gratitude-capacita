@@ -351,4 +351,40 @@ public class RelatorioAdapter implements RelatorioGateway {
         
         return out;
     }
+
+    @Override
+    public List<Map<String, Object>> obterMesesDisponiveisParticipante(Integer fkUsuario, Integer fkCurso) {
+        // Retorna os meses/anos distintos em que o participante finalizou materiais
+        String sql = "SELECT DISTINCT YEAR(ma.ultimo_acesso) as ano, MONTH(ma.ultimo_acesso) as mes " +
+            "FROM material_aluno ma " +
+            "WHERE ma.fk_usuario = :fkUsuario " +
+            "AND (:fkCurso IS NULL OR ma.fk_curso = :fkCurso) " +
+            "AND ma.finalizada = 1 " +
+            "AND ma.ultimo_acesso IS NOT NULL " +
+            "ORDER BY ano DESC, mes DESC";
+
+        Query q = em.createNativeQuery(sql);
+        q.setParameter("fkUsuario", fkUsuario);
+        q.setParameter("fkCurso", fkCurso);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = q.getResultList();
+
+        String[] mesesPt = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                           "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
+
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Object[] row : rows) {
+            int year = ((Number) row[0]).intValue();
+            int month = ((Number) row[1]).intValue();
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("year", year);
+            map.put("month", month);
+            map.put("monthName", mesesPt[month - 1]);
+            out.add(map);
+        }
+
+        return out;
+    }
 }

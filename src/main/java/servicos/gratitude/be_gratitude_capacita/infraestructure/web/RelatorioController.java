@@ -144,6 +144,21 @@ public class RelatorioController {
         }
     }
 
+    /**
+     * Retorna os meses/anos em que o participante tem materiais concluídos.
+     * Útil para popular filtros de data dinamicamente.
+     */
+    @GetMapping("/participante/{fkUsuario}/meses-disponiveis")
+    public ResponseEntity<List<Map<String, Object>>> obterMesesDisponiveis(
+            @PathVariable Integer fkUsuario,
+            @RequestParam(name = "fkCurso", required = false) Integer fkCurso) {
+        List<Map<String, Object>> meses = obterEngajamentoUseCase.mesesDisponiveisParticipante(fkUsuario, fkCurso);
+        if (meses == null || meses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(meses);
+    }
+
     private List<Map<String, Object>> fillDateRange(List<Map<String, Object>> existing, LocalDate from, LocalDate to) {
         Map<String, Integer> map = new HashMap<>();
         for (Map<String, Object> row : existing) {
