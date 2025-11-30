@@ -15,6 +15,8 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Pageable;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 @RestController
 @RequestMapping("/apostilas")
 public class ApostilaController {
@@ -38,6 +40,7 @@ public class ApostilaController {
         this.listarApostilaPorCursoPaginadoUseCase = listarApostilaPorCursoPaginadoUseCase;
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Apostila> cadastrarApostila(
             @RequestBody CriarApostilaCommand request) {
@@ -85,6 +88,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-dados/{idApostila}")
     public ResponseEntity<Apostila> atualizarDadosApostila(
             @RequestBody AtualizarApostilaCommand request,
@@ -101,6 +105,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-oculto/{idApostila}")
     public ResponseEntity<Apostila> atualizarOcultoApostila(
             @PathVariable Integer idApostila) {
@@ -115,6 +120,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @DeleteMapping("/{idAPostila}")
     public ResponseEntity deletarApostila(
             @PathVariable("idAPostila") Integer idApostila) {

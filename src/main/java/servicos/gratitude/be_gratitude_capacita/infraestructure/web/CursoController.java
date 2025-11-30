@@ -30,6 +30,9 @@ import servicos.gratitude.be_gratitude_capacita.S3.S3Service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+
 @RestController
 @RequestMapping("/cursos")
 public class CursoController {
@@ -204,6 +207,7 @@ public class CursoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Curso> cadastrarCurso(
             @RequestBody CriarCursoCommand request) {
@@ -225,6 +229,7 @@ public class CursoController {
     }
 
     // Variante multipart: permite enviar a imagem do curso e salvar a URL no banco
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Curso> cadastrarCursoMultipart(
             @RequestParam("tituloCurso") String tituloCurso,
@@ -262,12 +267,17 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity<List<CursoResponse>> listarCursos() {
-        List<Curso> cursos = listarCursoUseCase.execute();
-
-        if (cursos.isEmpty()) {
+        List<CursoResponse> resp = listarCursosCacheable();
+        if (resp == null || resp.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
 
+    // Cache only the DTO list (and not the ResponseEntity) to avoid Redis deserialization issues
+    @Cacheable(cacheNames = "cursos", key = "'list'")
+    public List<CursoResponse> listarCursosCacheable() {
+        List<Curso> cursos = listarCursoUseCase.execute();
         List<CursoResponse> resp = new java.util.ArrayList<>();
         for (Curso c : cursos) {
             CursoResponse r = new CursoResponse();
@@ -323,8 +333,7 @@ public class CursoController {
 
             resp.add(r);
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(resp);
+        return resp;
     }
 
     @GetMapping("/paginated")
@@ -395,6 +404,7 @@ public class CursoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/{idCurso}")
     public ResponseEntity<Curso> atualizarCurso(
             @PathVariable Integer idCurso,
@@ -420,6 +430,7 @@ public class CursoController {
     }
 
     // Variante multipart para atualização com imagem
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping(value = "/{idCurso}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Curso> atualizarCursoMultipart(
             @PathVariable Integer idCurso,
@@ -447,6 +458,7 @@ public class CursoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizarOculto/{idCurso}")
     public ResponseEntity<Curso> atualizarOculto(
             @PathVariable Integer idCurso) {
@@ -458,6 +470,7 @@ public class CursoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @DeleteMapping("/{idCurso}")
     public ResponseEntity deletarCurso(
             @PathVariable Integer idCurso) {
@@ -473,6 +486,7 @@ public class CursoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping("/{idCurso}/publicar")
     public ResponseEntity<CursoResponse> publicarCurso(
             @PathVariable Integer idCurso,
@@ -508,6 +522,7 @@ public class CursoController {
     }
 
     // Reordena cursos (drag & drop) recebendo lista de {idCurso, ordemCurso}
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/reordenar")
     public ResponseEntity<java.util.List<CursoResponse>> reordenar(@RequestBody java.util.List<ReordenarCursosUseCase.Item> itens) {
         try {

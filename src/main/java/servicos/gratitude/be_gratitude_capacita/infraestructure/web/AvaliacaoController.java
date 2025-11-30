@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 @RestController
 @RequestMapping("/avaliacoes")
 public class AvaliacaoController {
@@ -69,6 +71,7 @@ public class AvaliacaoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Avaliacao> cadastrarAvaliacao(
             @RequestBody servicos.gratitude.be_gratitude_capacita.infraestructure.web.request.CreateAvaliacaoRequest request
@@ -115,6 +118,7 @@ public class AvaliacaoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-acertos/{idAvaliacao}")
     public ResponseEntity<Avaliacao> atualizarAcertosMinimosAvaliacao(
             @RequestBody DefinirAcertosMinimosCommand request,
@@ -224,6 +228,7 @@ public class AvaliacaoController {
         }
 
     // Novo endpoint para atualizar avaliação completa (nota mínima, questões e alternativas)
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/{idAvaliacao}")
     public ResponseEntity<?> atualizarAvaliacaoCompleta(@PathVariable Integer idAvaliacao, @RequestBody AvaliacaoUpdateRequest request) {
         System.out.println("[AvaliacaoController] PUT /avaliacoes/" + idAvaliacao);
