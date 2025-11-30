@@ -53,24 +53,24 @@ INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (4, 7.0, 4)
 ON DUPLICATE KEY UPDATE nota_minima = VALUES(nota_minima), fk_curso = VALUES(fk_curso);
 
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
-  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', 'Projetos', NULL),
-  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', 'RH', NULL),
-  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', 'TI', NULL)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url) VALUES
+  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', NULL),
+  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', NULL),
+  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url);
 -- Dados adicionais de usuario (id 10 a 19) para testes variados
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url) VALUES
-  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL, NULL),
-  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL, NULL),
-  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL, NULL),
-  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL, NULL),
-  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL, NULL),
-  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL, NULL),
-  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL, NULL),
-  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL, NULL),
-  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL, NULL),
-  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL, NULL)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url) VALUES
+  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL),
+  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL),
+  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL),
+  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL),
+  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL),
+  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL),
+  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL),
+  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL),
+  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL),
+  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url);
 
 
 
@@ -130,14 +130,14 @@ ON DUPLICATE KEY UPDATE
   ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Adiciona usuário Alexandre (pedido: alexandre.nichiojr@sptech.school)
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url, data_entrada, ultimo_acesso) VALUES
-  (21, 'Alexandre Nichio Jr', '30000000001', 'alexandre.nichiojr@sptech.school', 'senhaAlex', 1, NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
+  (21, 'Alexandre Nichio Jr', '30000000001', 'alexandre.nichiojr@sptech.school', 'senhaAlex', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Adiciona usuário Giorgio (pedido: giorgio.antunes@sptech.school)
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, departamento, foto_url, data_entrada, ultimo_acesso) VALUES
-  (22, 'Giorgio Antunes', '30000000002', 'giorgio.antunes@sptech.school', 'senhaGiorgio', 1, NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), departamento = VALUES(departamento), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
+  (22, 'Giorgio Antunes', '30000000002', 'giorgio.antunes@sptech.school', 'senhaGiorgio', 1, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela matricula
 
@@ -944,3 +944,80 @@ WHERE fk_usuario = 12 AND fk_curso = 1;
 -- Usuário 15 (Felipe Rocha): Concluiu curso 1 em 18/11
 UPDATE matricula SET completo = 1, data_finalizado = '2025-11-18 11:00:00' 
 WHERE fk_usuario = 15 AND fk_curso = 1;
+
+-- =============================================================
+-- Adiciona 10 novos colaboradores (fk_cargo = 2) com matrícula,
+-- material e uma tentativa/resposta mínima para avaliação 1
+-- ids escolhidos: 23..32
+-- =============================================================
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
+  (23, 'Laura Mendes', '40000000001', 'laura.mendes@example.com', 'senhaLaura1', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (24, 'Marcos Pinto', '40000000002', 'marcos.pinto@example.com', 'senhaMarcos2', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (25, 'Natalia Rocha', '40000000003', 'natalia.rocha@example.com', 'senhaNatalia3', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (26, 'Pedro Alvez', '40000000004', 'pedro.alvez@example.com', 'senhaPedro4', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (27, 'Rosa Ferreira', '40000000005', 'rosa.ferreira@example.com', 'senhaRosa5', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (28, 'Samuel Costa', '40000000006', 'samuel.costa@example.com', 'senhaSamuel6', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (29, 'Tatiana Lopes', '40000000007', 'tatiana.lopes@example.com', 'senhaTatiana7', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (30, 'Urbano Silva', '40000000008', 'urbano.silva@example.com', 'senhaUrbano8', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (31, 'Vanessa Braga', '40000000009', 'vanessa.braga@example.com', 'senhaVanessa9', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (32, 'Rafael Torres', '40000000010', 'rafael.torres@example.com', 'senhaRafael10', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Matrículas: inscreve cada colaborador no curso 1 (curso base)
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
+  (23, 1, '2025-10-01 08:00:00', '2025-10-10 09:00:00', 0, NULL),
+  (24, 1, '2025-10-02 08:00:00', '2025-10-12 09:00:00', 0, NULL),
+  (25, 1, '2025-10-03 08:00:00', '2025-10-13 09:00:00', 1, '2025-10-20 10:00:00'),
+  (26, 1, '2025-10-04 08:00:00', '2025-10-14 09:00:00', 0, NULL),
+  (27, 1, '2025-10-05 08:00:00', '2025-10-15 09:00:00', 1, '2025-10-22 11:00:00'),
+  (28, 1, '2025-10-06 08:00:00', '2025-10-16 09:00:00', 0, NULL),
+  (29, 1, '2025-10-07 08:00:00', '2025-10-17 09:00:00', 1, '2025-10-24 12:00:00'),
+  (30, 1, '2025-10-08 08:00:00', '2025-10-18 09:00:00', 0, NULL),
+  (31, 1, '2025-10-09 08:00:00', '2025-10-19 09:00:00', 0, NULL),
+  (32, 1, '2025-10-10 08:00:00', '2025-10-20 09:00:00', 1, '2025-10-27 13:00:00')
+ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
+
+-- Material do aluno: cada colaborador tem pelo menos 1 material (video id 1) e alguns têm conclusão
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  (23, 1, 1, NULL, 1, '2025-10-10 09:00:00'),
+  (24, 1, 1, NULL, 0, '2025-10-12 09:00:00'),
+  (25, 1, 1, NULL, 1, '2025-10-20 10:00:00'),
+  (26, 1, 1, NULL, 0, '2025-10-14 09:00:00'),
+  (27, 1, 1, NULL, 1, '2025-10-22 11:00:00'),
+  (28, 1, 1, NULL, 0, '2025-10-16 09:00:00'),
+  (29, 1, 1, NULL, 1, '2025-10-24 12:00:00'),
+  (30, 1, 1, NULL, 0, '2025-10-18 09:00:00'),
+  (31, 1, 1, NULL, 0, '2025-10-19 09:00:00'),
+  (32, 1, 1, NULL, 1, '2025-10-27 13:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Tentativas (ids 60..69) e respostas para avaliação 1 (fk_avaliacao = 1)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  (60, 23, 1, '2025-10-11 10:00:00', 1),
+  (61, 24, 1, '2025-10-13 10:30:00', 1),
+  (62, 25, 1, '2025-10-21 11:00:00', 1),
+  (63, 26, 1, '2025-10-15 09:30:00', 1),
+  (64, 27, 1, '2025-10-23 12:00:00', 1),
+  (65, 28, 1, '2025-10-17 10:15:00', 1),
+  (66, 29, 1, '2025-10-25 12:30:00', 1),
+  (67, 30, 1, '2025-10-19 11:45:00', 1),
+  (68, 31, 1, '2025-10-20 14:00:00', 1),
+  (69, 32, 1, '2025-10-28 15:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Respostas: cada tentativa responde ao menos a questão 1 (padrão) e, quando aplicável, questão 2
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (23, 1, 60, 1, 1, 2),
+  (24, 1, 61, 1, 1, 3),
+  (25, 1, 62, 1, 1, 2),
+  (26, 1, 63, 1, 1, 1),
+  (27, 1, 64, 1, 1, 2),
+  (28, 1, 65, 1, 1, 3),
+  (29, 1, 66, 1, 1, 2),
+  (30, 1, 67, 1, 1, 1),
+  (31, 1, 68, 1, 1, 2),
+  (32, 1, 69, 1, 1, 2)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- Fim do bloco de colaboradores adicionais
+
