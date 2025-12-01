@@ -161,7 +161,6 @@ jobs:
                   SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
                   SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
                   SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: true
-
                   # Email Configuration (Gmail SMTP)
                   MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
                   MAIL_PORT: ${MAIL_PORT:-587}
