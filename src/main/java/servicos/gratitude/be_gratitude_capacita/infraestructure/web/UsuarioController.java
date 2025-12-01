@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import servicos.gratitude.be_gratitude_capacita.S3.S3Service;
+
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -63,6 +65,7 @@ public class UsuarioController {
     private final RespostaDoUsuarioRepository respostaDoUsuarioRepository;
     private final FeedbackRepository feedbackRepository;
     private final TokenJwtAdapter tokenJwtAdapter;
+    private final S3Service s3Service;
 
     public UsuarioController(
             CriarUsuarioUseCase criarUsuarioUseCase,
@@ -79,7 +82,8 @@ public class UsuarioController {
             TentativaRepository tentativaRepository,
             RespostaDoUsuarioRepository respostaDoUsuarioRepository,
             FeedbackRepository feedbackRepository,
-            TokenJwtAdapter tokenJwtAdapter) {
+            TokenJwtAdapter tokenJwtAdapter,
+            S3Service s3Service) {
         this.criarUsuarioUseCase = criarUsuarioUseCase;
         this.listarUsuariosUseCase = listarUsuariosUseCase;
         this.pesquisarPorNomeDeUsuarioUseCase = pesquisarPorNomeDeUsuarioUseCase;
@@ -95,6 +99,7 @@ public class UsuarioController {
         this.respostaDoUsuarioRepository = respostaDoUsuarioRepository;
         this.feedbackRepository = feedbackRepository;
         this.tokenJwtAdapter = tokenJwtAdapter;
+        this.s3Service = s3Service;
     }
 
     @PostMapping("/login")
@@ -325,7 +330,7 @@ public class UsuarioController {
         }
     }
 
-    // Novo: Upload de avatar (foto de perfil) – recebe arquivo e salva localmente via FileUploadController; atualiza foto_url
+    // Upload de avatar (foto de perfil) – envia para S3 e atualiza foto_url no banco
     @PostMapping("/{idUsuario}/avatar")
     public ResponseEntity<?> uploadAvatar(
             @PathVariable Integer idUsuario,
@@ -334,20 +339,10 @@ public class UsuarioController {
             Usuario usuario = buscarUsuarioPorIdUseCase.execute(idUsuario);
             if (usuario == null) throw new NaoEncontradoException("Usuário não encontrado");
 
-            // Reutiliza lógica de uploads locais: salva em uploads/ e retorna URL relativa
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null) originalFilename = "avatar";
-            String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
-            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
-            String uniqueFilename = System.currentTimeMillis() + "_" + filename;
+            // Envia imagem para S3 (bucket de imagens do frontend, pasta avatars/)
+            String url = s3Service.uploadAvatar(file);
+            LOG.info("[Avatar] Imagem enviada para S3: {}", url);
 
-            java.nio.file.Path uploadsDir = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize();
-            java.nio.file.Files.createDirectories(uploadsDir);
-            java.nio.file.Path dest = uploadsDir.resolve(uniqueFilename).toAbsolutePath().normalize();
-            if (dest.getParent() != null) java.nio.file.Files.createDirectories(dest.getParent());
-            file.transferTo(dest.toFile());
-
-            String url = "/uploads/" + uniqueFilename;
             usuario.setFotoUrl(url);
             servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity entity = UsuarioMapper.toEntity(usuario);
             servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.entity.UsuarioEntity saved = usuarioRepository.save(entity);
@@ -355,7 +350,8 @@ public class UsuarioController {
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+            LOG.error("[Avatar] Erro ao fazer upload: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao salvar avatar: " + e.getMessage(), e);
         }
     }
 
