@@ -68,28 +68,6 @@ public class SecurityConfiguracao {
             "/error",
             "/uploads/**",
             "/proxy/image",
-            "/matriculas/curso/*/participantes",
-            "/relatorios/curso/*/engajamento",
-            "/matriculas/curso/*/participantes",
-            "/cursos/*/materiais",
-            "/cursos/*/materiais/*",
-            "/cursos/*/detalhes",
-            "/cursos/*/publicar",
-            "/materiais",
-            "/materiais/**",
-            "/debug/notificacao/**",
-            "/materiais-alunos/finalizar-por-material/video/**",
-            "/tentativas/*/*",
-            "/participantes/*/avaliacoes",
-            "/answersheet/**"
-        ,"/exams/**",
-        "/avaliacoes/**",
-<<<<<<< HEAD
-        // TEMPORÁRIO: permitir notificações sem autenticação para testes
-=======
->>>>>>> a626386979748ca05b351b5bfc5a9cbd722cf8dc
-        "/notificacoes/**",
-        "/api/email-notifications/**"
     };
 
     @Bean
