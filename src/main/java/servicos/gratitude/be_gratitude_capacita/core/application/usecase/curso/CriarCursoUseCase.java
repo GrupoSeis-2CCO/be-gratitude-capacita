@@ -40,7 +40,8 @@ public class CriarCursoUseCase {
         curso.setDescricao(command.descricao());
         curso.setImagem(command.imagem());
         curso.setDuracaoEstimada(command.duracaoEstimada());
-        curso.setOcultado(true);
+        // Usa o valor do command, ou true como padrão se não informado
+        curso.setOcultado(command.ocultado() != null ? command.ocultado() : true);
 
         // Define ordem como última + 1
         try {
