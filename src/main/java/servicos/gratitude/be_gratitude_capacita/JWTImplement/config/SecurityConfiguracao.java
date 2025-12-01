@@ -84,7 +84,8 @@ public class SecurityConfiguracao {
             "/answersheet/**"
         ,"/exams/**",
         "/avaliacoes/**",
-        "/notificacoes/**"
+        "/notificacoes/**",
+        "/api/email-notifications/**"
     };
 
     @Bean
