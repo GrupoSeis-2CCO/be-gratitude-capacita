@@ -84,7 +84,10 @@ public class SecurityConfiguracao {
             "/answersheet/**"
         ,"/exams/**",
         "/avaliacoes/**",
+<<<<<<< HEAD
         // TEMPORÁRIO: permitir notificações sem autenticação para testes
+=======
+>>>>>>> a626386979748ca05b351b5bfc5a9cbd722cf8dc
         "/notificacoes/**",
         "/api/email-notifications/**"
     };
