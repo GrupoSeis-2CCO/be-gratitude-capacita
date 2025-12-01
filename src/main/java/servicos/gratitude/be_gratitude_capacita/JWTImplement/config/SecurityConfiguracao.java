@@ -83,7 +83,8 @@ public class SecurityConfiguracao {
             "/participantes/*/avaliacoes",
             "/answersheet/**"
         ,"/exams/**",
-        "/avaliacoes/**"
+        "/avaliacoes/**",
+        "/notificacoes/**"
     };
 
     @Bean
