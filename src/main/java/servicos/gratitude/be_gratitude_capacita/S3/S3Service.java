@@ -3,8 +3,7 @@ package servicos.gratitude.be_gratitude_capacita.S3;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.persistence.repository.ApostilaRepository;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class S3Service {
@@ -35,11 +36,24 @@ public class S3Service {
         @Value("${aws.s3.region}")
         private String region;
 
-        @Value("${aws.accessKeyId:test}")
-        private String accessKeyId;
+        // S3Client reutilizável - usa DefaultCredentialsProvider que automaticamente:
+        // 1. Lê AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN (variáveis de ambiente)
+        // 2. Ou obtém credenciais da IAM Role via IMDS (EC2 Instance Metadata Service)
+        private S3Client s3Client;
 
-        @Value("${aws.secretAccessKey:test}")
-        private String secretAccessKey;
+        @PostConstruct
+        public void init() {
+                System.out.println("[S3Service] Inicializando S3Client com DefaultCredentialsProvider...");
+                System.out.println("[S3Service] Região: " + region);
+                System.out.println("[S3Service] Bucket de imagens: " + bucketImages);
+                
+                this.s3Client = S3Client.builder()
+                        .region(Region.of(region))
+                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .build();
+                
+                System.out.println("[S3Service] S3Client inicializado com sucesso!");
+        }
 
         /**
          * Envia arquivo para o bucket Bronze, Silver ou Gold.
@@ -50,12 +64,6 @@ public class S3Service {
          * @throws IOException
          */
         public String uploadFile(MultipartFile file, String tipoBucket) throws IOException {
-                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-                S3Client s3 = S3Client.builder()
-                                .region(Region.of(region))
-                                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                                .build();
-
                 // Extrai apenas o nome do arquivo, sem caminho
                 String originalFilename = file.getOriginalFilename();
                 if (originalFilename == null) {
@@ -75,7 +83,7 @@ public class S3Service {
                         default -> throw new IllegalArgumentException("Tipo de bucket inválido");
                 };
 
-                s3.putObject(PutObjectRequest.builder()
+                s3Client.putObject(PutObjectRequest.builder()
                                 .bucket(bucket)
                                 .key(uniqueFilename)
                                 .contentType(file.getContentType())
@@ -100,12 +108,6 @@ public class S3Service {
             System.out.println("[S3Service] Content-Type: " + file.getContentType());
             System.out.println("[S3Service] Tamanho do arquivo: " + file.getSize() + " bytes");
 
-            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-            S3Client s3 = S3Client.builder()
-                    .region(Region.of(region))
-                    .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                    .build();
-
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null) {
                 System.out.println("[S3Service] Falha: nome do arquivo nulo.");
@@ -120,7 +122,7 @@ public class S3Service {
             System.out.println("[S3Service] Nome do arquivo S3: " + key);
 
             try {
-                s3.putObject(
+                s3Client.putObject(
                         PutObjectRequest.builder()
                                 .bucket(bucketImages)
                                 .key(key)
@@ -153,12 +155,6 @@ public class S3Service {
             System.out.println("[S3Service] Content-Type: " + file.getContentType());
             System.out.println("[S3Service] Tamanho do arquivo: " + file.getSize() + " bytes");
 
-            AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-            S3Client s3 = S3Client.builder()
-                    .region(Region.of(region))
-                    .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                    .build();
-
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null) {
                 System.out.println("[S3Service] Falha: nome do arquivo nulo.");
@@ -173,7 +169,7 @@ public class S3Service {
             System.out.println("[S3Service] Nome do arquivo S3: " + key);
 
             try {
-                s3.putObject(
+                s3Client.putObject(
                         PutObjectRequest.builder()
                                 .bucket(bucketImages)
                                 .key(key)
