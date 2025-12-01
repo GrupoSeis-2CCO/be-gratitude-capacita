@@ -187,6 +187,52 @@ public class S3Service {
         }
 
         /**
+         * Envia avatar (foto de perfil) de usuário para o bucket dedicado
+         * e retorna a URL pública.
+         */
+        public String uploadAvatar(MultipartFile file) throws IOException {
+            System.out.println("[S3Service] Iniciando upload de avatar...");
+            if (file == null || file.isEmpty()) {
+                System.out.println("[S3Service] Falha: arquivo de avatar ausente ou vazio.");
+                throw new IllegalArgumentException("Arquivo de avatar ausente");
+            }
+
+            System.out.println("[S3Service] Bucket de imagens: " + bucketImages);
+            System.out.println("[S3Service] Região: " + region);
+            System.out.println("[S3Service] Content-Type: " + file.getContentType());
+            System.out.println("[S3Service] Tamanho do arquivo: " + file.getSize() + " bytes");
+
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                originalFilename = "avatar.jpg";
+            }
+            String filename = originalFilename.replaceAll("^.*[\\\\/]", "");
+            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+            String uniqueFilename = java.util.UUID.randomUUID() + "_" + filename;
+            String key = "avatars/" + uniqueFilename;
+
+            System.out.println("[S3Service] Nome do arquivo original: " + originalFilename);
+            System.out.println("[S3Service] Nome do arquivo S3: " + key);
+
+            try {
+                s3Client.putObject(
+                        PutObjectRequest.builder()
+                                .bucket(bucketImages)
+                                .key(key)
+                                .contentType(file.getContentType())
+                                .build(),
+                        software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+                String url = "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
+                System.out.println("[S3Service] Upload de avatar concluído. URL gerada: " + url);
+                return url;
+            } catch (Exception e) {
+                System.out.println("[S3Service] Erro ao enviar avatar para S3: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
+        }
+
+        /**
          * Atualiza apenas a URL do arquivo da apostila no banco de dados.
          * 
          * @param idApostila id da apostila
