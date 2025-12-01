@@ -130,14 +130,6 @@ jobs:
                   - "5672:5672"
                   - "15672:15672"
                 restart: unless-stopped
-              
-              mailhog:
-                image: mailhog/mailhog
-                container_name: mailhog
-                ports:
-                  - "1025:1025"  # SMTP
-                  - "8025:8025"  # Painel web
-                restart: unless-stopped
 
               api:
                 image: amazoncorretto:21
@@ -166,6 +158,11 @@ jobs:
                   SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
                   SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
                   SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
+                  # Email Configuration (Gmail SMTP)
+                  MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+                  MAIL_PORT: ${MAIL_PORT:-587}
+                  MAIL_USERNAME: ${MAIL_USERNAME:-}
+                  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
                 extra_hosts:
                   - "host.docker.internal:host-gateway"
                 depends_on:
@@ -197,6 +194,11 @@ jobs:
             SPRING_RABBITMQ_PORT=5672
             SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
             SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
+            # Email Configuration (Gmail SMTP)
+            MAIL_HOST=smtp.gmail.com
+            MAIL_PORT=587
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
             ENVEOF
             
             echo ".env criado com secrets"
