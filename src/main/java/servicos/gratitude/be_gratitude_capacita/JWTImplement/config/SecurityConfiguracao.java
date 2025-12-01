@@ -83,7 +83,10 @@ public class SecurityConfiguracao {
             "/participantes/*/avaliacoes",
             "/answersheet/**"
         ,"/exams/**",
-        "/avaliacoes/**"
+        "/avaliacoes/**",
+        // TEMPORÁRIO: permitir notificações sem autenticação para testes
+        "/notificacoes/**",
+        "/api/email-notifications/**"
     };
 
     @Bean
