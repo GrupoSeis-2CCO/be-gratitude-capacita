@@ -228,14 +228,16 @@ public class CursoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Curso> cadastrarCursoMultipart(
             @RequestParam("tituloCurso") String tituloCurso,
-            @RequestParam("descricao") String descricao,
+            @RequestParam(value = "descricao", required = false) String descricao,
             @RequestParam(value = "duracaoEstimada", required = false) Integer duracaoEstimada,
+            @RequestParam(value = "ocultado", required = false, defaultValue = "true") Boolean ocultado,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
         try {
             System.out.println("[CursoController] Recebendo cadastro de curso via multipart...");
             System.out.println("  - Título: " + tituloCurso);
             System.out.println("  - Descrição: " + descricao);
             System.out.println("  - Duração: " + duracaoEstimada);
+            System.out.println("  - Ocultado: " + ocultado);
             System.out.println("  - Imagem recebida? " + (imagem != null && !imagem.isEmpty()));
             String imagemUrl = null;
             if (imagem != null && !imagem.isEmpty()) {
@@ -243,8 +245,8 @@ public class CursoController {
                 imagemUrl = s3Service.uploadCourseImage(imagem);
                 System.out.println("[CursoController] URL da imagem recebida do S3: " + imagemUrl);
             }
-            CriarCursoCommand command = new CriarCursoCommand(tituloCurso, descricao, imagemUrl, duracaoEstimada);
-            System.out.println("[CursoController] Criando curso com imagemUrl: " + imagemUrl);
+            CriarCursoCommand command = new CriarCursoCommand(tituloCurso, descricao, imagemUrl, duracaoEstimada, ocultado);
+            System.out.println("[CursoController] Criando curso com imagemUrl: " + imagemUrl + ", ocultado: " + ocultado);
             Curso cursoCriado = criarCursoUseCase.execute(command);
             System.out.println("[CursoController] Curso criado. ID: " + cursoCriado.getIdCurso() + ", Imagem: " + cursoCriado.getImagem());
             return ResponseEntity.status(HttpStatus.CREATED).body(cursoCriado);
