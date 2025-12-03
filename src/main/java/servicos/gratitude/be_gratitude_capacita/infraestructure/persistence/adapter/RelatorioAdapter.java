@@ -23,14 +23,14 @@ public class RelatorioAdapter implements RelatorioGateway {
     @Override
     public List<Map<String, Object>> obterEngajamentoDiarioPorCurso(Integer fkCurso, LocalDate from, LocalDate to) {
         // Query nativa que une material_aluno.ultimo_acesso e tentativa.dt_tentativa, faz union e agrupa por data (YYYY-MM-DD)
-    // Count only finalized materials as engagement (each finalized material increments engagement by 1)
-    String sql = "SELECT data, SUM(cnt) as value FROM (" +
-        " SELECT DATE(ultimo_acesso) as data, COUNT(*) as cnt FROM material_aluno m " +
-        " WHERE m.fk_curso = :fkCurso AND m.finalizada = 1 AND m.ultimo_acesso BETWEEN :fromTs AND :toTs GROUP BY DATE(m.ultimo_acesso) " +
-        " UNION ALL " +
-        " SELECT DATE(t.dt_tentativa) as data, COUNT(*) as cnt FROM tentativa t " +
-        " WHERE t.fk_curso = :fkCurso AND t.dt_tentativa BETWEEN :fromTs AND :toTs GROUP BY DATE(t.dt_tentativa) " +
-        ") as combined GROUP BY data ORDER BY data ASC";
+        // Count only finalized materials as engagement (each finalized material increments engagement by 1)
+        String sql = "SELECT data, SUM(cnt) as value FROM (" +
+            " SELECT DATE(ultimo_acesso) as data, COUNT(*) as cnt FROM material_aluno m " +
+            " WHERE m.fk_curso = :fkCurso AND m.finalizada = 1 AND m.ultimo_acesso BETWEEN :fromTs AND :toTs GROUP BY DATE(m.ultimo_acesso) " +
+            " UNION ALL " +
+            " SELECT DATE(t.dt_tentativa) as data, COUNT(*) as cnt FROM tentativa t " +
+            " WHERE t.fk_curso = :fkCurso AND t.dt_tentativa BETWEEN :fromTs AND :toTs GROUP BY DATE(t.dt_tentativa) " +
+            ") as combined GROUP BY data ORDER BY data ASC";
 
         Query q = em.createNativeQuery(sql);
         // usamos start of day e end of day para garantir inclusão
@@ -44,7 +44,40 @@ public class RelatorioAdapter implements RelatorioGateway {
         @SuppressWarnings("unchecked")
         List<Object[]> results = q.getResultList();
 
+        // Query para obter usuários únicos por dia
+        String sqlUsuariosUnicos = "SELECT data, COUNT(DISTINCT fk_usuario) as usuarios_unicos FROM (" +
+            " SELECT DATE(ultimo_acesso) as data, fk_usuario FROM material_aluno m " +
+            " WHERE m.fk_curso = :fkCurso AND m.finalizada = 1 AND m.ultimo_acesso BETWEEN :fromTs AND :toTs " +
+            " UNION ALL " +
+            " SELECT DATE(t.dt_tentativa) as data, fk_usuario FROM tentativa t " +
+            " WHERE t.fk_curso = :fkCurso AND t.dt_tentativa BETWEEN :fromTs AND :toTs " +
+            ") as combined GROUP BY data ORDER BY data ASC";
+
+        Query qUsuarios = em.createNativeQuery(sqlUsuariosUnicos);
+        qUsuarios.setParameter("fkCurso", fkCurso);
+        qUsuarios.setParameter("fromTs", fromTs);
+        qUsuarios.setParameter("toTs", toTs);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> usuariosResults = qUsuarios.getResultList();
+
+        // Mapa de data -> usuários únicos
+        Map<String, Integer> usuariosPorDia = new HashMap<>();
         DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
+        for (Object[] row : usuariosResults) {
+            Object dataObj = row[0];
+            String dateStr;
+            if (dataObj instanceof java.sql.Date) {
+                dateStr = ((java.sql.Date) dataObj).toLocalDate().format(fmt);
+            } else if (dataObj instanceof java.sql.Timestamp) {
+                dateStr = ((java.sql.Timestamp) dataObj).toLocalDateTime().toLocalDate().format(fmt);
+            } else {
+                dateStr = String.valueOf(dataObj);
+            }
+            Integer usuarios = ((Number) row[1]).intValue();
+            usuariosPorDia.put(dateStr, usuarios);
+        }
+
         List<Map<String, Object>> out = new ArrayList<>();
         for (Object[] row : results) {
             Object dataObj = row[0];
@@ -59,10 +92,12 @@ public class RelatorioAdapter implements RelatorioGateway {
             }
 
             Integer cnt = valueObj == null ? 0 : ((Number) valueObj).intValue();
+            Integer usuariosUnicos = usuariosPorDia.getOrDefault(dateStr, 0);
 
             Map<String, Object> map = new HashMap<>();
             map.put("date", dateStr);
             map.put("value", cnt);
+            map.put("usuariosUnicos", usuariosUnicos);
             out.add(map);
         }
 
@@ -340,13 +375,18 @@ public class RelatorioAdapter implements RelatorioGateway {
         }
 
         Map<String, Object> out = new HashMap<>();
+        out.put("totalAlunosCurso", totalAlunos);
         out.put("ativosSemanaPct", (ativosSemana * 100.0) / totalAlunos);
         out.put("ativosSemanaCount", ativosSemana);
+        out.put("ativosSemanaLabel", ativosSemana + "/" + totalAlunos);
         out.put("ativos3xSemanaPct", (ativos3x * 100.0) / totalAlunos);
         out.put("ativos3xSemanaCount", ativos3x);
+        out.put("ativos3xSemanaLabel", ativos3x + "/" + totalAlunos);
         out.put("concluindoMais1CursoPct", (concluiuMais1 * 100.0) / totalAlunos);
         out.put("concluindoMais1CursoCount", concluiuMais1);
+        out.put("concluindoMais1CursoLabel", concluiuMais1 + "/" + totalAlunos);
         out.put("inativosCount", listaInativos.size());
+        out.put("inativosLabel", listaInativos.size() + "/" + totalAlunos);
         out.put("inativosLista", listaInativos);
         
         return out;
