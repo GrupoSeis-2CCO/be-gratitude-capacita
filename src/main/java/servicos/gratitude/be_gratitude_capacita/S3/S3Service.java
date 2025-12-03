@@ -179,7 +179,6 @@ public class S3Service {
                                 .bucket(bucketImages)
                                 .key(key)
                                 .contentType(file.getContentType())
-                                .acl(ObjectCannedACL.PUBLIC_READ)
                                 .build(),
                         software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
                 String url = "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
@@ -226,7 +225,6 @@ public class S3Service {
                                 .bucket(bucketImages)
                                 .key(key)
                                 .contentType(file.getContentType())
-                                .acl(ObjectCannedACL.PUBLIC_READ)
                                 .build(),
                         software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
                 String url = "https://" + bucketImages + ".s3." + region + ".amazonaws.com/" + key;
