@@ -1021,3 +1021,349 @@ ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
 
 -- Fim do bloco de colaboradores adicionais
 
+-- =============================================================================
+-- DADOS DE ENGAJAMENTO: NOVEMBRO A 10/12/2025
+-- Popula material_aluno e tentativa para preencher gráfico de Materiais Concluídos
+-- =============================================================================
+
+-- Materiais concluídos em Novembro/2025 (vários usuários, dias espalhados)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  -- Semana 1 de Novembro (01-07)
+  (10, 1, 2, NULL, 1, '2025-11-01 10:00:00'),
+  (11, 1, 2, NULL, 1, '2025-11-01 11:00:00'),
+  (12, 1, NULL, 2, 1, '2025-11-02 09:00:00'),
+  (13, 1, 1, NULL, 1, '2025-11-03 14:00:00'),
+  (14, 1, NULL, 1, 1, '2025-11-04 10:30:00'),
+  (15, 1, 2, NULL, 1, '2025-11-05 08:00:00'),
+  (16, 1, 1, NULL, 1, '2025-11-06 15:00:00'),
+  (17, 1, NULL, 2, 1, '2025-11-07 12:00:00'),
+  
+  -- Semana 2 de Novembro (08-14)
+  (10, 1, 3, NULL, 1, '2025-11-08 09:30:00'),
+  (11, 1, NULL, 3, 1, '2025-11-09 10:00:00'),
+  (12, 1, 3, NULL, 1, '2025-11-10 11:00:00'),
+  (13, 1, NULL, 2, 1, '2025-11-11 14:00:00'),
+  (19, 1, 2, NULL, 1, '2025-11-12 08:00:00'),
+  (23, 1, 2, NULL, 1, '2025-11-13 09:00:00'),
+  (24, 1, 2, NULL, 1, '2025-11-14 10:00:00'),
+  
+  -- Semana 3 de Novembro (15-21)
+  (25, 1, 2, NULL, 1, '2025-11-15 11:00:00'),
+  (26, 1, 1, NULL, 1, '2025-11-16 12:00:00'),
+  (27, 1, NULL, 2, 1, '2025-11-17 09:00:00'),
+  (28, 1, 2, NULL, 1, '2025-11-18 14:00:00'),
+  (29, 1, 3, NULL, 1, '2025-11-19 10:00:00'),
+  (30, 1, 1, NULL, 1, '2025-11-20 08:30:00'),
+  (31, 1, NULL, 1, 1, '2025-11-21 15:00:00'),
+  
+  -- Semana 4 de Novembro (22-28)
+  (10, 1, NULL, 3, 1, '2025-11-22 09:00:00'),
+  (11, 1, 3, NULL, 1, '2025-11-23 10:00:00'),
+  (12, 1, NULL, 1, 1, '2025-11-24 11:30:00'),
+  (15, 1, 3, NULL, 1, '2025-11-25 14:00:00'),
+  (17, 1, 3, NULL, 1, '2025-11-26 08:00:00'),
+  (32, 1, 2, NULL, 1, '2025-11-27 09:30:00'),
+  (20, 1, 3, NULL, 1, '2025-11-28 12:00:00'),
+  
+  -- Semana 5 de Novembro e Dezembro (29/11 a 05/12)
+  (10, 1, NULL, 4, 1, '2025-11-29 10:00:00'),
+  (11, 1, NULL, 4, 1, '2025-11-30 11:00:00'),
+  (12, 1, 4, NULL, 1, '2025-12-01 09:00:00'),
+  (13, 1, 3, NULL, 1, '2025-12-02 14:00:00'),
+  (14, 1, 3, NULL, 1, '2025-12-03 10:00:00'),
+  (15, 1, NULL, 3, 1, '2025-12-04 08:00:00'),
+  (16, 1, 2, NULL, 1, '2025-12-05 15:00:00'),
+  
+  -- Semana de 06 a 10/12
+  (17, 1, 4, NULL, 1, '2025-12-06 09:00:00'),
+  (19, 1, 3, NULL, 1, '2025-12-07 10:30:00'),
+  (20, 1, 4, NULL, 1, '2025-12-08 11:00:00'),
+  (23, 1, 3, NULL, 1, '2025-12-08 14:00:00'),
+  (24, 1, 3, NULL, 1, '2025-12-09 08:00:00'),
+  (25, 1, 3, NULL, 1, '2025-12-09 09:00:00'),
+  (26, 1, 2, NULL, 1, '2025-12-10 10:00:00'),
+  (27, 1, 3, NULL, 1, '2025-12-10 11:00:00'),
+  (28, 1, 3, NULL, 1, '2025-12-10 12:00:00'),
+  (29, 1, NULL, 4, 1, '2025-12-10 14:00:00'),
+  (30, 1, 2, NULL, 1, '2025-12-10 15:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Tentativas em Novembro e início de Dezembro (ids 70..99)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  -- Novembro
+  (70, 10, 1, '2025-11-01 14:00:00', 1),
+  (71, 11, 1, '2025-11-02 10:00:00', 1),
+  (72, 12, 1, '2025-11-03 11:00:00', 1),
+  (73, 13, 1, '2025-11-05 09:00:00', 1),
+  (74, 14, 1, '2025-11-06 14:30:00', 1),
+  (75, 15, 1, '2025-11-08 10:00:00', 1),
+  (76, 16, 1, '2025-11-10 11:00:00', 1),
+  (77, 17, 1, '2025-11-12 08:00:00', 1),
+  (78, 19, 1, '2025-11-14 15:00:00', 1),
+  (79, 20, 1, '2025-11-15 09:30:00', 1),
+  (80, 23, 1, '2025-11-17 10:00:00', 1),
+  (81, 24, 1, '2025-11-19 11:00:00', 1),
+  (82, 25, 1, '2025-11-20 14:00:00', 1),
+  (83, 26, 1, '2025-11-22 08:00:00', 1),
+  (84, 27, 1, '2025-11-24 09:00:00', 1),
+  (85, 28, 1, '2025-11-25 10:30:00', 1),
+  (86, 29, 1, '2025-11-27 11:00:00', 1),
+  (87, 30, 1, '2025-11-28 14:00:00', 1),
+  (88, 31, 1, '2025-11-29 08:00:00', 1),
+  (89, 32, 1, '2025-11-30 09:00:00', 1),
+  -- Dezembro (até 10/12)
+  (90, 10, 1, '2025-12-01 10:00:00', 1),
+  (91, 11, 1, '2025-12-02 11:00:00', 1),
+  (92, 12, 1, '2025-12-03 09:00:00', 1),
+  (93, 13, 1, '2025-12-04 14:00:00', 1),
+  (94, 14, 1, '2025-12-05 10:00:00', 1),
+  (95, 15, 1, '2025-12-06 08:00:00', 1),
+  (96, 16, 1, '2025-12-07 15:00:00', 1),
+  (97, 17, 1, '2025-12-08 09:00:00', 1),
+  (98, 19, 1, '2025-12-09 10:30:00', 1),
+  (99, 20, 1, '2025-12-10 11:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Respostas para as novas tentativas
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (10, 1, 70, 1, 1, 2),
+  (11, 1, 71, 1, 1, 2),
+  (12, 1, 72, 1, 1, 2),
+  (13, 1, 73, 1, 1, 1),
+  (14, 1, 74, 1, 1, 2),
+  (15, 1, 75, 1, 1, 2),
+  (16, 1, 76, 1, 1, 1),
+  (17, 1, 77, 1, 1, 2),
+  (19, 1, 78, 1, 1, 2),
+  (20, 1, 79, 1, 1, 2),
+  (23, 1, 80, 1, 1, 2),
+  (24, 1, 81, 1, 1, 3),
+  (25, 1, 82, 1, 1, 2),
+  (26, 1, 83, 1, 1, 1),
+  (27, 1, 84, 1, 1, 2),
+  (28, 1, 85, 1, 1, 3),
+  (29, 1, 86, 1, 1, 2),
+  (30, 1, 87, 1, 1, 1),
+  (31, 1, 88, 1, 1, 2),
+  (32, 1, 89, 1, 1, 2),
+  (10, 1, 90, 1, 1, 2),
+  (11, 1, 91, 1, 1, 2),
+  (12, 1, 92, 1, 1, 2),
+  (13, 1, 93, 1, 1, 2),
+  (14, 1, 94, 1, 1, 2),
+  (15, 1, 95, 1, 1, 2),
+  (16, 1, 96, 1, 1, 2),
+  (17, 1, 97, 1, 1, 2),
+  (19, 1, 98, 1, 1, 2),
+  (20, 1, 99, 1, 1, 2)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- =============================================================================
+-- DADOS DEZEMBRO 2025 - MAIS VARIADOS PARA KPIs
+-- Data atual simulada: 03/12/2025
+-- Últimos 7 dias: 26/11 a 03/12
+-- =============================================================================
+
+-- PARTICIPANTES INATIVOS (>15 dias sem acesso)
+-- Usuários 13, 14, 16, 31, 1, 2, 3 ficam sem acesso recente (mais de 15 dias)
+UPDATE usuario SET ultimo_acesso = '2025-11-01 10:00:00' WHERE id_usuario = 13;
+UPDATE usuario SET ultimo_acesso = '2025-11-05 14:00:00' WHERE id_usuario = 14;
+UPDATE usuario SET ultimo_acesso = '2025-11-08 09:00:00' WHERE id_usuario = 16;
+UPDATE usuario SET ultimo_acesso = '2025-11-02 11:00:00' WHERE id_usuario = 31;
+UPDATE usuario SET ultimo_acesso = '2025-10-20 08:00:00' WHERE id_usuario = 1;
+UPDATE usuario SET ultimo_acesso = '2025-10-15 10:00:00' WHERE id_usuario = 2;
+UPDATE usuario SET ultimo_acesso = '2025-10-25 12:00:00' WHERE id_usuario = 3;
+UPDATE usuario SET ultimo_acesso = '2025-11-10 09:00:00' WHERE id_usuario = 21;
+UPDATE usuario SET ultimo_acesso = '2025-11-12 14:00:00' WHERE id_usuario = 22;
+
+-- ATIVOS NOS ÚLTIMOS 7 DIAS (26/11 a 03/12)
+-- Usuários com acesso recente
+UPDATE usuario SET ultimo_acesso = '2025-12-03 10:00:00' WHERE id_usuario = 10;
+UPDATE usuario SET ultimo_acesso = '2025-12-02 11:00:00' WHERE id_usuario = 11;
+UPDATE usuario SET ultimo_acesso = '2025-12-03 09:00:00' WHERE id_usuario = 12;
+UPDATE usuario SET ultimo_acesso = '2025-12-01 14:00:00' WHERE id_usuario = 15;
+UPDATE usuario SET ultimo_acesso = '2025-11-30 08:00:00' WHERE id_usuario = 17;
+UPDATE usuario SET ultimo_acesso = '2025-12-02 10:30:00' WHERE id_usuario = 19;
+UPDATE usuario SET ultimo_acesso = '2025-12-03 11:00:00' WHERE id_usuario = 20;
+UPDATE usuario SET ultimo_acesso = '2025-11-28 09:00:00' WHERE id_usuario = 23;
+UPDATE usuario SET ultimo_acesso = '2025-11-29 10:00:00' WHERE id_usuario = 24;
+UPDATE usuario SET ultimo_acesso = '2025-11-27 11:00:00' WHERE id_usuario = 25;
+UPDATE usuario SET ultimo_acesso = '2025-12-01 12:00:00' WHERE id_usuario = 26;
+UPDATE usuario SET ultimo_acesso = '2025-11-30 09:00:00' WHERE id_usuario = 27;
+UPDATE usuario SET ultimo_acesso = '2025-12-02 14:00:00' WHERE id_usuario = 28;
+UPDATE usuario SET ultimo_acesso = '2025-11-26 10:00:00' WHERE id_usuario = 29;
+UPDATE usuario SET ultimo_acesso = '2025-11-28 08:30:00' WHERE id_usuario = 30;
+UPDATE usuario SET ultimo_acesso = '2025-12-03 15:00:00' WHERE id_usuario = 32;
+
+-- ATIVOS 3x OU MAIS (3+ dias distintos nos últimos 7 dias: 26/11 a 03/12)
+-- Usuários 10, 11, 12, 20 terão atividade em 3+ dias distintos
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  -- Usuário 10: 3 dias distintos (27, 29, 01, 03)
+  (10, 1, 1, NULL, 1, '2025-11-27 10:00:00'),
+  (10, 1, NULL, 2, 1, '2025-11-29 11:00:00'),
+  (10, 1, 2, NULL, 1, '2025-12-01 09:00:00'),
+  (10, 1, NULL, 3, 1, '2025-12-03 14:00:00'),
+  
+  -- Usuário 11: 4 dias distintos (26, 28, 30, 02)
+  (11, 1, 3, NULL, 1, '2025-11-26 08:00:00'),
+  (11, 1, NULL, 1, 1, '2025-11-28 09:30:00'),
+  (11, 1, 1, NULL, 1, '2025-11-30 10:00:00'),
+  (11, 1, NULL, 2, 1, '2025-12-02 11:00:00'),
+  
+  -- Usuário 12: 3 dias distintos (27, 30, 03)
+  (12, 1, NULL, 4, 1, '2025-11-27 14:00:00'),
+  (12, 1, 3, NULL, 1, '2025-11-30 08:00:00'),
+  (12, 1, NULL, 1, 1, '2025-12-03 09:00:00'),
+  
+  -- Usuário 20: 5 dias distintos (26, 27, 29, 01, 03)
+  (20, 1, 2, NULL, 1, '2025-11-26 10:00:00'),
+  (20, 1, NULL, 1, 1, '2025-11-27 11:00:00'),
+  (20, 1, 3, NULL, 1, '2025-11-29 09:00:00'),
+  (20, 1, NULL, 3, 1, '2025-12-01 14:00:00'),
+  (20, 1, 4, NULL, 1, '2025-12-03 08:00:00'),
+  
+  -- Usuário 19: 3 dias distintos (28, 30, 02)
+  (19, 1, 4, NULL, 1, '2025-11-28 09:00:00'),
+  (19, 1, NULL, 4, 1, '2025-11-30 10:00:00'),
+  (19, 1, 2, NULL, 1, '2025-12-02 11:00:00'),
+  
+  -- Usuário 32: 3 dias distintos (27, 01, 03)
+  (32, 1, 3, NULL, 1, '2025-11-27 15:00:00'),
+  (32, 1, NULL, 3, 1, '2025-12-01 10:00:00'),
+  (32, 1, 4, NULL, 1, '2025-12-03 14:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+
+-- Tentativas adicionais para os últimos 7 dias (ids 100..120)
+INSERT INTO tentativa (id_tentativa, fk_usuario, fk_curso, dt_tentativa, fk_avaliacao) VALUES
+  -- Tentativas variadas nos últimos 7 dias
+  (100, 10, 1, '2025-11-27 11:00:00', 1),
+  (101, 10, 1, '2025-12-01 10:00:00', 1),
+  (102, 10, 1, '2025-12-03 15:00:00', 1),
+  (103, 11, 1, '2025-11-26 09:00:00', 1),
+  (104, 11, 1, '2025-11-30 11:00:00', 1),
+  (105, 11, 1, '2025-12-02 12:00:00', 1),
+  (106, 12, 1, '2025-11-27 15:00:00', 1),
+  (107, 12, 1, '2025-12-03 10:00:00', 1),
+  (108, 20, 1, '2025-11-26 11:00:00', 1),
+  (109, 20, 1, '2025-11-29 10:00:00', 1),
+  (110, 20, 1, '2025-12-03 09:00:00', 1),
+  (111, 19, 1, '2025-11-28 10:00:00', 1),
+  (112, 19, 1, '2025-12-02 12:00:00', 1),
+  (113, 32, 1, '2025-11-27 16:00:00', 1),
+  (114, 32, 1, '2025-12-03 15:00:00', 1),
+  (115, 15, 1, '2025-12-01 15:00:00', 1),
+  (116, 17, 1, '2025-11-30 09:00:00', 1),
+  (117, 26, 1, '2025-12-01 13:00:00', 1),
+  (118, 28, 1, '2025-12-02 15:00:00', 1),
+  (119, 23, 1, '2025-11-28 10:00:00', 1),
+  (120, 24, 1, '2025-11-29 11:00:00', 1)
+ON DUPLICATE KEY UPDATE fk_usuario = VALUES(fk_usuario), fk_curso = VALUES(fk_curso), dt_tentativa = VALUES(dt_tentativa), fk_avaliacao = VALUES(fk_avaliacao);
+
+-- Respostas para as novas tentativas
+INSERT INTO resposta_do_usuario (fk_usuario, fk_curso, fk_tentativa, fk_avaliacao, fk_questao, fk_alternativa) VALUES
+  (10, 1, 100, 1, 1, 2),
+  (10, 1, 101, 1, 1, 2),
+  (10, 1, 102, 1, 1, 2),
+  (11, 1, 103, 1, 1, 2),
+  (11, 1, 104, 1, 1, 2),
+  (11, 1, 105, 1, 1, 2),
+  (12, 1, 106, 1, 1, 2),
+  (12, 1, 107, 1, 1, 2),
+  (20, 1, 108, 1, 1, 2),
+  (20, 1, 109, 1, 1, 2),
+  (20, 1, 110, 1, 1, 2),
+  (19, 1, 111, 1, 1, 2),
+  (19, 1, 112, 1, 1, 2),
+  (32, 1, 113, 1, 1, 2),
+  (32, 1, 114, 1, 1, 2),
+  (15, 1, 115, 1, 1, 2),
+  (17, 1, 116, 1, 1, 2),
+  (26, 1, 117, 1, 1, 2),
+  (28, 1, 118, 1, 1, 2),
+  (23, 1, 119, 1, 1, 2),
+  (24, 1, 120, 1, 1, 2)
+ON DUPLICATE KEY UPDATE fk_alternativa = VALUES(fk_alternativa);
+
+-- CONCLUINDO +1 CURSO NOS ÚLTIMOS 7 DIAS (26/11 a 03/12)
+-- Usuários 10, 11, 20, 19, 32 concluíram cursos recentemente
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-27 12:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-28 10:00:00' WHERE fk_usuario = 11 AND fk_curso = 1;
+UPDATE matricula SET completo = 1, data_finalizado = '2025-12-01 14:00:00' WHERE fk_usuario = 20 AND fk_curso = 1;
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-30 11:00:00' WHERE fk_usuario = 19 AND fk_curso = 1;
+UPDATE matricula SET completo = 1, data_finalizado = '2025-12-02 15:00:00' WHERE fk_usuario = 32 AND fk_curso = 1;
+UPDATE matricula SET completo = 1, data_finalizado = '2025-11-26 09:00:00' WHERE fk_usuario = 12 AND fk_curso = 1;
+
+-- Matricular alguns usuários no curso 1 que ainda não estão (para aumentar total de alunos)
+INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
+  (1, 1, '2025-09-01 08:00:00', '2025-10-20 08:00:00', 0, NULL),
+  (2, 1, '2025-09-05 08:00:00', '2025-10-15 10:00:00', 0, NULL),
+  (3, 1, '2025-09-10 08:00:00', '2025-10-25 12:00:00', 0, NULL),
+  (18, 1, '2025-10-01 08:00:00', '2025-11-10 09:00:00', 0, NULL)
+ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
+
+-- Dados variados para o gráfico de dezembro (valores diferentes por dia)
+INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finalizada, ultimo_acesso) VALUES
+  -- 26/11 - 3 materiais
+  (23, 1, 4, NULL, 1, '2025-11-26 10:00:00'),
+  (24, 1, NULL, 4, 1, '2025-11-26 11:00:00'),
+  (25, 1, 4, NULL, 1, '2025-11-26 14:00:00'),
+  
+  -- 27/11 - 5 materiais
+  (26, 1, NULL, 4, 1, '2025-11-27 09:00:00'),
+  (27, 1, 4, NULL, 1, '2025-11-27 10:00:00'),
+  (28, 1, NULL, 3, 1, '2025-11-27 11:00:00'),
+  (29, 1, 4, NULL, 1, '2025-11-27 14:00:00'),
+  (30, 1, NULL, 4, 1, '2025-11-27 15:00:00'),
+  
+  -- 28/11 - 4 materiais
+  (15, 1, 4, NULL, 1, '2025-11-28 08:00:00'),
+  (17, 1, NULL, 4, 1, '2025-11-28 10:00:00'),
+  (26, 1, 3, NULL, 1, '2025-11-28 14:00:00'),
+  (27, 1, NULL, 3, 1, '2025-11-28 16:00:00'),
+  
+  -- 29/11 - 6 materiais
+  (23, 1, NULL, 3, 1, '2025-11-29 08:00:00'),
+  (24, 1, 4, NULL, 1, '2025-11-29 09:00:00'),
+  (25, 1, NULL, 3, 1, '2025-11-29 10:00:00'),
+  (28, 1, 4, NULL, 1, '2025-11-29 11:00:00'),
+  (29, 1, NULL, 3, 1, '2025-11-29 14:00:00'),
+  (30, 1, 3, NULL, 1, '2025-11-29 15:00:00'),
+  
+  -- 30/11 - 7 materiais
+  (15, 1, NULL, 3, 1, '2025-11-30 08:00:00'),
+  (17, 1, 3, NULL, 1, '2025-11-30 09:00:00'),
+  (23, 1, 3, NULL, 1, '2025-11-30 10:00:00'),
+  (24, 1, NULL, 3, 1, '2025-11-30 11:00:00'),
+  (26, 1, 4, NULL, 1, '2025-11-30 12:00:00'),
+  (27, 1, 3, NULL, 1, '2025-11-30 14:00:00'),
+  (28, 1, NULL, 4, 1, '2025-11-30 15:00:00'),
+  
+  -- 01/12 - 8 materiais
+  (15, 1, 3, NULL, 1, '2025-12-01 08:00:00'),
+  (17, 1, NULL, 3, 1, '2025-12-01 09:00:00'),
+  (19, 1, 3, NULL, 1, '2025-12-01 10:00:00'),
+  (23, 1, NULL, 4, 1, '2025-12-01 11:00:00'),
+  (25, 1, 3, NULL, 1, '2025-12-01 12:00:00'),
+  (27, 1, NULL, 4, 1, '2025-12-01 13:00:00'),
+  (29, 1, 3, NULL, 1, '2025-12-01 14:00:00'),
+  (30, 1, NULL, 3, 1, '2025-12-01 15:00:00'),
+  
+  -- 02/12 - 5 materiais
+  (15, 1, NULL, 4, 1, '2025-12-02 08:00:00'),
+  (17, 1, 4, NULL, 1, '2025-12-02 10:00:00'),
+  (26, 1, NULL, 3, 1, '2025-12-02 12:00:00'),
+  (28, 1, 3, NULL, 1, '2025-12-02 14:00:00'),
+  (30, 1, 4, NULL, 1, '2025-12-02 16:00:00'),
+  
+  -- 03/12 - 9 materiais
+  (15, 1, 4, NULL, 1, '2025-12-03 08:00:00'),
+  (17, 1, NULL, 4, 1, '2025-12-03 09:00:00'),
+  (19, 1, NULL, 3, 1, '2025-12-03 10:00:00'),
+  (23, 1, 4, NULL, 1, '2025-12-03 11:00:00'),
+  (24, 1, 3, NULL, 1, '2025-12-03 12:00:00'),
+  (25, 1, NULL, 4, 1, '2025-12-03 13:00:00'),
+  (26, 1, 3, NULL, 1, '2025-12-03 14:00:00'),
+  (28, 1, NULL, 3, 1, '2025-12-03 15:00:00'),
+  (29, 1, 4, NULL, 1, '2025-12-03 16:00:00')
+ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
+

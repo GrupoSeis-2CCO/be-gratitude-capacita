@@ -273,7 +273,6 @@ public class S3Service {
                                 .bucket(bucketApostilas)
                                 .key(key)
                                 .contentType(file.getContentType() != null ? file.getContentType() : "application/pdf")
-                                .acl(ObjectCannedACL.PUBLIC_READ)
                                 .build(),
                         software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
                 String url = "https://" + bucketApostilas + ".s3." + region + ".amazonaws.com/" + key;
