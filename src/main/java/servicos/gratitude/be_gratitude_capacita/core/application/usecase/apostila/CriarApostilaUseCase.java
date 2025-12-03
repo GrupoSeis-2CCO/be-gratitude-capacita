@@ -44,6 +44,11 @@ public class CriarApostilaUseCase {
         apostila.setDescricaoApostila(command.descricaoApostila());
         apostila.setTamanhoBytes(command.tamanhoBytes());
         apostila.setFkCurso(curso);
+        
+        // Define a URL do arquivo se fornecida (upload S3)
+        if (command.urlArquivo() != null && !command.urlArquivo().isEmpty()) {
+            apostila.setUrlArquivo(command.urlArquivo());
+        }
 
         apostila.setNomeApostilaArmazenamento(command.nomeApostila() + LocalDateTime.now());
         apostila.setDataPostadoApostila(LocalDateTime.now());
