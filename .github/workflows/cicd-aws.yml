@@ -61,7 +61,7 @@ jobs:
           script: |
             set -e
             
-            BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}" 
+            BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
             echo "IP do Backend: $BACKEND_IP"
             
             # Escrever chave no bastion temporariamente
@@ -114,7 +114,7 @@ jobs:
             # Criar diretório para compose
             mkdir -p /home/ubuntu/api
             
-            # Criar compose-api.yaml (inclui rabbitmq + api)
+            # Criar compose-api.yaml (inclui rabbitmq + redis + api)
             cat > /home/ubuntu/api/compose-api.yaml <<'EOF'
             version: "3.8"
 
@@ -131,7 +131,8 @@ jobs:
                   - "5672:5672"
                   - "15672:15672"
                 restart: unless-stopped
-                redis:
+
+            redis:
                 image: redis:7-alpine
                 container_name: redis
                 command: ["redis-server", "--save", "60", "100", "--loglevel", "warning"]
@@ -183,12 +184,12 @@ jobs:
                   - "host.docker.internal:host-gateway"
                 depends_on:
                   - rabbitmq
-                   - redis
+                  - redis
                 restart: unless-stopped
 
             volumes:
               rabbitmq_data:
-               redis_data:
+              redis_data:
             EOF
 
             echo "compose-api.yaml criado"
@@ -229,7 +230,7 @@ jobs:
             SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
             SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
             RABBITMQ_ENABLE_LISTENERS=true
-             # Redis Cache
+            # Redis Cache
             CACHE_TYPE=redis
             REDIS_HOST=redis
             REDIS_PORT=6379
