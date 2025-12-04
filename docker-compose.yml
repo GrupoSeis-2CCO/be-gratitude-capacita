@@ -68,6 +68,25 @@ services:
       - capacita-net
     restart: unless-stopped
 
+  # Redis para cache (Spring Cache)
+  redis:
+    image: redis:7-alpine
+    container_name: redis-capacita
+    hostname: redis
+    command: ["redis-server", "--save", "60", "100", "--loglevel", "warning"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - capacita-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
 networks:
   capacita-net:
     driver: bridge
@@ -75,3 +94,4 @@ networks:
 volumes:
   rabbitmq-data:
   mysql-data:
+  redis-data:

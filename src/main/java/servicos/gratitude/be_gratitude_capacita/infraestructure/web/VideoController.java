@@ -13,6 +13,8 @@ import servicos.gratitude.be_gratitude_capacita.core.domain.Video;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 @RestController
 @RequestMapping("/videos")
 public class VideoController {
@@ -30,6 +32,7 @@ public class VideoController {
         this.listarVideoPorCursoUseCase = listarVideoPorCursoUseCase;
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Video> cadastrarVideo(
             @RequestBody CriarVideoCommand request
@@ -66,6 +69,7 @@ public class VideoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-dados/{idVideo}")
     public ResponseEntity<Video> atualizarDados(
             @RequestBody AtualizarVideoCommand request,
@@ -84,6 +88,7 @@ public class VideoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-oculto/{idVideo}")
     public ResponseEntity<Video> atualizarOculto(
             @PathVariable Integer idVideo
@@ -97,6 +102,7 @@ public class VideoController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @DeleteMapping("/{idVideo}")
     public ResponseEntity deletarVideo(
             @PathVariable Integer idVideo

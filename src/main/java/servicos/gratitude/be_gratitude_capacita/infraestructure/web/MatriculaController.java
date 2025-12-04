@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import java.util.List;
 import servicos.gratitude.be_gratitude_capacita.infraestructure.web.response.PagedResponse;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 @RestController
 @RequestMapping("/matriculas")
 public class MatriculaController {
@@ -223,6 +225,7 @@ public class MatriculaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Matricula> cadastrarMatricula(
             @RequestBody CriarMatriculaCommand request
@@ -488,6 +491,7 @@ public class MatriculaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @DeleteMapping("/{fkUsuario}/{fkCurso}")
     public ResponseEntity<Void> deletarMatricula(
             @PathVariable Integer fkUsuario,

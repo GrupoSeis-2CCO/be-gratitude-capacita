@@ -18,6 +18,8 @@ import servicos.gratitude.be_gratitude_capacita.S3.S3Service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+
 @RestController
 @RequestMapping("/apostilas")
 public class ApostilaController {
@@ -44,6 +46,7 @@ public class ApostilaController {
         this.s3Service = s3Service;
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping
     public ResponseEntity<Apostila> cadastrarApostila(
             @RequestBody CriarApostilaCommand request) {
@@ -142,6 +145,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-dados/{idApostila}")
     public ResponseEntity<Apostila> atualizarDadosApostila(
             @RequestBody AtualizarApostilaCommand request,
@@ -158,6 +162,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PutMapping("/atualizar-oculto/{idApostila}")
     public ResponseEntity<Apostila> atualizarOcultoApostila(
             @PathVariable Integer idApostila) {
@@ -172,6 +177,7 @@ public class ApostilaController {
         }
     }
 
+    @CacheEvict(cacheNames = "cursos", allEntries = true)
     @DeleteMapping("/{idAPostila}")
     public ResponseEntity deletarApostila(
             @PathVariable("idAPostila") Integer idApostila) {

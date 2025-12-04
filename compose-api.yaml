@@ -6,12 +6,30 @@ services:
     container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
-      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}  
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"  # Porta SMTP (para envio de emails pelo backend)
+      - "8025:8025"  # Painel web do Mailhog
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: ["redis-server", "--save", "60", "100", "--loglevel", "warning"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
 
   api:
@@ -52,7 +70,10 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - rabbitmq
+      - mailhog
+      - redis
     restart: unless-stopped
 
 volumes:
   rabbitmq_data:
+  redis_data:

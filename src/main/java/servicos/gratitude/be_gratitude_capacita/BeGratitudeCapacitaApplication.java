@@ -2,11 +2,13 @@ package servicos.gratitude.be_gratitude_capacita;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import jakarta.annotation.PostConstruct;
 
 import java.util.TimeZone;
 
 @SpringBootApplication
+@EnableCaching
 public class BeGratitudeCapacitaApplication {
 
 	public static void main(String[] args) {
