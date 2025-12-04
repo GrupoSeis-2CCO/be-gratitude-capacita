@@ -383,12 +383,13 @@ public class UsuarioController {
                     .max(java.time.LocalDateTime::compareTo)
                     .orElse(usuario.getUltimoAcesso());
 
-            return ResponseEntity.ok(Map.of(
-                    "cursosConcluidos", concluidos,
-                    "cursosFaltantes", Math.max(faltando, 0),
-                    "horasEstudo", horas,
-                    "ultimaAtividade", ultimaAtividade
-            ));
+            java.util.Map<String, Object> resultado = new java.util.HashMap<>();
+            resultado.put("cursosConcluidos", concluidos);
+            resultado.put("cursosFaltantes", Math.max(faltando, 0));
+            resultado.put("horasEstudo", horas);
+            resultado.put("ultimaAtividade", ultimaAtividade);
+            
+            return ResponseEntity.ok(resultado);
         } catch (NaoEncontradoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
