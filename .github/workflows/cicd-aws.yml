@@ -268,6 +268,13 @@ jobs:
                 echo "Removendo container redis pré-existente para evitar conflito com docker compose"
                 sudo docker rm -f redis || true
             fi
+            
+            # Garantir que não exista um container solto chamado api-spring que conflite com o compose
+            if sudo docker ps -a --format '{{.Names}}' | grep -q '^api-spring$' ; then
+                echo "Removendo container api-spring pré-existente para evitar conflito com docker compose"
+                sudo docker rm -f api-spring || true
+            fi
+
 
             # Parar containers gerenciados pelo compose (se existirem)
             cd /home/ubuntu/api
