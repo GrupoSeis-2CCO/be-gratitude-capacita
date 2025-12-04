@@ -13,7 +13,7 @@ import servicos.gratitude.be_gratitude_capacita.infraestructure.messaging.dto.No
 public class NotificacaoConsumer {
     private static final Logger logger = LoggerFactory.getLogger(NotificacaoConsumer.class);
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:}")
     private String mailFrom;
 
     private final JavaMailSender mailSender;
@@ -25,6 +25,12 @@ public class NotificacaoConsumer {
     @RabbitListener(queues = "${rabbitmq.queue.notificacao}")
     public void receberNotificacao(NotificacaoEmailDTO notificacao) {
         try {
+            // Validar configuração de email
+            if (mailFrom == null || mailFrom.isBlank()) {
+                logger.error("MAIL_USERNAME não configurado! Defina a variável de ambiente MAIL_USERNAME com um email válido.");
+                return; // Não tenta enviar, evita erro
+            }
+
             logger.info("Processando notificação para: {} | Curso: {}", 
                 notificacao.getEmailAluno(), notificacao.getTituloCurso());
 
@@ -42,7 +48,7 @@ public class NotificacaoConsumer {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(mailFrom);
             message.setTo(notificacao.getEmailAluno());
-            message.setSubject("🎓 Novo Curso Lançado: " + notificacao.getTituloCurso());
+            message.setSubject("Novo Curso Disponível: " + notificacao.getTituloCurso());
             message.setText(construirCorpoEmail(notificacao));
 
             mailSender.send(message);

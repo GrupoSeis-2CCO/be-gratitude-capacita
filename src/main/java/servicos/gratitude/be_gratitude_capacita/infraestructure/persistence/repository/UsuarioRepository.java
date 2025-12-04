@@ -14,4 +14,10 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Integer>
     Boolean existsByCpf(String cpf);
 
     Optional<UsuarioEntity> findByEmailAndSenha(String email, String senha);
+
+    /**
+     * Busca usuários por ID do cargo.
+     * Ex: fkCargo.idCargo = 2 retorna colaboradores
+     */
+    List<UsuarioEntity> findByFkCargo_IdCargo(Integer idCargo);
 }

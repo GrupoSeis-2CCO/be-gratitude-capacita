@@ -6,7 +6,7 @@ services:
     container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
-      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
+      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}  
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
@@ -47,8 +47,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
       SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      # AWS Credentials - Se não definidas, o SDK usa automaticamente a IAM Role da EC2
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       AWS_S3_BUCKET_BRONZE: ${AWS_S3_BUCKET_BRONZE}
       AWS_S3_BUCKET_SILVER: ${AWS_S3_BUCKET_SILVER}
       AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
@@ -58,16 +60,12 @@ services:
       SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
       SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
       SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
-      SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      SPRING_MAIL_HOST: mailhog
-      SPRING_MAIL_PORT: 1025
-      SPRING_MAIL_USERNAME: ""
-      SPRING_MAIL_PASSWORD: ""
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: false
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: false
+      SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: ${RABBITMQ_ENABLE_LISTENERS:-true}
+      # Email Configuration (Gmail SMTP)
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

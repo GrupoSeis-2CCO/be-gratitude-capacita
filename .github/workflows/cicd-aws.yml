@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+
       
 
 jobs:
@@ -130,14 +131,6 @@ jobs:
                   - "5672:5672"
                   - "15672:15672"
                 restart: unless-stopped
-              
-              mailhog:
-                image: mailhog/mailhog
-                container_name: mailhog
-                ports:
-                  - "1025:1025"  # SMTP
-                  - "8025:8025"  # Painel web
-                restart: unless-stopped
 
               api:
                 image: amazoncorretto:21
@@ -154,8 +147,10 @@ jobs:
                   SPRING_JPA_HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-none}
                   SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
                   AWS_REGION: ${AWS_REGION:-us-east-1}
-                  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-                  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+                  # AWS Credentials - Se não definidas, o SDK usa automaticamente a IAM Role da EC2
+                  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+                  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+                  AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
                   AWS_S3_BUCKET_BRONZE: ${AWS_S3_BUCKET_BRONZE}
                   AWS_S3_BUCKET_SILVER: ${AWS_S3_BUCKET_SILVER}
                   AWS_S3_BUCKET_GOLD: ${AWS_S3_BUCKET_GOLD}
@@ -165,7 +160,12 @@ jobs:
                   SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
                   SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
                   SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
-                  SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: false
+                  SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: true
+                  # Email Configuration (Gmail SMTP)
+                  MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+                  MAIL_PORT: ${MAIL_PORT:-587}
+                  MAIL_USERNAME: ${MAIL_USERNAME:-}
+                  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
                 extra_hosts:
                   - "host.docker.internal:host-gateway"
                 depends_on:
@@ -178,7 +178,22 @@ jobs:
 
             echo "compose-api.yaml criado"
 
-            # Criar arquivo .env com secrets
+            # Buscar credenciais AWS dinamicamente do IMDS (Instance Metadata Service)
+            echo "=== Buscando credenciais AWS da IAM Role ==="
+            
+            # Obter o nome da role
+            ROLE_NAME=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+            echo "IAM Role: $ROLE_NAME"
+            
+            # Obter credenciais temporárias
+            CREDS=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME)
+            AWS_ACCESS_KEY_ID=$(echo $CREDS | python3 -c "import sys, json; print(json.load(sys.stdin)['AccessKeyId'])")
+            AWS_SECRET_ACCESS_KEY=$(echo $CREDS | python3 -c "import sys, json; print(json.load(sys.stdin)['SecretAccessKey'])")
+            AWS_SESSION_TOKEN=$(echo $CREDS | python3 -c "import sys, json; print(json.load(sys.stdin)['Token'])")
+            
+            echo "Credenciais AWS obtidas dinamicamente da IAM Role"
+
+            # Criar arquivo .env com secrets (incluindo credenciais dinâmicas)
             cat > /home/ubuntu/api/.env <<ENVEOF
             DATABASE_NAME=capacita
             DATABASE_USER=${{ secrets.DATABASE_USER }}
@@ -186,8 +201,9 @@ jobs:
             HIBERNATE_DDL_AUTO=none
             SHOW_SQL=false
             AWS_REGION=us-east-1
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
             AWS_S3_BUCKET_BRONZE=${{ secrets.BRONZE_BUCKET }}
             AWS_S3_BUCKET_SILVER=${{ secrets.SILVER_BUCKET }}
             AWS_S3_BUCKET_GOLD=${{ secrets.GOLD_BUCKET }}
@@ -197,9 +213,15 @@ jobs:
             SPRING_RABBITMQ_PORT=5672
             SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
             SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
+            RABBITMQ_ENABLE_LISTENERS=true
+            # Email Configuration (Gmail SMTP)
+            MAIL_HOST=smtp.gmail.com
+            MAIL_PORT=587
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
             ENVEOF
             
-            echo ".env criado com secrets"
+            echo ".env criado com credenciais dinâmicas"
             
             # Executar Script.sql para criar o schema do banco (antes de iniciar Spring Boot)
             echo "=== Executando Script.sql para criar schema do banco ==="
