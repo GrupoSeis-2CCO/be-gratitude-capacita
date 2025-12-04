@@ -61,7 +61,7 @@ jobs:
           script: |
             set -e
             
-            BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}"
+            BACKEND_IP="${{ secrets.BACKEND_PRIVATE_IP }}" 
             echo "IP do Backend: $BACKEND_IP"
             
             # Escrever chave no bastion temporariamente
@@ -131,6 +131,15 @@ jobs:
                   - "5672:5672"
                   - "15672:15672"
                 restart: unless-stopped
+                redis:
+                image: redis:7-alpine
+                container_name: redis
+                command: ["redis-server", "--save", "60", "100", "--loglevel", "warning"]
+                ports:
+                  - "6379:6379"
+                volumes:
+                  - redis_data:/data
+                restart: unless-stopped
 
               api:
                 image: amazoncorretto:21
@@ -161,6 +170,10 @@ jobs:
                   SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-capacita_rabbit}
                   SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-CapacitaRabbit123}
                   SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP: true
+                  # Redis Cache
+                  CACHE_TYPE: redis
+                  REDIS_HOST: redis
+                  REDIS_PORT: 6379
                   # Email Configuration (Gmail SMTP)
                   MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
                   MAIL_PORT: ${MAIL_PORT:-587}
@@ -170,10 +183,12 @@ jobs:
                   - "host.docker.internal:host-gateway"
                 depends_on:
                   - rabbitmq
+                   - redis
                 restart: unless-stopped
 
             volumes:
               rabbitmq_data:
+               redis_data:
             EOF
 
             echo "compose-api.yaml criado"
@@ -214,6 +229,10 @@ jobs:
             SPRING_RABBITMQ_USERNAME=${{ secrets.SPRING_RABBITMQ_USERNAME }}
             SPRING_RABBITMQ_PASSWORD=${{ secrets.SPRING_RABBITMQ_PASSWORD }}
             RABBITMQ_ENABLE_LISTENERS=true
+             # Redis Cache
+            CACHE_TYPE=redis
+            REDIS_HOST=redis
+            REDIS_PORT=6379
             # Email Configuration (Gmail SMTP)
             MAIL_HOST=smtp.gmail.com
             MAIL_PORT=587
