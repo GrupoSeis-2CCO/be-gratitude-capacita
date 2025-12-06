@@ -9,25 +9,25 @@ ON DUPLICATE KEY UPDATE nome_cargo = VALUES(nome_cargo);
 
 -- Garantir que cursos base existem antes das avaliações (contexto: Regularização Fundiária)
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada, ordem_curso) VALUES
-  (1, 'Regularização Fundiária: Fundamentos', 'Conceitos, etapas e objetivos da Reurb (S/E).', 'https://aguaslindasdegoias.go.gov.br/wp-content/uploads/2022/05/REGULARIZACAO-01-938x535-1.jpg', 0, 20, 1),
-  (2, 'Legislação Urbana e Instrumentos da Reurb', 'Lei 13.465/2017, Decreto 9.310/2018, modalidades Reurb-S/Reurb-E e instrumentos jurídicos.', 'https://www.fundacao1demaio.org.br/media/2021/07/regularizacao_fundiaria.png', 0, 40, 2),
-  (3, 'Diagnóstico Socioeconômico e Cadastro Social', 'Coleta, análise e gestão de dados para apoiar a regularização fundiária.', 'https://adenilsongiovanini.com.br/blog/wp-content/uploads/2019/11/regulariza%C3%A7%C3%A3o-fundi%C3%A1ria.jpg', 0, 30, 3)
+  (1, 'Regularização Fundiária: Fundamentos', 'Conceitos, etapas e objetivos da Reurb (S/E).', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80', 0, 20, 1),
+  (2, 'Legislação Urbana e Instrumentos da Reurb', 'Lei 13.465/2017, Decreto 9.310/2018, modalidades Reurb-S/Reurb-E e instrumentos jurídicos.', 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80', 0, 40, 2),
+  (3, 'Diagnóstico Socioeconômico e Cadastro Social', 'Coleta, análise e gestão de dados para apoiar a regularização fundiária.', 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80', 0, 30, 3)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada), ordem_curso = VALUES(ordem_curso);
 
 -- Adicionar um novo curso e conteúdo para John Doe
 
 -- Curso 5 criado para testes, sem avaliação associada (contexto Reurb)
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada, ordem_curso) VALUES
-  (5, 'Comunicação e Participação Social na Reurb', 'Mobilização comunitária, comunicação e engajamento social em projetos de regularização fundiária.', 'https://publicacao.saocristovao.se.gov.br/storage/post/sao-cristovao-realiza-regularizacao-fundiaria-com-o-programa-moradia-legal-2024-10-22-6718078c8bb87.jpeg', 0, 18, 5)
+  (5, 'Comunicação e Participação Social na Reurb', 'Mobilização comunitária, comunicação e engajamento social em projetos de regularização fundiária.', 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=800&q=80', 0, 18, 5)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada), ordem_curso = VALUES(ordem_curso);
 
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada, ordem_curso) VALUES
-  (4, 'Procedimentos Técnicos e Documentais na Reurb', 'Levantamentos, plantas, memoriais descritivos e fluxo documental dos processos de regularização.', 'https://static.poder360.com.br/2020/05/governo-ceara-regularizacao-fundiaria.jpg', 0, 25, 4)
+  (4, 'Procedimentos Técnicos e Documentais na Reurb', 'Levantamentos, plantas, memoriais descritivos e fluxo documental dos processos de regularização.', 'https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80', 0, 25, 4)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada), ordem_curso = VALUES(ordem_curso);
 
--- Exemplo: curso com imagem hospedada no bucket S3 de imagens do frontend
+-- Curso 6: Gestão de Projetos Urbanos
 INSERT INTO curso (id_curso, titulo_curso, descricao, imagem, ocultado, duracao_estimada, ordem_curso) VALUES
-  (6, 'Gestão de Projetos Urbanos', 'Planejamento e execução de projetos no contexto urbano.', 'https://gratitude-imagens-frontend.s3.us-east-1.amazonaws.com/cursos/exemplo_imagem_curso.jpg', 0, 24, 6)
+  (6, 'Gestão de Projetos Urbanos', 'Planejamento e execução de projetos no contexto urbano.', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80', 0, 24, 6)
 ON DUPLICATE KEY UPDATE titulo_curso = VALUES(titulo_curso), descricao = VALUES(descricao), imagem = VALUES(imagem), ocultado = VALUES(ocultado), duracao_estimada = VALUES(duracao_estimada), ordem_curso = VALUES(ordem_curso);
 
 -- Vídeo e apostila de exemplo para o curso 4
