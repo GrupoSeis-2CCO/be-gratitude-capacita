@@ -92,7 +92,6 @@ public class CursoController {
     @GetMapping("/{idCurso}/materiais")
     public ResponseEntity<List<MaterialResponse>> listarMateriaisDoCurso(@PathVariable Integer idCurso) {
         try {
-            // Videos
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Video> videos = listarVideoPorCursoUseCase.execute(idCurso);
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Apostila> apostilas = listarApostilaPorCursoUseCase.execute(idCurso);
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
@@ -102,8 +101,6 @@ public class CursoController {
                 out.add(new MaterialResponse(v.getIdVideo(), "video", v.getNomeVideo(), v.getDescricaoVideo(), v.getUrlVideo(), v.getOrdemVideo()));
             }
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
-                // Return the URL to the stored PDF so the frontend can render/download without
-                // requiring the single-material endpoint (which may 404 on mixed id spaces)
                 out.add(new MaterialResponse(
                         a.getIdApostila(),
                         "apostila",
@@ -177,7 +174,6 @@ public class CursoController {
     @GetMapping("/{idCurso}/materiais/{idMaterial}")
     public ResponseEntity<MaterialResponse> obterMaterialDoCurso(@PathVariable Integer idCurso, @PathVariable Integer idMaterial) {
         try {
-            // Videos
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Video> videos = listarVideoPorCursoUseCase.execute(idCurso);
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Video v : videos) {
                 if (v.getIdVideo() != null && v.getIdVideo().equals(idMaterial)) {
@@ -185,7 +181,6 @@ public class CursoController {
                 }
             }
 
-            // Apostilas
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Apostila> apostilas = listarApostilaPorCursoUseCase.execute(idCurso);
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Apostila a : apostilas) {
                 if (a.getIdApostila() != null && a.getIdApostila().equals(idMaterial)) {
@@ -193,7 +188,6 @@ public class CursoController {
                 }
             }
 
-            // Avaliacoes
             List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(idCurso);
             for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
                 if (av.getIdAvaliacao() != null && av.getIdAvaliacao().equals(idMaterial)) {
@@ -228,7 +222,6 @@ public class CursoController {
         }
     }
 
-    // Variante multipart: permite enviar a imagem do curso e salvar a URL no banco
     @CacheEvict(cacheNames = "cursos", allEntries = true)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Curso> cadastrarCursoMultipart(
@@ -276,7 +269,6 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 
-    // Cache only the DTO list (and not the ResponseEntity) to avoid Redis deserialization issues
     @Cacheable(cacheNames = "cursos", key = "'list'")
     public List<CursoResponse> listarCursosCacheable() {
         List<Curso> cursos = listarCursoUseCase.execute();
