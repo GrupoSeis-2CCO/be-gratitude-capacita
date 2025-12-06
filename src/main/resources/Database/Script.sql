@@ -102,7 +102,9 @@ CREATE TABLE material_aluno (
     ultimo_acesso DATETIME,
     FOREIGN KEY (FK_usuario, FK_curso) REFERENCES matricula(FK_usuario, FK_curso),
     FOREIGN KEY (FK_video) REFERENCES video(id_video),
-    FOREIGN KEY (FK_apostila) REFERENCES apostila(id_apostila)
+    FOREIGN KEY (FK_apostila) REFERENCES apostila(id_apostila),
+    UNIQUE KEY uk_material_aluno_video (FK_usuario, FK_curso, FK_video),
+    UNIQUE KEY uk_material_aluno_apostila (FK_usuario, FK_curso, FK_apostila)
 );
 
 select * from material_aluno;

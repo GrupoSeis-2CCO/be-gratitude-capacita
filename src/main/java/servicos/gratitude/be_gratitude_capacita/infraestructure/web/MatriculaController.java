@@ -101,10 +101,9 @@ public class MatriculaController {
             }
             final List<servicos.gratitude.be_gratitude_capacita.core.domain.Feedback> feedbacksDoCurso = _feedbacksTemp;
 
-            // pré-calcula materiais totais do curso (apostilas + videos + questões de avaliações)
+            // pré-calcula materiais totais do curso (apenas apostilas + videos)
             int totalApostilas = 0;
             int totalVideos = 0;
-            int totalQuestoes = 0;
             try {
                 totalApostilas = listarApostilaPorCursoUseCase.execute(fkCurso).size();
             } catch (Exception e) {
@@ -115,49 +114,18 @@ public class MatriculaController {
             } catch (Exception e) {
                 totalVideos = 0;
             }
-            try {
-                java.util.List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(fkCurso);
-                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
-                    try {
-                        totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size();
-                    } catch (Exception ex) {
-                        // ignore per-avaliacao errors
-                    }
-                }
-            } catch (Exception e) {
-                totalQuestoes = 0;
-            }
-            final int materiaisTotaisDoCurso = totalApostilas + totalVideos + totalQuestoes;
+            // Materiais são apenas vídeos e apostilas (não inclui questões de avaliação)
+            final int materiaisTotaisDoCurso = totalApostilas + totalVideos;
 
             List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
                 Usuario usuario = matricula.getUsuario();
-                // Quantidade de materiais concluídos para esta matrícula (usado no front como "materiaisConcluidos")
+                // Quantidade de materiais concluídos para esta matrícula (apenas vídeos e apostilas finalizados)
                 int materiaisConcluidos;
                 try {
                     List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(matricula);
                     materiaisConcluidos = (int) materiais.stream()
                             .filter(mat -> Boolean.TRUE.equals(mat.getFinalizado()))
                             .count();
-
-                    // também conta questões respondidas pelo usuário neste curso (cada questão conta como 1 material)
-                    try {
-                        List<servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario> respostas = listarRespostasDoUsuarioUseCase.execute(usuario);
-                        long respostasNoCurso = respostas.stream()
-                                .filter(r -> r != null && r.getTentativa() != null && r.getTentativa().getMatricula() != null && r.getTentativa().getMatricula().getCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso().equals(curso.getIdCurso()))
-                                .map(r -> {
-                                    if (r.getAlternativa() != null && r.getAlternativa().getQuestao() != null && r.getAlternativa().getQuestao().getIdQuestaoComposto() != null) {
-                                        return r.getAlternativa().getQuestao().getIdQuestaoComposto();
-                                    }
-                                    return null;
-                                })
-                                .filter(java.util.Objects::nonNull)
-                                .distinct()
-                                .count();
-
-                        materiaisConcluidos += (int) respostasNoCurso;
-                    } catch (Exception ex){
-                        // ignora falhas na leitura de respostas
-                    }
                 } catch (Exception e) {
                     materiaisConcluidos = 0;
                 }
@@ -274,38 +242,18 @@ public class MatriculaController {
 
             int totalApostilas = 0;
             int totalVideos = 0;
-            int totalQuestoes = 0;
             try { totalApostilas = listarApostilaPorCursoUseCase.execute(fkCurso).size(); } catch (Exception ignored) {}
             try { totalVideos = listarVideoPorCursoUseCase.execute(fkCurso).size(); } catch (Exception ignored) {}
-            try {
-                java.util.List<servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao> avaliacoes = listarAvaliacaoPorCursoUseCase.execute(fkCurso);
-                for (servicos.gratitude.be_gratitude_capacita.core.domain.Avaliacao av : avaliacoes) {
-                    try { totalQuestoes += listarQuestoesPorAvaliacaoUseCase.execute(av.getIdAvaliacao()).size(); } catch (Exception ignored) {}
-                }
-            } catch (Exception ignored) {}
-            final int materiaisTotaisDoCurso = totalApostilas + totalVideos + totalQuestoes;
+            // Materiais são apenas vídeos e apostilas
+            final int materiaisTotaisDoCurso = totalApostilas + totalVideos;
 
             List<ParticipanteCursoResponse> participantes = matriculas.stream().map(matricula -> {
                 Usuario usuario = matricula.getUsuario();
+                // Quantidade de materiais concluídos (apenas vídeos e apostilas finalizados)
                 int materiaisConcluidos;
                 try {
                     List<MaterialAluno> materiais = listarMaterialPorMatriculaUseCase.execute(matricula);
                     materiaisConcluidos = (int) materiais.stream().filter(mat -> Boolean.TRUE.equals(mat.getFinalizado())).count();
-                    try {
-                        List<servicos.gratitude.be_gratitude_capacita.core.domain.RespostaDoUsuario> respostas = listarRespostasDoUsuarioUseCase.execute(usuario);
-                        long respostasNoCurso = respostas.stream()
-                                .filter(r -> r != null && r.getTentativa() != null && r.getTentativa().getMatricula() != null && r.getTentativa().getMatricula().getCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso() != null && r.getTentativa().getMatricula().getCurso().getIdCurso().equals(curso.getIdCurso()))
-                                .map(r -> {
-                                    if (r.getAlternativa() != null && r.getAlternativa().getQuestao() != null && r.getAlternativa().getQuestao().getIdQuestaoComposto() != null) {
-                                        return r.getAlternativa().getQuestao().getIdQuestaoComposto();
-                                    }
-                                    return null;
-                                })
-                                .filter(java.util.Objects::nonNull)
-                                .distinct()
-                                .count();
-                        materiaisConcluidos += (int) respostasNoCurso;
-                    } catch (Exception ignored) {}
                 } catch (Exception e) {
                     materiaisConcluidos = 0;
                 }
