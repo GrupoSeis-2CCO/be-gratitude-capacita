@@ -19,7 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-// import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,29 +44,13 @@ public class SecurityConfiguracao {
         this.autenticacaoService = autenticacaoService;
     }
 
-    // CSV de origens permitidas; use "*" para permitir todas (sem credenciais)
     @Value("${app.cors.allowed-origins:*}")
     private String allowedOriginsCsv;
 
     private static final String[] URLS_PERMITIDAS = {
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/api/public/**",
-            "/api/public/authenticate",
-            "/webjars/**",
-            "/v3/api-docs/**",
-            "/actuator/*",
-        "/usuarios/login/**",
-            "/cargos/**",
-            "/h2-console/**",
-            "/api/cursos",
+            "/usuarios/login",
+            "/usuarios/login/**",
             "/error",
-            "/uploads/**",
-            "/proxy/image",
     };
 
     @Bean
@@ -78,13 +61,9 @@ public class SecurityConfiguracao {
                 .cors(Customizer.withDefaults())
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
         .authorizeHttpRequests(authorize -> authorize
-            // URLs gerais permitidas (documentação, públicos, etc.)
             .requestMatchers(URLS_PERMITIDAS).permitAll()
-            // Registro de usuário e login devem ser públicos para obter o primeiro token
-            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios", "/usuarios/login").permitAll()
-            // Permite CORS preflight (OPTIONS) para endpoints de auth sem exigir token
-            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/usuarios", "/usuarios/login").permitAll()
-            // Demais endpoints exigem autenticação
+            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios/login").permitAll()
+            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/usuarios/login").permitAll()
             .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(autenticacaoEntryPoint))
@@ -116,10 +95,6 @@ public class SecurityConfiguracao {
         return new AutenticacaoFilter(autenticacaoService, jwtAuthenticationUtilBean());
     }
 
-    // @Bean
-    // public GerenciadorTokenJwt gerenciadorTokenJwt() {
-    // return new GerenciadorTokenJwt();
-    // }
     @Bean
     public GerenciadorTokenJwt jwtAuthenticationUtilBean() {
         return new GerenciadorTokenJwt();
@@ -134,9 +109,7 @@ public class SecurityConfiguracao {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuracao = new CorsConfiguration();
         configuracao.applyPermitDefaultValues();
-        // Origens permitidas (de propriedade app.cors.allowed-origins)
         if ("*".equals(allowedOriginsCsv.trim())) {
-            // Usa padrões para permitir qualquer origem (sem credenciais)
             configuracao.setAllowedOriginPatterns(List.of("*"));
         } else {
             configuracao.setAllowedOrigins(Arrays.stream(allowedOriginsCsv.split(","))
@@ -144,7 +117,6 @@ public class SecurityConfiguracao {
                     .filter(s -> !s.isEmpty())
                     .toList());
         }
-        // Cabeçalhos comuns usados por Axios e JWT
         configuracao.setAllowedHeaders(List.of("*"));
         configuracao.setAllowedMethods(
                 Arrays.asList(
@@ -163,21 +135,14 @@ public class SecurityConfiguracao {
         return origem;
     }
 
-        // Customize the HttpFirewall to allow some percent-encoded characters (e.g. %0A) that
-        // StrictHttpFirewall blocks by default. Use with caution: permitting encoded control
-        // characters can widen the attack surface if unvalidated URLs are forwarded to
-        // downstream systems. Prefer sanitizing inputs when possible.
-        @Bean
-        public HttpFirewall allowUrlEncodedCharsHttpFirewall() {
-            // Use DefaultHttpFirewall which is more permissive than StrictHttpFirewall.
-            // This avoids rejecting requests that contain encoded control characters like %0A.
-            return new DefaultHttpFirewall();
-        }
+    @Bean
+    public HttpFirewall allowUrlEncodedCharsHttpFirewall() {
+        return new DefaultHttpFirewall();
+    }
 
-        // Apply the custom firewall to WebSecurity so Spring Security uses it when building filter chains
-        @Bean
-        public WebSecurityCustomizer applyCustomHttpFirewall(HttpFirewall httpFirewall) {
-            return web -> web.httpFirewall(httpFirewall);
-        }
+    @Bean
+    public WebSecurityCustomizer applyCustomHttpFirewall(HttpFirewall httpFirewall) {
+        return web -> web.httpFirewall(httpFirewall);
+    }
 
 }
