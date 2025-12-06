@@ -53,24 +53,24 @@ INSERT INTO avaliacao (id_avaliacao, nota_minima, fk_curso) VALUES
   (4, 7.0, 4)
 ON DUPLICATE KEY UPDATE nota_minima = VALUES(nota_minima), fk_curso = VALUES(fk_curso);
 
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url) VALUES
-  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', NULL),
-  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', NULL),
-  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', NULL)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
+  (1, 'João Silva', '12345678901', 'joao@email.com', 'senha123', 1, '(11) 99999-0001', NULL, '2025-01-01 08:00:00', '2025-10-20 08:00:00'),
+  (2, 'Maria Souza', '98765432109', 'maria@email.com', 'senha456', 2, '(11) 99999-0002', NULL, '2025-01-02 08:00:00', '2025-10-15 10:00:00'),
+  (3, 'Carlos Oliveira', '11122233344', 'carlos@email.com', 'senha789', 1, '(11) 99999-0003', NULL, '2025-01-03 08:00:00', '2025-10-25 12:00:00')
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 -- Dados adicionais de usuario (id 10 a 19) para testes variados
-INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url) VALUES
-  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL),
-  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL),
-  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL),
-  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL),
-  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL),
-  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL),
-  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL),
-  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL),
-  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL),
-  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL)
-ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url);
+INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
+  (10, 'Ana Lima', '20000000001', 'ana.lima@example.com', 'senhaAna1', 1, NULL, NULL, '2025-01-10 08:00:00', '2025-12-03 10:00:00'),
+  (11, 'Bruno Costa', '20000000002', 'bruno.costa@example.com', 'senhaBruno2', 1, NULL, NULL, '2025-01-11 08:00:00', '2025-12-02 11:00:00'),
+  (12, 'Carla Nunes', '20000000003', 'carla.nunes@example.com', 'senhaCarla3', 2, NULL, NULL, '2025-01-12 08:00:00', '2025-12-03 09:00:00'),
+  (13, 'Diego Alves', '20000000004', 'diego.alves@example.com', 'senhaDiego4', 1, NULL, NULL, '2025-01-13 08:00:00', '2025-11-01 10:00:00'),
+  (14, 'Elisa Prado', '20000000005', 'elisa.prado@example.com', 'senhaElisa5', 2, NULL, NULL, '2025-01-14 08:00:00', '2025-11-05 14:00:00'),
+  (15, 'Felipe Rocha', '20000000006', 'felipe.rocha@example.com', 'senhaFelipe6', 1, NULL, NULL, '2025-01-15 08:00:00', '2025-12-01 14:00:00'),
+  (16, 'Gabriela Moraes', '20000000007', 'gabriela.moraes@example.com', 'senhaGabriela7', 2, NULL, NULL, '2025-01-16 08:00:00', '2025-11-08 09:00:00'),
+  (17, 'Hugo Pereira', '20000000008', 'hugo.pereira@example.com', 'senhaHugo8', 1, NULL, NULL, '2025-01-17 08:00:00', '2025-11-30 08:00:00'),
+  (18, 'Isabela Santos', '20000000009', 'isabela.santos@example.com', 'senhaIsabela9', 2, NULL, NULL, '2025-01-18 08:00:00', '2025-11-10 09:00:00'),
+  (19, 'João Pedro', '20000000010', 'joao.pedro@example.com', 'senhaJoao10', 1, NULL, NULL, '2025-01-19 08:00:00', '2025-12-02 10:30:00')
+ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 
 
@@ -86,7 +86,7 @@ INSERT INTO usuario (
     data_entrada,
     ultimo_acesso
 ) VALUES
-(20, 'John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+(20, 'John Doe', '12345678900', 'john@doe.com', '$2a$10$QQPobUtOp3Gwh3P94Itu0u/e3jGNDRt6WHhIqz2TdDFpXaK6y6lw6', 1, '2025-01-20 08:00:00', '2025-12-03 11:00:00')
 ON DUPLICATE KEY UPDATE
   nome = VALUES(nome),
   cpf = VALUES(cpf),
@@ -111,6 +111,7 @@ INSERT INTO material_aluno (fk_usuario, fk_curso, fk_video, fk_apostila, finaliz
 ON DUPLICATE KEY UPDATE fk_video = VALUES(fk_video), fk_apostila = VALUES(fk_apostila), finalizada = VALUES(finalizada), ultimo_acesso = VALUES(ultimo_acesso);
 
 INSERT INTO usuario (
+    id_usuario,
     nome,
     cpf,
     email,
@@ -119,7 +120,7 @@ INSERT INTO usuario (
     data_entrada,
     ultimo_acesso
 ) VALUES
-('Cintia Tanivaro', '98765432100', 'cintia@tanivaro.com', '123123', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+(4, 'Cintia Tanivaro', '98765432100', 'cintia@tanivaro.com', '123123', 2, '2025-01-04 08:00:00', '2025-11-15 10:00:00')
 ON DUPLICATE KEY UPDATE
   nome = VALUES(nome),
   cpf = VALUES(cpf),
@@ -131,12 +132,12 @@ ON DUPLICATE KEY UPDATE
 
 -- Adiciona usuário Alexandre (pedido: alexandre.nichiojr@sptech.school)
 INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
-  (21, 'Alexandre Nichio Jr', '30000000001', 'alexandre.nichiojr@sptech.school', 'senhaAlex', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (21, 'Alexandre Nichio Jr', '30000000001', 'alexandre.nichiojr@sptech.school', 'senhaAlex', 2, NULL, NULL, '2025-02-01 08:00:00', '2025-11-10 09:00:00')
 ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Adiciona usuário Giorgio (pedido: giorgio.antunes@sptech.school)
 INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
-  (22, 'Giorgio Antunes', '30000000002', 'giorgio.antunes@sptech.school', 'senhaGiorgio', 1, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (22, 'Giorgio Antunes', '30000000002', 'giorgio.antunes@sptech.school', 'senhaGiorgio', 1, NULL, NULL, '2025-02-01 08:00:00', '2025-11-12 14:00:00')
 ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Dados iniciais para tabela matricula
@@ -884,21 +885,17 @@ SELECT id_questao, fk_alternativa_correta FROM questao WHERE fk_avaliacao = 1;
 SELECT * FROM avaliacao WHERE fk_curso = 1;
 
 -- Ajuste: garantir pelo menos 4 participantes com ultimo_acesso recente (dentro dos últimos 15 dias)
--- Atualiza `usuario`, `matricula` e `material_aluno` para refletir acessos recentes em novembro/2025
-UPDATE usuario SET ultimo_acesso = '2025-11-10 09:00:00' WHERE id_usuario = 1;
-UPDATE usuario SET ultimo_acesso = '2025-11-15 10:00:00' WHERE id_usuario = 10;
-UPDATE usuario SET ultimo_acesso = '2025-11-05 14:30:00' WHERE id_usuario = 11;
-UPDATE usuario SET ultimo_acesso = '2025-11-18 08:45:00' WHERE id_usuario = 12;
+-- Os valores de ultimo_acesso dos usuários já estão definidos no INSERT inicial
 
-UPDATE matricula SET ultimo_senso = '2025-11-10 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
-UPDATE matricula SET ultimo_senso = '2025-11-15 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
-UPDATE matricula SET ultimo_senso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
-UPDATE matricula SET ultimo_senso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-12-03 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-12-03 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-12-02 11:00:00' WHERE fk_usuario = 11 AND fk_curso = 1;
+UPDATE matricula SET ultimo_senso = '2025-12-03 09:00:00' WHERE fk_usuario = 12 AND fk_curso = 1;
 
-UPDATE material_aluno SET ultimo_acesso = '2025-11-10 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
-UPDATE material_aluno SET ultimo_acesso = '2025-11-15 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
-UPDATE material_aluno SET ultimo_acesso = '2025-11-05 14:30:00' WHERE fk_usuario = 11 AND fk_curso = 1;
-UPDATE material_aluno SET ultimo_acesso = '2025-11-18 08:45:00' WHERE fk_usuario = 12 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-12-03 09:00:00' WHERE fk_usuario = 1 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-12-03 10:00:00' WHERE fk_usuario = 10 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-12-02 11:00:00' WHERE fk_usuario = 11 AND fk_curso = 1;
+UPDATE material_aluno SET ultimo_acesso = '2025-12-03 09:00:00' WHERE fk_usuario = 12 AND fk_curso = 1;
 
 -- =============================================================================
 -- DADOS PARA MÉTRICAS DE ENGAJAMENTO (NOVEMBRO 2025)
@@ -951,16 +948,16 @@ WHERE fk_usuario = 15 AND fk_curso = 1;
 -- ids escolhidos: 23..32
 -- =============================================================
 INSERT INTO usuario (id_usuario, nome, cpf, email, senha, fk_cargo, telefone, foto_url, data_entrada, ultimo_acesso) VALUES
-  (23, 'Laura Mendes', '40000000001', 'laura.mendes@example.com', 'senhaLaura1', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (24, 'Marcos Pinto', '40000000002', 'marcos.pinto@example.com', 'senhaMarcos2', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (25, 'Natalia Rocha', '40000000003', 'natalia.rocha@example.com', 'senhaNatalia3', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (26, 'Pedro Alvez', '40000000004', 'pedro.alvez@example.com', 'senhaPedro4', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (27, 'Rosa Ferreira', '40000000005', 'rosa.ferreira@example.com', 'senhaRosa5', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (28, 'Samuel Costa', '40000000006', 'samuel.costa@example.com', 'senhaSamuel6', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (29, 'Tatiana Lopes', '40000000007', 'tatiana.lopes@example.com', 'senhaTatiana7', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (30, 'Urbano Silva', '40000000008', 'urbano.silva@example.com', 'senhaUrbano8', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (31, 'Vanessa Braga', '40000000009', 'vanessa.braga@example.com', 'senhaVanessa9', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (32, 'Rafael Torres', '40000000010', 'rafael.torres@example.com', 'senhaRafael10', 2, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (23, 'Laura Mendes', '40000000001', 'laura.mendes@example.com', 'senhaLaura1', 2, NULL, NULL, '2025-09-23 08:00:00', '2025-11-28 09:00:00'),
+  (24, 'Marcos Pinto', '40000000002', 'marcos.pinto@example.com', 'senhaMarcos2', 2, NULL, NULL, '2025-09-24 08:00:00', '2025-11-29 10:00:00'),
+  (25, 'Natalia Rocha', '40000000003', 'natalia.rocha@example.com', 'senhaNatalia3', 2, NULL, NULL, '2025-09-25 08:00:00', '2025-11-27 11:00:00'),
+  (26, 'Pedro Alvez', '40000000004', 'pedro.alvez@example.com', 'senhaPedro4', 2, NULL, NULL, '2025-09-26 08:00:00', '2025-12-01 12:00:00'),
+  (27, 'Rosa Ferreira', '40000000005', 'rosa.ferreira@example.com', 'senhaRosa5', 2, NULL, NULL, '2025-09-27 08:00:00', '2025-11-30 09:00:00'),
+  (28, 'Samuel Costa', '40000000006', 'samuel.costa@example.com', 'senhaSamuel6', 2, NULL, NULL, '2025-09-28 08:00:00', '2025-12-02 14:00:00'),
+  (29, 'Tatiana Lopes', '40000000007', 'tatiana.lopes@example.com', 'senhaTatiana7', 2, NULL, NULL, '2025-09-29 08:00:00', '2025-11-26 10:00:00'),
+  (30, 'Urbano Silva', '40000000008', 'urbano.silva@example.com', 'senhaUrbano8', 2, NULL, NULL, '2025-09-30 08:00:00', '2025-11-28 08:30:00'),
+  (31, 'Vanessa Braga', '40000000009', 'vanessa.braga@example.com', 'senhaVanessa9', 2, NULL, NULL, '2025-09-30 08:00:00', '2025-11-02 11:00:00'),
+  (32, 'Rafael Torres', '40000000010', 'rafael.torres@example.com', 'senhaRafael10', 2, NULL, NULL, '2025-09-30 08:00:00', '2025-12-03 15:00:00')
 ON DUPLICATE KEY UPDATE nome = VALUES(nome), cpf = VALUES(cpf), email = VALUES(email), senha = VALUES(senha), fk_cargo = VALUES(fk_cargo), telefone = VALUES(telefone), foto_url = VALUES(foto_url), data_entrada = VALUES(data_entrada), ultimo_acesso = VALUES(ultimo_acesso);
 
 -- Matrículas: inscreve cada colaborador no curso 1 (curso base)
@@ -1294,11 +1291,12 @@ UPDATE matricula SET completo = 1, data_finalizado = '2025-12-02 15:00:00' WHERE
 UPDATE matricula SET completo = 1, data_finalizado = '2025-11-26 09:00:00' WHERE fk_usuario = 12 AND fk_curso = 1;
 
 -- Matricular alguns usuários no curso 1 que ainda não estão (para aumentar total de alunos)
+-- Nota: usuários 1, 2, 3 já tem matrículas anteriores, este INSERT apenas garante que existem
 INSERT INTO matricula (fk_usuario, fk_curso, fk_inicio, ultimo_senso, completo, data_finalizado) VALUES
-  (1, 1, '2025-09-01 08:00:00', '2025-10-20 08:00:00', 0, NULL),
-  (2, 1, '2025-09-05 08:00:00', '2025-10-15 10:00:00', 0, NULL),
-  (3, 1, '2025-09-10 08:00:00', '2025-10-25 12:00:00', 0, NULL),
-  (18, 1, '2025-10-01 08:00:00', '2025-11-10 09:00:00', 0, NULL)
+  (1, 1, '2025-01-01 08:00:00', '2025-12-03 09:00:00', 0, NULL),
+  (2, 1, '2025-01-02 08:00:00', '2025-10-15 10:00:00', 0, NULL),
+  (3, 1, '2025-01-03 08:00:00', '2025-10-25 12:00:00', 0, NULL),
+  (18, 1, '2025-01-18 08:00:00', '2025-11-10 09:00:00', 0, NULL)
 ON DUPLICATE KEY UPDATE fk_inicio = VALUES(fk_inicio), ultimo_senso = VALUES(ultimo_senso), completo = VALUES(completo), data_finalizado = VALUES(data_finalizado);
 
 -- Dados variados para o gráfico de dezembro (valores diferentes por dia)
